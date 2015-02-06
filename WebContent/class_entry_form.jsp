@@ -7,6 +7,13 @@
 <title>Class Entry Form</title>
 </head>
 <body>
-
+<h2>Class Entry Form</h2>
+<form action="class_entry_form.jsp">
+<label for="id">Course ID</label>
+<input type="text" name="id"><br><br>
+<label for="title">Course Title</label>
+<input type="text" name="title"><br><br>
+<input type="submit">
+</form>
 </body>
 </html>

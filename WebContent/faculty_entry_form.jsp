@@ -7,6 +7,11 @@
 <title>Faculty Entry Form</title>
 </head>
 <body>
-
+<h2>Faculty Entry Form</h2>
+<form action="faculty_entry_form.jsp">
+<input type="text" value="name">
+<input type="text" value="title">
+<input type="text" value="department">
+</form>
 </body>
 </html>
