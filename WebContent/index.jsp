@@ -10,11 +10,15 @@
 <h1>Home Page</h1>
 <h2><a href='course_entry_form.jsp'>Course Entry Form x</a></h2>
 <h2><a href='class_entry_form.jsp'>Class Entry Form x</a></h2>
-<h2><a href='student_entry_form.jsp'>Student Entry Form</a></h2>
-<h2><a href='faculty_entry_form.jsp'>Faculty Entry Form</a></h2>
-<h2><a href='course_enrollment.jsp'>Course Enrollment</a></h2>
-<h2><a href='past_class_taken.jsp'>Past Classes Taken</a></h2>
-<h2><a href='thesis_commitee_submission.jsp'>Thesis Committee Submission</a></h2>
+<h2><a href='student_entry_form.jsp'>Student Entry Form x</a></h2>
+<h3><a href='previous_degree_form.jsp'>Previous Degree Entry Form x</a></h3>
+<h3><a href='student_previous_degree_form.jsp'>Previously Earned Degree Entry Form x</a></h3>
+<h3><a href='undergraduate_entry_form.jsp'>Undergraduate Entry Form x</a></h3>
+<h3><a href='graduate_entry_form.jsp'>Graduate Entry Form x</a></h3>
+<h2><a href='faculty_entry_form.jsp'>Faculty Entry Form x</a></h2>
+<h2><a href='course_enrollment.jsp'>Course Enrollment x</a></h2>
+<h2><a href='past_class_taken.jsp'>Past Classes Taken x</a></h2>
+<h2><a href='thesis_commitee_submission.jsp'>Thesis Committee Submission x</a></h2>
 <h2><a href='probation_info_submission.jsp'>Probation Info Submission x</a></h2>
 <h2><a href='review_session_info_submission.jsp'>Review Session Info Submission</a></h2>
 <h2><a href='degree_requirement_info_submission.jsp'>Degree Requirements Info Submission</a></h2>

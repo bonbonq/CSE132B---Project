@@ -7,9 +7,10 @@
 <title>Course Entry Form</title>
 </head>
 
-<%@ page import="java.sql.*"%>
-<%@ page import="java.util.*"%>
-<%@ page import="java.io.*"%>
+<%@page import="java.util.*"%>
+<%@page import="java.io.*"%>
+<%@page import="java.sql.*" %>
+<%@page import="org.postgresql.*" %>
 
 <%
 Connection conn = null;
@@ -59,9 +60,9 @@ try {
 <!-- HTML Body Start -->
 <body>
 
-<h2>Course Entry Form</h2>
+	<h2>Course Entry Form</h2>
 
-<!-- Course Insertion Form -->
+	<!-- Course Insertion Form -->
 	<form action="course_entry_form.jsp" method="POST">
 		
 		<div class="form-group">

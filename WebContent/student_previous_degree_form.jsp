@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Thesis Committee Submission</title>
+<title>Student's Previous Degree Entry Form</title>
 </head>
 
 
@@ -12,10 +12,10 @@
 <!-- HTML body part -->
 <body>
 
-	<h2>Thesis Committee Entry Form</h2>
+	<h2>Student's Previous Earned Degree Entry Form</h2>
 	
 	<!-- Insertion Form -->
-	<form action="thesis_committee_submission.jsp" method="POST">
+	<form action="student_previous_degree_form.jsp" method="POST">
 		
 		<div>
 			PID: <input type="text" name="pid" required>
@@ -24,18 +24,19 @@
 		<p>
 		
 		<div>
-			Department or Non-Department:
-			<br>
-			<input type="radio" name="faculty_type" value="department" checked>Department</input><br>
-			<input type="radio" name="faculty_type" value="nondepartment" >Non-Department</input>
+			School Name:
+			<select name="school">
+				<option value="school1">Test School 1</option>
+				<option value="school2">Test School 2</option>
+			</select>
 		</div>
 		<p>
 		
 		<div>
-			Faculty Name:
-			<select name="faculty">
-				<option value="name1">Test Name 1</option>
-				<option value="name2">Test Name 2</option>
+			Degree Name:
+			<select name="degree">
+				<option value="degree1">Test Degree 1</option>
+				<option value="degree2">Test Degree 1</option>
 			</select>
 		</div>
 		<p>
