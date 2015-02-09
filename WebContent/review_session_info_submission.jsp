@@ -9,6 +9,6 @@
 <body>
 <label for="courseno">Course Number</label>
 <input type="text" name="courseno" value="courseno">
-<input type=""
+<input type="">
 </body>
 </html>
