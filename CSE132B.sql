@@ -6,7 +6,7 @@ CREATE TABLE student (
   idstudent SERIAL PRIMARY KEY,
   first_name text NOT NULL,
   last_name text NOT NULL,
-  middle_name text NOT NULL,
+  middle_name text,
   ss_num text NOT NULL,
   enrolled boolean NOT NULL,
   residency text NOT NULL

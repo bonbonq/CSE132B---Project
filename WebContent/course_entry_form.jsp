@@ -14,7 +14,8 @@
 
 <!-- Java Part start -->
 <%
-boolean debug = true;
+boolean debug = false;
+
 boolean success = false;
 String sql1 = "";
 String sql2 = "";
@@ -253,6 +254,7 @@ if (action!=null && action.equals("insert")) {
 			success = true;
 					
 		} catch (SQLException e) {
+			conn.rollback();
 			e.printStackTrace();
             String message = "Failure: Your entry failed " + e.getMessage();
 		   	%>
@@ -293,7 +295,7 @@ if (action!=null && action.equals("insert")) {
 
 
 /* Generate Form Fields Action */
-
+// The following will always run regardless of action
 try{
 	conn.setAutoCommit(false);
 	PreparedStatement dept_stmt = conn.prepareStatement("SELECT * FROM department");
@@ -306,14 +308,18 @@ try{
 	conn.setAutoCommit(true);
 	
 } catch(SQLException e) {
+	conn.rollback();
 	e.printStackTrace();
-       String message = "Failure: Your entry failed " + e.getMessage();
+    String message = "Failure: Your entry failed " + e.getMessage();
    	%>
 	<h1><%=message %></h1>
 	<%
 } 
 	
 %>
+
+
+
 
 <!-- HTML Body Start -->
 <body>
