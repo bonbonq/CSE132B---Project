@@ -171,7 +171,7 @@ CREATE TABLE graduate_department (
 CREATE TABLE undergraduate_degree__major (
   idundergraduate_degree__major SERIAL PRIMARY KEY,
   idundergraduate integer REFERENCES undergraduate(idundergraduate) ON DELETE CASCADE,
-  iiddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE
   );
 
 
@@ -179,9 +179,9 @@ CREATE TABLE undergraduate_degree__major (
 -- Table CSE132B.undergraduate_degree__minor
 -- -----------------------------------------------------
 CREATE TABLE undergraduate_degree__minor (
-  idundergraduate_degree__major SERIAL PRIMARY KEY,
+  idundergraduate_degree__minor SERIAL PRIMARY KEY,
   idundergraduate integer REFERENCES undergraduate(idundergraduate) ON DELETE CASCADE,
-  iiddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE
   );
 
 
