@@ -7,6 +7,8 @@
 <title>Review Sess Info Submission</title>
 </head>
 <body>
-
+<label for="courseno">Course Number</label>
+<input type="text" name="courseno" value="courseno">
+<input type=""
 </body>
 </html>

@@ -12,6 +12,7 @@
 <input type="text" value="name">
 <input type="text" value="title">
 <input type="text" value="department">
+<input type="submit">
 </form>
 </body>
 </html>

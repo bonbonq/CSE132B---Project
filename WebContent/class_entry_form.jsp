@@ -9,8 +9,13 @@
 <body>
 <h2>Class Entry Form</h2>
 <form action="class_entry_form.jsp">
-<label for="id">Course ID</label>
+<label for="id">Course Number</label>
 <input type="text" name="id"><br><br>
+<label for="quarter">Quarter<br></label>
+<input type="radio" name="quarter" value="fall">Fall<br>
+<input type="radio" name="quarter" value="winter">Winter<br>
+<input type="radio" name="quarter" value="spring">Spring<br>
+<input type="radio" name="quarter" value="summer">Summer<br><br>
 <label for="title">Course Title</label>
 <input type="text" name="title"><br><br>
 <input type="submit">

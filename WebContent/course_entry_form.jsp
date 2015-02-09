@@ -16,7 +16,7 @@
 Connection conn = null;
 
 try {
-	Class.forName("org.postgresql.Driver");
+	//Class.forName("org.postgresql.Driver");
 	conn = DriverManager.getConnection(
             "jdbc:postgresql://localhost/CSE132B?");
 	
