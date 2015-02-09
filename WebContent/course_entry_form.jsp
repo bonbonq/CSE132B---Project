@@ -12,7 +12,12 @@
 <%@page import="java.sql.*" %>
 <%@page import="org.postgresql.*" %>
 
+<!-- Java Part start -->
 <%
+boolean debug = false;
+boolean success = true;
+
+/* Create DB connection */
 Connection conn = null;
 
 try {
@@ -20,17 +25,35 @@ try {
 	conn = DriverManager.getConnection(
             "jdbc:postgresql://localhost/CSE132B?");
 	
-	String action = request.getParameter("action");
+} catch (ClassNotFoundException e) {
+	e.printStackTrace();
+	out.println("<h1>org.postgresql.Driver Not Found</h1>");
+}
+
+
+String action = request.getParameter("action");
+String course_number;
+String[] prereqs;
+int min_units;
+int max_units;
+String grade_type;
+String lab;
+if (debug)
 	System.out.println("action: "+action);
-	/* Insert Action */
-	if (action!=null && action.equals("insert")) {
-		
-		String course_number = request.getParameter("course_number");
-		String[] prereqs = request.getParameterValues("prereq");
-		String min_units = request.getParameter("min_units");
-		String max_units = request.getParameter("max_units");
-		String grade_type = request.getParameter("grade_type");
-		String lab = request.getParameter("lab");
+
+
+/* Insert Action */
+if (action!=null && action.equals("insert")) {
+	
+	course_number = request.getParameter("course_number");
+	prereqs = request.getParameterValues("prereq");
+	min_units = Integer.parseInt(request.getParameter("min_units"));
+	max_units = Integer.parseInt(request.getParameter("max_units"));
+	grade_type = request.getParameter("grade_type");
+	lab = request.getParameter("lab");
+	
+	/* Print statements for parameters */
+	if (debug){
 		
 		System.out.println("Course Number: " + course_number);
 		System.out.print("Prereq: ");
@@ -39,20 +62,66 @@ try {
 			{
 				System.out.print(prereq + ", ");
 			}
+			System.out.println("");
 		}
 		else{
 			System.out.println("none");
 		}
 		System.out.println("Unit range: " + min_units + " - " + max_units);
 		System.out.println("Grade Type: " + grade_type);
-		System.out.println("Lab? " + lab);
-            
+		System.out.println("Lab? " + lab);	
+		
 	}
 	
-	
-} catch (SQLException e) {
-	e.printStackTrace();
-    String message = "Failure: Your signup failed " + e.getMessage();
+	if(course_number!=null && max_units >= min_units && grade_type!=null && lab!=null) {
+		String sql = "";
+		PreparedStatement pstmt = null;
+		try{
+			// Create the statement
+			conn.setAutoCommit(false);
+			// Insert the user into table users, only if it does not already exist
+			sql =	"INSERT INTO users (name, role, age, state) " +
+					"SELECT ?,?,?,? " +
+					"WHERE NOT EXISTS (SELECT name FROM users WHERE name = ?);" ;
+			//System.out.print(sql + "\n");	
+										
+			/* pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, name);
+			pstmt.setString(2, role);
+			pstmt.setInt(3, Integer.parseInt(age));
+			pstmt.setString(4, state);
+			pstmt.setString(5, name); */
+
+			int count1 = pstmt.executeUpdate();
+
+			if(count1 == 1)
+			{
+				conn.commit();
+				success = true;
+			}
+			else
+			{
+				conn.rollback();
+				throw new SQLException("Your signup failed!");
+			}
+
+			conn.setAutoCommit(true);
+			conn.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+            String message = "Failure: Your signup failed " + e.getMessage();
+		   	     	%>
+					<h1><%=message %></h1>
+					<%
+		}
+		
+	/* else will happen if parameters are not correct */
+	}
+	else {
+		success = false;
+	}
+        
 }
 	
 %>
