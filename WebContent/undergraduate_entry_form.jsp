@@ -35,7 +35,7 @@
 		<div>
 			Minor:
 			<select name="minor">
-				<option value="none">None</option>
+				<option value="NULL">None</option>
 				<option value="minor1">Test Major 1</option>
 				<option value="minor2">Test Major 1</option>
 			</select>

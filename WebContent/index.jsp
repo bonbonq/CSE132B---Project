@@ -11,8 +11,8 @@
 <h2><a href='course_entry_form.jsp'>Course Entry Form xx</a></h2>
 <h2><a href='class_entry_form.jsp'>Class Entry Form x</a></h2>
 <h2><a href='student_entry_form.jsp'>Student Entry Form xx</a></h2>
-<h3><a href='previous_degree_form.jsp'>&nbsp;&nbsp;Previous Degree Entry Form x</a></h3>
-<h3><a href='student_previous_degree_form.jsp'>&nbsp;&nbsp;Previously Earned Degree Entry Form x</a></h3>
+<h3><a href='previous_degree_form.jsp'>&nbsp;&nbsp;Previous Degree Entry Form xx</a></h3>
+<h3><a href='student_previous_degree_form.jsp'>&nbsp;&nbsp;Previously Earned Degree Entry Form xx</a></h3>
 <h3><a href='undergraduate_entry_form.jsp'>&nbsp;&nbsp;Undergraduate Entry Form x</a></h3>
 <h3><a href='graduate_entry_form.jsp'>&nbsp;&nbsp;Graduate Entry Form x</a></h3>
 <h2><a href='faculty_entry_form.jsp'>Faculty Entry Form x</a></h2>
