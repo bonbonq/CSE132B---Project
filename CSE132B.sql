@@ -67,7 +67,7 @@ CREATE TABLE ms (
 -- -----------------------------------------------------
 CREATE TABLE undergraduate_ms (
   idundergraduate_ms SERIAL PRIMARY KEY,
-  idundergraduate integer REFERENCES undergraduate(idundergraduate) ON DELETE CASCADE,
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
   idms integer REFERENCES ms(idms) ON DELETE CASCADE
   );
 
