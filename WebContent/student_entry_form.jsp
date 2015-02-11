@@ -276,7 +276,7 @@ try{
 	    <th>Social Security</th>
 	    <th>Enrolled?</th>
 	    <th>Residency</th>
-	    <th>Update Actions</th>
+	    <th>Edit Actions</th>
 	  </tr>
 	  
 	  
