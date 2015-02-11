@@ -29,7 +29,6 @@ try
 	while (rs1.next())
 	{
 		name = rs1.getString("name");
-		System.out.println(name);
 		%> <option value=<%=name%>><%=name%></option>
 		<%
 	}}
