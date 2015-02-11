@@ -217,6 +217,7 @@ try{
 
 <!-- HTML body part -->
 <body>
+
 	<a href='index.jsp'><button>Home</button></a>
 	<h2>Student Entry Form</h2>
 	
@@ -261,8 +262,10 @@ try{
 	
 	<br>
 	<br>
-	<h2>Student Edit Form</h2>
+	
 	<!-- Student Update/Delete Form -->
+	<h2>Student Edit Form</h2>
+	
 	<br>
 	<table>
 	  <tr>
