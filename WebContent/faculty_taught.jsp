@@ -106,6 +106,60 @@ if (action!=null && action.equals("insert")) {
 }
 
 
+/* ============= */
+/* Update Action */
+/* ============= */
+else if(action!=null && action.equals("update")){
+	
+	PreparedStatement update = conn.prepareStatement(	
+			"Update faculty_instance_hastaught SET " +
+			"idinstance=?" +
+			"WHERE idfaculty_instance_hastaught=?");
+	update.setInt(1, Integer.parseInt(request.getParameter("idinstance")));
+	update.setInt(2, Integer.parseInt(request.getParameter("ididfaculty_instance_hastaught")));
+	
+	if (update.executeUpdate()==1) {
+		%>
+		<h1>Successfully Updated!</h1>
+		<%
+	}
+	else {
+		%>
+		<h1>Update has failed!</h1>
+		<%
+	}
+}
+
+
+
+/* ============= */
+/* Delete Action */
+/* ============= */
+
+else if(action!=null && action.equals("delete")) {
+
+	/* Just change these */
+	String table_name = "faculty_instance_hastaught";
+	String table_id = "idfaculty_instance_hastaught";
+	String id_parameter_name = "idfaculty_instance_hastaught";
+	
+	PreparedStatement delete = conn.prepareStatement("DELETE FROM " + table_name + " WHERE " + table_id + "=?");
+	delete.setInt(1, Integer.parseInt(request.getParameter(id_parameter_name)));
+	
+	if (delete.executeUpdate()==1) {
+		%>
+		<h1>Successfully Deleted!</h1>
+		<%
+	}
+	else {
+		%>
+		<h1>Delete has failed!</h1>
+		<%
+	}
+	
+}
+
+
 /* =========================== */
 /* Generate Form Fields Action */
 /* =========================== */
@@ -130,18 +184,18 @@ try{
 	PreparedStatement course_stmt = null;
 	if (winter){
 		/* if currently winter quarter */
-		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber WHERE year<?");
+		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber WHERE year<?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		course_stmt.setInt(1, current_year);
 	}
 	else if (spring) {
 		/* if currently spring quarter */
-		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber WHERE (year<? OR (year=? AND season='winter'))");
+		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber WHERE (year<? OR (year=? AND season='winter'))", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		course_stmt.setInt(1, current_year);
 		course_stmt.setInt(2, current_year);
 	}
 	else if (fall) {
 		/* if currently fall quarter */
-		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber WHERE (year<? OR (year=? AND season='winter') OR (year=? AND season='spring'))");
+		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber WHERE (year<? OR (year=? AND season='winter') OR (year=? AND season='spring'))", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		course_stmt.setInt(1, current_year);
 		course_stmt.setInt(2, current_year);
 		course_stmt.setInt(3, current_year);
@@ -162,12 +216,38 @@ try{
 	<h1><%=message %></h1>
 	<%
 } 
+
+
+/* ========================= */
+/* EDIT FORM DATA GENERATION */
+/* ========================= */
+
+ResultSet rs = null;
+
+//The following will always run regardless of action
+try{
+	conn.setAutoCommit(false);
+	/* The below statements are not closed, this might cause issues later... */
+	rs = conn.prepareStatement("SELECT * FROM faculty_instance_hastaught NATURAL JOIN quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber").executeQuery();
+	conn.commit();
+	conn.setAutoCommit(true);
+	
+} catch(SQLException e) {
+	conn.rollback();
+	e.printStackTrace();
+	String message = "Failure: Unable to retrieve dropdown info - " + e.getMessage();
+	%>
+	<h1><%=message %></h1>
+	<%
+}
+
 %>
 
 
 <!-- HTML body part -->
 <body>
 
+	<a href='index.jsp'><button>Home</button></a>
 	<h2>Faculty Previous Taught Course Form</h2>
 	
 	<!-- Student Insertion Form -->
@@ -199,6 +279,55 @@ try{
 		<button type="submit" name="action" value="insert">Submit</button>
 		
 	</form>
+	
+	<br>
+	<br>
+	<!-- Edit Form -->
+	<h2>Edit Form</h2>
+	
+	<table>
+	  <tr>
+	    <th>Faculty Name</th>
+	    <th>Course Number</th>
+	    <th>Edit Actions</th>
+	  </tr>
+	  <%
+		if (rs.isBeforeFirst()) {
+			while(rs.next()) { 
+			%>
+				<form action="faculty_taught.jsp" method="POST">
+					<input type="hidden" name="idfaculty_instance_hastaught" value="<%=rs.getString("idfaculty_instance_hastaught") %>">
+		  			<tr>
+					    <td><%=rs.getString("faculty_name") %></td>
+					    <td>
+					    	<select name="course">
+								<%
+								course_rs.beforeFirst();
+								if (course_rs.isBeforeFirst())
+								{
+									while(course_rs.next()){
+										%>
+										<option value=<%=course_rs.getString("idinstance")%>  <%= rs.getString("idinstance").equals(course_rs.getString("idinstance")) ? "selected" : "" %>>  ><%=course_rs.getString("idcoursenumber")%> - <%=course_rs.getString("year")%> <%=course_rs.getString("season")%></option>
+										<%
+									}
+								}
+								%>
+							</select>
+					    </td>
+					    <td>
+							&nbsp;
+							<button type="submit" name="action" value="update">Update</button>
+							&nbsp;
+							<button type="submit" name="action" value="delete">Delete</button>
+						</td>
+					</tr>
+			 	</form>
+					
+			<%
+			}
+		}
+	  %>
+	</table>
 
 </body>
 <!-- HTML Body End -->

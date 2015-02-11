@@ -396,6 +396,7 @@ try{
 <!-- HTML body part -->
 <body>
 
+	<a href='index.jsp'><button>Home</button></a>
 	<h2>Graduate Entry Form</h2>
 	
 	<!-- Student Insertion Form -->
