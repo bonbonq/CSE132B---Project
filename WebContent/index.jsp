@@ -8,15 +8,18 @@
 </head>
 <body>
 <h1>Home Page</h1>
-<h2><a href='course_entry_form.jsp'>Course Entry Form x</a></h2>
+<h2><a href='course_entry_form.jsp'>Course Entry Form xx</a></h2>
 <h2><a href='class_entry_form.jsp'>Class Entry Form x</a></h2>
-<h2><a href='student_entry_form.jsp'>Student Entry Form x</a></h2>
-<h3><a href='previous_degree_form.jsp'>&nbsp;&nbsp;Previous Degree Entry Form x</a></h3>
-<h3><a href='student_previous_degree_form.jsp'>&nbsp;&nbsp;Previously Earned Degree Entry Form x</a></h3>
-<h3><a href='undergraduate_entry_form.jsp'>&nbsp;&nbsp;Undergraduate Entry Form x</a></h3>
-<h3><a href='graduate_entry_form.jsp'>&nbsp;&nbsp;Graduate Entry Form x</a></h3>
+<h2><a href='student_entry_form.jsp'>Student Entry Form xx</a></h2>
+	<h3><a href='previous_degree_form.jsp'>&nbsp;&nbsp;Previous Degree Entry Form xx</a></h3>
+	<h3><a href='student_previous_degree_form.jsp'>&nbsp;&nbsp;Previously Earned Degree Entry Form xx</a></h3>
+	<h3><a href='undergraduate_entry_form.jsp'>&nbsp;&nbsp;Undergraduate Entry Form xx</a></h3>
+	<h3><a href='graduate_entry_form.jsp'>&nbsp;&nbsp;Graduate Entry Form xx</a></h3>
 <h2><a href='faculty_entry_form.jsp'>Faculty Entry Form x</a></h2>
-<h2><a href='course_enrollment.jsp'>Course Enrollment x</a></h2>
+	<h3><a href='faculty_taught.jsp'>Faculty Previous Taught Course Form</a></h3>
+	<h3><a href='faculty_isteaching.jsp'>Faculty Currently Teaching Course Form</a></h3>
+	<h3><a href='faculty_willteach.jsp'>Faculty Future Teaching Course Form</a></h3>
+<h2><a href='precourse_enrollment.jsp'>Course Enrollment x</a></h2>
 <h2><a href='past_class_taken.jsp'>Past Classes Taken x</a></h2>
 <h2><a href='thesis_commitee_submission.jsp'>Thesis Committee Submission x</a></h2>
 <h2><a href='probation_info_submission.jsp'>Probation Info Submission x</a></h2>
