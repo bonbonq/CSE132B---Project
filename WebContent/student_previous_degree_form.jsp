@@ -115,8 +115,9 @@ if (action!=null && action.equals("insert")) {
 		<h1><%=message %></h1>
 		<%
 	}
+	
 	else {
-		String message = "Please make sure student doesn't already have the degree.";
+		String message = "Unsuccessfully added new previous degree";
 		%>
 		<h1><%=message %></h1>
 		<%
@@ -124,12 +125,68 @@ if (action!=null && action.equals("insert")) {
 
 }
 
+/* ============= */
+/* Update Action */
+/* ============= */
+else if(action!=null && action.equals("update")){
+	
+	PreparedStatement update = conn.prepareStatement(	
+			"Update student_degree_school SET " +
+			"idpreviousdegree=?, idschool=? " +
+			"WHERE idstudent_degree_school=?");
+	update.setInt(1, Integer.parseInt(request.getParameter("idpreviousdegree")));
+	update.setInt(2, Integer.parseInt(request.getParameter("idschool")));
+	update.setInt(3, Integer.parseInt(request.getParameter("idstudent_degree_school")));
+	
+	if (update.executeUpdate()==1) {
+		%>
+		<h1>Successfully Updated!</h1>
+		<%
+	}
+	else {
+		%>
+		<h1>Update has failed!</h1>
+		<%
+	}
+}
+
+/* ============= */
+/* Delete Action */
+/* ============= */
+
+else if(action!=null && action.equals("delete")) {
+
+	/* Just change these */
+	String table_name = "student_degree_school";
+	String table_id = "idstudent_degree_school";
+	String id_parameter_name = "idstudent_degree_school";
+	
+	PreparedStatement delete = conn.prepareStatement("DELETE FROM " + table_name + " WHERE " + table_id + "=?");
+	delete.setInt(1, Integer.parseInt(request.getParameter(id_parameter_name)));
+	
+	if (delete.executeUpdate()==1) {
+		%>
+		<h1>Successfully Deleted!</h1>
+		<%
+	}
+	else {
+		%>
+		<h1>Delete has failed!</h1>
+		<%
+	}
+	
+}
+
+
+/* =========================== */
 /* Generate Form Fields Action */
+/* =========================== */
+
 //The following will always run regardless of action
 try{
 	conn.setAutoCommit(false);
-	PreparedStatement school_stmt = conn.prepareStatement("SELECT * FROM school");
-	PreparedStatement degree_stmt = conn.prepareStatement("SELECT * FROM previousdegree");
+	PreparedStatement school_stmt = conn.prepareStatement("SELECT * FROM school", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+	PreparedStatement degree_stmt = conn.prepareStatement("SELECT * FROM previousdegree", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 	/* The below two statements are not closed, this might cause issues later... */
 	school_rs = school_stmt.executeQuery();
 	degree_rs = degree_stmt.executeQuery();
@@ -146,12 +203,35 @@ try{
 	<%
 } 
 
-%>
+/* ========================= */
+/* EDIT FORM DATA GENERATION */
+/* ========================= */
 
+ResultSet rs = null;
+
+//The following will always run regardless of action
+try{
+	conn.setAutoCommit(false);
+	/* The below statements are not closed, this might cause issues later... */
+	rs = conn.prepareStatement("SELECT * FROM student_degree_school NATURAL JOIN student NATURAL JOIN previousdegree NATURAL JOIN school ORDER BY idstudent").executeQuery();
+	conn.commit();
+	conn.setAutoCommit(true);
+	
+} catch(SQLException e) {
+	conn.rollback();
+	e.printStackTrace();
+	String message = "Failure: Unable to retrieve dropdown info - " + e.getMessage();
+	%>
+	<h1><%=message %></h1>
+	<%
+} 
+
+%>
 
 <!-- HTML body part -->
 <body>
 
+	<a href='index.jsp'><button>Home</button></a>
 	<h2>Student's Previous Earned Degree Entry Form</h2>
 	
 	<!-- Insertion Form -->
@@ -188,7 +268,7 @@ try{
 				{
 					while(degree_rs.next()){
 						%>
-						<option value=<%=degree_rs.getString("idpreviousdegree")%>><%=degree_rs.getString("field")%></option>
+						<option value=<%=degree_rs.getString("idpreviousdegree")%>><%=degree_rs.getString("field")%> - <%=degree_rs.getString("type")%></option>
 						<%
 					}
 				}
@@ -201,5 +281,75 @@ try{
 		
 	</form>
 
+	<br>
+	<br>
+	
+	<h2></h2>
+	<!-- Edit -->
+	<h2>Edit Form</h2>
+	
+	<table>
+	  <tr>
+	    <th>PID - Name</th>
+	    <th>School Name</th>
+	    <th>Degree Name</th>
+	    <th>Edit Actions</th>
+	  </tr>
+	  <%
+		if (rs.isBeforeFirst()) {
+			while(rs.next()) { 
+			%>
+				<form action="student_previous_degree_form.jsp" method="POST">
+					<input type="hidden" name="idstudent_degree_school" value="<%=rs.getString("idstudent_degree_school") %>">
+		  			<tr>
+					    <td><%=rs.getString("idstudent") %> - <%=rs.getString("first_name") %> <%=rs.getString("last_name") %></td>
+					    <td>
+					    	<select name="idschool">
+								<%
+								school_rs.beforeFirst();
+								if (school_rs.isBeforeFirst())
+								{
+									while(school_rs.next()){
+										%>
+										<option value=<%=school_rs.getString("idschool")%> <%= rs.getString("idschool").trim().equals(school_rs.getString("idschool")) ? "selected" : "" %> ><%=school_rs.getString("name")%></option>
+										<%
+									}
+								}
+								%>
+							</select>
+					    </td>
+					    <td>
+					    	<select name="idpreviousdegree">
+								<%
+								degree_rs.beforeFirst();
+								if (degree_rs.isBeforeFirst())
+								{
+									while(degree_rs.next()){
+										%>
+										<option value=<%=degree_rs.getString("idpreviousdegree")%>  <%= rs.getString("idpreviousdegree").trim().equals(degree_rs.getString("idpreviousdegree")) ? "selected" : "" %>  ><%=degree_rs.getString("field")%> - <%=degree_rs.getString("type")%></option>
+										<%
+									}
+								}
+								%>
+							</select>
+					    </td>
+					    <td>
+							&nbsp;
+							<button type="submit" name="action" value="update">Update</button>
+							&nbsp;
+							<button type="submit" name="action" value="delete">Delete</button>
+						</td>
+					</tr>
+			 	</form>
+					
+			<%
+			}
+		}
+	  %>
+	</table>
+	
+	
+	
+	
 </body>
 </html>
