@@ -42,6 +42,7 @@ String action = request.getParameter("action");
 int pid;
 String type;
 int department;
+int degree;
 String advisor = "";
 
 /* =========================== */
@@ -53,6 +54,7 @@ if (action!=null && action.equals("insert")) {
 	pid = Integer.parseInt(request.getParameter("pid"));
 	type = request.getParameter("type");
 	department = Integer.parseInt(request.getParameter("department"));
+	degree = Integer.parseInt(request.getParameter("degree"));
 	advisor = request.getParameter("advisor").replaceAll("_", " ");
 	
 	if (debug) {
@@ -89,6 +91,8 @@ if (action!=null && action.equals("insert")) {
 			}
 			
 			if (idms!=0){
+				
+				/* Insert into graduate_department if idms returned */
 				sql2 = "INSERT INTO graduate_department (idstudent, iddepartment) SELECT ?,? WHERE NOT EXISTS (SELECT idgraduate_department FROM graduate_department WHERE idstudent=?) RETURNING idgraduate_department";
 				pstmt2 = conn.prepareStatement(sql2);
 				pstmt2.setInt(1, pid);
@@ -110,6 +114,7 @@ if (action!=null && action.equals("insert")) {
 					throw new SQLException("Insert into graduate_department failed.");
 				}
 				
+				/* Insert into undergraduate_ms if 5 year */
 				if (type.equals("5year")) {
 					success = false;
 					sql3 = "INSERT INTO undergraduate_ms (idstudent, idms) SELECT ?,? WHERE NOT EXISTS (SELECT idundergraduate_ms FROM undergraduate_ms WHERE idstudent=?) AND EXISTS (SELECT idstudent FROM student WHERE idstudent=?) RETURNING idundergraduate_ms";
@@ -133,6 +138,29 @@ if (action!=null && action.equals("insert")) {
 					{
 						throw new SQLException("Insert into undergraduate_ms failed.");
 					}
+				}
+				
+				/* Insert into graduate_degree */
+				success = false;
+				sql4 = "INSERT INTO graduate_degree (idstudent, iddegree) SELECT ?,? WHERE NOT EXISTS (SELECT idgraduate_degree FROM graduate_degree WHERE idstudent=?) RETURNING idgraduate_degree";
+				pstmt4 = conn.prepareStatement(sql4);
+				pstmt4.setInt(1, pid);
+				pstmt4.setInt(2, degree);
+				pstmt4.setInt(3, pid);
+				if (pstmt4.execute())
+				{
+					ResultSet rs4 = pstmt4.getResultSet();
+					if (rs4.next()){
+						if(rs4.getInt("idgraduate_degree") > 0)
+							success = true;
+					}
+					else {
+						throw new SQLException("That student is already registered for a degree.");
+					}
+				}
+				else
+				{
+					throw new SQLException("Insert into graduate_degree failed.");
 				}
 			}
 			
@@ -182,6 +210,31 @@ if (action!=null && action.equals("insert")) {
 				{
 					throw new SQLException("Insert into graduate_department failed.");
 				}
+			}
+			
+			/* NOTE: THERE IS NO sql3 or pstmt3 */
+			
+			/* Insert into graduate_degree */
+			success = false;
+			sql4 = "INSERT INTO graduate_degree (idstudent, iddegree) SELECT ?,? WHERE NOT EXISTS (SELECT idgraduate_degree FROM graduate_degree WHERE idstudent=?) RETURNING idgraduate_degree";
+			pstmt4 = conn.prepareStatement(sql4);
+			pstmt4.setInt(1, pid);
+			pstmt4.setInt(2, degree);
+			pstmt4.setInt(3, pid);
+			if (pstmt4.execute())
+			{
+				ResultSet rs4 = pstmt4.getResultSet();
+				if (rs4.next()){
+					if(rs4.getInt("idgraduate_degree") > 0)
+						success = true;
+				}
+				else {
+					throw new SQLException("That student is already registered for a degree.");
+				}
+			}
+			else
+			{
+				throw new SQLException("Insert into graduate_degree failed.");
 			}
 			
 		}
@@ -254,6 +307,29 @@ if (action!=null && action.equals("insert")) {
 				{
 					throw new SQLException("Insert into graduate_department failed.");
 				}
+				
+				/* Insert into graduate_degree */
+				success = false;
+				sql4 = "INSERT INTO graduate_degree (idstudent, iddegree) SELECT ?,? WHERE NOT EXISTS (SELECT idgraduate_degree FROM graduate_degree WHERE idstudent=?) RETURNING idgraduate_degree";
+				pstmt4 = conn.prepareStatement(sql4);
+				pstmt4.setInt(1, pid);
+				pstmt4.setInt(2, degree);
+				pstmt4.setInt(3, pid);
+				if (pstmt4.execute())
+				{
+					ResultSet rs4 = pstmt4.getResultSet();
+					if (rs4.next()){
+						if(rs4.getInt("idgraduate_degree") > 0)
+							success = true;
+					}
+					else {
+						throw new SQLException("That student is already registered for a degree.");
+					}
+				}
+				else
+				{
+					throw new SQLException("Insert into graduate_degree failed.");
+				}
 			}
 		}
 		
@@ -291,15 +367,18 @@ if (action!=null && action.equals("insert")) {
 
 ResultSet department_rs = null;
 ResultSet faculty_rs = null;
+ResultSet degree_rs = null;
 
 //The following will always run regardless of action
 try{
 	conn.setAutoCommit(false);
 	PreparedStatement department_stmt = conn.prepareStatement("SELECT * FROM department");
 	PreparedStatement faculty_stmt = conn.prepareStatement("SELECT * FROM faculty");
+	PreparedStatement degree_stmt = conn.prepareStatement("SELECT * FROM degree WHERE type='MS' OR type='PHD'");
 	/* The below two statements are not closed, this might cause issues later... */
 	department_rs = department_stmt.executeQuery();
 	faculty_rs = faculty_stmt.executeQuery();
+	degree_rs = degree_stmt.executeQuery();
 	
 	conn.commit();
 	conn.setAutoCommit(true);
@@ -348,6 +427,23 @@ try{
 					while(department_rs.next()){
 						%>
 						<option value=<%=department_rs.getString("iddepartment")%>><%=department_rs.getString("name")%></option>
+						<%
+					}
+				}
+				%>
+			</select>
+		</div>
+		<p>
+		
+		<div>
+			Degree:
+			<select name="degree">
+				<%
+				if (degree_rs.isBeforeFirst())
+				{
+					while(degree_rs.next()){
+						%>
+						<option value=<%=degree_rs.getString("iddegree")%>><%=degree_rs.getString("name")%> - <%=degree_rs.getString("type")%></option>
 						<%
 					}
 				}

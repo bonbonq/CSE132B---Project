@@ -37,9 +37,9 @@ CREATE TABLE school (
 -- -----------------------------------------------------
 CREATE TABLE student_degree_school (
   idstudent_degree_school SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
-  idpreviousdegree integer REFERENCES previousdegree(idpreviousdegree) ON DELETE CASCADE,
-  idschool integer REFERENCES  school(idschool) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  idpreviousdegree integer REFERENCES previousdegree(idpreviousdegree) ON DELETE CASCADE ON UPDATE CASCADE,
+  idschool integer REFERENCES  school(idschool) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -49,7 +49,7 @@ CREATE TABLE student_degree_school (
 CREATE TABLE undergraduate (
   idundergraduate SERIAL PRIMARY KEY,
   college text NOT NULL,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -58,7 +58,7 @@ CREATE TABLE undergraduate (
 -- -----------------------------------------------------
 CREATE TABLE ms (
   idms SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -67,8 +67,8 @@ CREATE TABLE ms (
 -- -----------------------------------------------------
 CREATE TABLE undergraduate_ms (
   idundergraduate_ms SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
-  idms integer REFERENCES ms(idms) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  idms integer REFERENCES ms(idms) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -88,7 +88,7 @@ CREATE TABLE degree (
 -- -----------------------------------------------------
 CREATE TABLE lower_division (
   idlower_division SERIAL PRIMARY KEY,
-  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE,
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE ON UPDATE CASCADE,
   units integer NOT NULL,
   gpa double precision NOT NULL
   );
@@ -99,7 +99,7 @@ CREATE TABLE lower_division (
 -- -----------------------------------------------------
 CREATE TABLE upper_division (
   idlower_division SERIAL PRIMARY KEY,
-  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE,
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE ON UPDATE CASCADE,
   units integer NOT NULL,
   gpa double precision NOT NULL
   );
@@ -111,7 +111,7 @@ CREATE TABLE upper_division (
 CREATE TABLE minimum_gpa (
   idminimum_gpa SERIAL PRIMARY KEY,
   gpa double precision NOT NULL,
-  iiddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -120,7 +120,7 @@ CREATE TABLE minimum_gpa (
 -- -----------------------------------------------------
 CREATE TABLE concentration (
   idconcentration SERIAL PRIMARY KEY,
-  iiddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE,
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE ON UPDATE CASCADE,
   gpa double precision NOT NULL
   );
 
@@ -140,8 +140,8 @@ CREATE TABLE department (
 -- -----------------------------------------------------
 CREATE TABLE department_degree (
   iddepartment_degree SERIAL PRIMARY KEY,
-  iddepartment integer REFERENCES department(iddepartment) ON DELETE CASCADE,
-  iiddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE
+  iddepartment integer REFERENCES department(iddepartment) ON DELETE CASCADE ON UPDATE CASCADE,
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -150,8 +150,8 @@ CREATE TABLE department_degree (
 -- -----------------------------------------------------
 CREATE TABLE graduate_degree (
   idgraduate_degree SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
-  iiddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -160,8 +160,8 @@ CREATE TABLE graduate_degree (
 -- -----------------------------------------------------
 CREATE TABLE graduate_department (
   idgraduate_department SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
-  iddepartment integer REFERENCES department(iddepartment) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  iddepartment integer REFERENCES department(iddepartment) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -170,8 +170,8 @@ CREATE TABLE graduate_department (
 -- -----------------------------------------------------
 CREATE TABLE undergraduate_degree__major (
   idundergraduate_degree__major SERIAL PRIMARY KEY,
-  idundergraduate integer REFERENCES undergraduate(idundergraduate) ON DELETE CASCADE,
-  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE
+  idundergraduate integer REFERENCES undergraduate(idundergraduate) ON DELETE CASCADE ON UPDATE CASCADE,
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -180,8 +180,8 @@ CREATE TABLE undergraduate_degree__major (
 -- -----------------------------------------------------
 CREATE TABLE undergraduate_degree__minor (
   idundergraduate_degree__minor SERIAL PRIMARY KEY,
-  idundergraduate integer REFERENCES undergraduate(idundergraduate) ON DELETE CASCADE,
-  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE
+  idundergraduate integer REFERENCES undergraduate(idundergraduate) ON DELETE CASCADE ON UPDATE CASCADE,
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -199,8 +199,8 @@ CREATE TABLE faculty (
 -- -----------------------------------------------------
 CREATE TABLE department_faculty (
   iddepartment_faculty SERIAL PRIMARY KEY,
-  iddepartment integer REFERENCES department(iddepartment) ON DELETE CASCADE,
-  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE
+  iddepartment integer REFERENCES department(iddepartment) ON DELETE CASCADE ON UPDATE CASCADE,
+  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -209,7 +209,7 @@ CREATE TABLE department_faculty (
 -- -----------------------------------------------------
 CREATE TABLE candidate (
   idcandidate SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -218,7 +218,7 @@ CREATE TABLE candidate (
 -- -----------------------------------------------------
 CREATE TABLE precandidate (
   idprecandidate SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -227,8 +227,8 @@ CREATE TABLE precandidate (
 -- -----------------------------------------------------
 CREATE TABLE faculty_candidate (
   idfaculty_candidate SERIAL PRIMARY KEY,
-  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE,
-  idcandidate integer REFERENCES candidate(idcandidate) ON DELETE CASCADE
+  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE ON UPDATE CASCADE,
+  idcandidate integer REFERENCES candidate(idcandidate) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -237,8 +237,8 @@ CREATE TABLE faculty_candidate (
 -- -----------------------------------------------------
 CREATE TABLE faculty_graduate__dept (
   idfaculty_graduate__dept SERIAL PRIMARY KEY,
-  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE
+  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE ON UPDATE CASCADE,
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -247,8 +247,8 @@ CREATE TABLE faculty_graduate__dept (
 -- -----------------------------------------------------
 CREATE TABLE faculty_graduate__nondept (
   idfaculty_graduate__dept SERIAL PRIMARY KEY,
-  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE,
-  idcandidate integer REFERENCES candidate(idcandidate) ON DELETE CASCADE
+  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE ON UPDATE CASCADE,
+  idcandidate integer REFERENCES candidate(idcandidate) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -266,8 +266,8 @@ CREATE TABLE ap (
 -- -----------------------------------------------------
 CREATE TABLE student_ap (
   idstudent_ap SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
-  idap integer REFERENCES ap(idap) ON DELETE CASCADE,
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  idap integer REFERENCES ap(idap) ON DELETE CASCADE ON UPDATE CASCADE,
   score integer NOT NULL
   );
 
@@ -287,8 +287,8 @@ CREATE TABLE quarter (
 -- -----------------------------------------------------
 CREATE TABLE student_quarter__attends (
   idstudent_quarter_attends SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
-  idquarter integer REFERENCES quarter(idquarter) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  idquarter integer REFERENCES quarter(idquarter) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -297,8 +297,8 @@ CREATE TABLE student_quarter__attends (
 -- -----------------------------------------------------
 CREATE TABLE student_quarter__probation (
   idstudent_quarter__probation SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
-  idquarter integer REFERENCES quarter(idquarter) ON DELETE CASCADE,
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  idquarter integer REFERENCES quarter(idquarter) ON DELETE CASCADE ON UPDATE CASCADE,
   reason text NOT NULL
   );
 
@@ -339,8 +339,8 @@ CREATE TABLE coursenumber (
 -- -----------------------------------------------------
 CREATE TABLE course_coursenumber (
   idcourse_coursenumber SERIAL PRIMARY KEY,
-  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE,
-  idcoursenumber integer REFERENCES coursenumber(idcoursenumber) ON DELETE CASCADE
+  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE ON UPDATE CASCADE,
+  idcoursenumber integer REFERENCES coursenumber(idcoursenumber) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -349,8 +349,8 @@ CREATE TABLE course_coursenumber (
 -- -----------------------------------------------------
 CREATE TABLE department_course (
   iddepartment_course SERIAL PRIMARY KEY,
-  iddepartment integer REFERENCES department(iddepartment) ON DELETE CASCADE,
-  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE
+  iddepartment integer REFERENCES department(iddepartment) ON DELETE CASCADE ON UPDATE CASCADE,
+  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -359,8 +359,8 @@ CREATE TABLE department_course (
 -- -----------------------------------------------------
 CREATE TABLE concentration_course (
   idconcentration_course SERIAL PRIMARY KEY,
-  idconcentration integer REFERENCES concentration(idconcentration) ON DELETE CASCADE,
-  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE
+  idconcentration integer REFERENCES concentration(idconcentration) ON DELETE CASCADE ON UPDATE CASCADE,
+  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -369,8 +369,8 @@ CREATE TABLE concentration_course (
 -- -----------------------------------------------------
 CREATE TABLE prereqs (
   idprereqs SERIAL PRIMARY KEY,
-  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE,
-  prereq_idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE
+  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE ON UPDATE CASCADE,
+  prereq_idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -379,9 +379,9 @@ CREATE TABLE prereqs (
 -- -----------------------------------------------------
 CREATE TABLE quarter_course_class__instance (
   idinstance SERIAL PRIMARY KEY,
-  idquarter integer REFERENCES quarter(idquarter) ON DELETE CASCADE,
-  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE,
-  idclass integer REFERENCES class(idclass) ON DELETE CASCADE
+  idquarter integer REFERENCES quarter(idquarter) ON DELETE CASCADE ON UPDATE CASCADE,
+  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE ON UPDATE CASCADE,
+  idclass integer REFERENCES class(idclass) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -390,8 +390,8 @@ CREATE TABLE quarter_course_class__instance (
 -- -----------------------------------------------------
 CREATE TABLE student_instance (
   idstudent_instance SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
-  idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE,
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE ON UPDATE CASCADE,
   grade text NOT NULL
   );
 
@@ -410,9 +410,9 @@ CREATE TABLE section (
 -- -----------------------------------------------------
 CREATE TABLE faculty_class_section (
   idfaculty_class SERIAL PRIMARY KEY,
-  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE,
-  idclass integer REFERENCES class(idclass) ON DELETE CASCADE,
-  idsection integer REFERENCES section(idsection) ON DELETE CASCADE
+  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE ON UPDATE CASCADE,
+  idclass integer REFERENCES class(idclass) ON DELETE CASCADE ON UPDATE CASCADE,
+  idsection integer REFERENCES section(idsection) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -421,8 +421,8 @@ CREATE TABLE faculty_class_section (
 -- -----------------------------------------------------
 CREATE TABLE faculty_instance_teaches (
   idfaculty_instance_hastaught SERIAL PRIMARY KEY,
-  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE,
-  idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE
+  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE ON UPDATE CASCADE,
+  idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -431,8 +431,8 @@ CREATE TABLE faculty_instance_teaches (
 -- -----------------------------------------------------
 CREATE TABLE faculty_instance_willteach (
   idfaculty_instance_hastaught SERIAL PRIMARY KEY,
-  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE,
-  idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE
+  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE ON UPDATE CASCADE,
+  idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -441,8 +441,8 @@ CREATE TABLE faculty_instance_willteach (
 -- -----------------------------------------------------
 CREATE TABLE faculty_instance_hastaught (
   idfaculty_instance_hastaught SERIAL PRIMARY KEY,
-  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE,
-  idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE
+  faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE ON UPDATE CASCADE,
+  idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -451,8 +451,8 @@ CREATE TABLE faculty_instance_hastaught (
 -- -----------------------------------------------------
 CREATE TABLE student_section__enrolled (
   idstudent_section__enrolled SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
-  idsection integer REFERENCES section(idsection) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  idsection integer REFERENCES section(idsection) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -461,8 +461,8 @@ CREATE TABLE student_section__enrolled (
 -- -----------------------------------------------------
 CREATE TABLE student_section__waitlist (
   idstudent_section__enrolled SERIAL PRIMARY KEY,
-  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE,
-  idsection integer REFERENCES section(idsection) ON DELETE CASCADE
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  idsection integer REFERENCES section(idsection) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -499,8 +499,8 @@ CREATE TABLE reviewsession (
 -- -----------------------------------------------------
 CREATE TABLE section_weekly (
   idsection_weekly SERIAL PRIMARY KEY,
-  idsection integer REFERENCES section(idsection) ON DELETE CASCADE,
-  idweekly integer REFERENCES weekly(idweekly) ON DELETE CASCADE
+  idsection integer REFERENCES section(idsection) ON DELETE CASCADE ON UPDATE CASCADE,
+  idweekly integer REFERENCES weekly(idweekly) ON DELETE CASCADE ON UPDATE CASCADE
   );
 
 
@@ -509,6 +509,6 @@ CREATE TABLE section_weekly (
 -- -----------------------------------------------------
 CREATE TABLE section_reviewsession (
   idsection_reviewsession SERIAL PRIMARY KEY,
-  idsection integer REFERENCES section(idsection) ON DELETE CASCADE,
-  idreviewsession integer REFERENCES reviewsession(idreviewsession) ON DELETE CASCADE
+  idsection integer REFERENCES section(idsection) ON DELETE CASCADE ON UPDATE CASCADE,
+  idreviewsession integer REFERENCES reviewsession(idreviewsession) ON DELETE CASCADE ON UPDATE CASCADE
   );
