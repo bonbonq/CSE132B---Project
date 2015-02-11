@@ -75,12 +75,18 @@ try
 		
 		ps4.executeUpdate();
 		
-		conn.commit();
-		%><input type="hidden" name="todo" value="section">
+		conn.commit();%>
+		
+		<h3>Department: <%=dept%></h3>
+		<h4>Course Number: <%=courseno%></h4>
+		<h4>Section <%=classid%> successfully added</h4>
+		<form action="section.jsp">
+		<input type="hidden" name="todo" value="section">
 		<input type="hidden" name="dept" value="<%=dept%>">
 		<input type="hidden" name="courseno" value="<%=courseno%>">
-		<input type="hidden" name="sectionid" value="<%=classid%>"><%
-		response.sendRedirect("class_entry_form.jsp");
+		<input type="hidden" name="sectionid" value="<%=classid%>">
+		<input type="submit" value="Add Sections">
+		</form><%
 	}
 	
 	else if (todo == null)
@@ -142,33 +148,6 @@ try
 		<input type="hidden" name="department" value="<%=dept %>">
 		
 		</form>
-		<%
-	}
-	else if (todo.equals("section"))
-	{
-		String dept = request.getParameter("dept");
-		String courseno = request.getParameter("courseno");
-		String classid = request.getParameter("classid");
-		%>
-		<h3>Department: <%=dept%></h3>
-		<h4>Course Number: <%=courseno%></h4>
-		<h4>Section <%=classid%> successfully added</h4>
-		
-		<form action="section.jsp">
-			<input type="hidden" name="todo" value="lecture">
-			<input type="submit" value="Add Lecture">
-		</form>
-		
-		<form action="section.jsp">
-			<input type="hidden" name="todo" value="discussion">
-			<input type="submit" value="Add Discussion">
-		</form>
-		
-		<form action="section.jsp">
-			<input type="hidden" name="todo" value="review">
-			<input type="submit" value="Add Review Session">
-		</form>
-		
 		<%
 	}
 }

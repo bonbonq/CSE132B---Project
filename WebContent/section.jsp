@@ -10,10 +10,12 @@
 <title>Insert title here</title>
 </head>
 <body>
-
 <%
-
+	String dept = request.getParameter("dept");
+	String courseno = request.getParameter("courseno");
+	String sectionid = request.getParameter("sectionid");
 	String todo = request.getParameter("todo");
+	String type = request.getParameter("type");
 
 	if (todo == null)
 	{
@@ -23,9 +25,52 @@
 		<input type="submit" value="Go To Class Entry Form">
 		</form><%
 	}
-	%><form action="section.jsp"><%
-	if (todo.equals("review"))
+	
+	else if (todo.equals("section") && type == null)
 	{
+		%>
+		<h2>Section Add Form</h2>
+		<h3>Department:<%=dept%></h3>
+		<h3>Course Number: <%=courseno%></h3>
+		<h3>Section ID: <%=sectionid%></h3>
+		<form action="section.jsp">
+			<input type="hidden" name="type" value="lecture">
+			<input type="hidden" name="todo" value="section">
+			<input type="hidden" name="dept" value="<%=dept%>">
+			<input type="hidden" name="courseno" value="<%=courseno%>">
+			<input type="hidden" name="sectionid" value="<%=sectionid%>">
+			<input type="submit" value="Add Lecture">
+		</form>
+		
+		<form action="section.jsp">
+			<input type="hidden" name="type" value="discussion">
+			<input type="hidden" name="todo" value="section">
+			<input type="hidden" name="dept" value="<%=dept%>">
+			<input type="hidden" name="courseno" value="<%=courseno%>">
+			<input type="hidden" name="sectionid" value="<%=sectionid%>">
+			<input type="submit" value="Add Discussion">
+		</form>
+		
+		<form action="section.jsp">
+			<input type="hidden" name="type" value="review">
+			<input type="hidden" name="todo" value="section">
+			<input type="hidden" name="dept" value="<%=dept%>">
+			<input type="hidden" name="courseno" value="<%=courseno%>">
+			<input type="hidden" name="sectionid" value="<%=sectionid%>">
+			<input type="submit" value="Add Review Session">
+		</form><%
+	}
+	
+	if (type != null)
+	{
+		%>
+		<h2>Section Add Form</h2>
+		<h3>Department:<%=dept%></h3>
+		<h3>Course Number: <%=courseno%></h3>
+		<h3>Section ID: <%=sectionid%></h3><%
+		if (type.equals("review"))
+		{
+		%><form action="section.jsp"><%
 		%><h3>Adding a Review Session:</h3>
 		<input type="hidden" name="result" value="revadd">
 		
@@ -84,13 +129,15 @@
 			<option value="2016">2016</option>
 			<option value="2017">2017</option>
 		</select>
-		
+		</form>
 		
 		<% 
 	}
-	else if (todo.equals("lecture"))
+	else if (type.equals("lecture"))
 	{
-		%><h3>Adding a Lecture:</h3>
+		%>
+		<form action="section.jsp">
+		<h3>Adding a Lecture:</h3>
 		<input type="hidden" name="result" value="lecadd">
 		Days of Week:
 		<input type="checkbox" name="day" value="M">M
@@ -99,11 +146,14 @@
 		<input type="checkbox" name="day" value="Th">Th
 		<input type="checkbox" name="day" value="F">F
 		<input type="checkbox" name="day" value="Sa">Sa
-		<input type="checkbox" name="day" value="Su">Su<%
+		<input type="checkbox" name="day" value="Su">Su
+		</form><%
 	}
 	else
 	{
-		%><h3>Adding a Discussion:</h3>
+		%>
+		<form action="section.jsp">
+		<h3>Adding a Discussion:</h3>
 		<input type="hidden" name="result" value="discadd">
 		Days of Week:
 		<input type="checkbox" name="day" value="M">M
@@ -113,10 +163,11 @@
 		<input type="checkbox" name="day" value="F">F
 		<input type="checkbox" name="day" value="Sa">Sa
 		<input type="checkbox" name="day" value="Su">Su
+		</form>
 		<%
 	}
 
-%>
+%><form>
 		Start Time:
 		<select name="starth">
 			<option value="1">1</option>
@@ -178,5 +229,8 @@
 		<input type="text" name="location">
 	<input type="submit">
 </form>
+<%
+	}
+%>
 </body>
 </html>
