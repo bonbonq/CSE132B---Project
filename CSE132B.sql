@@ -8,7 +8,7 @@ CREATE TABLE student (
   last_name text NOT NULL,
   middle_name text NOT NULL,
   ss_num text NOT NULL,
-  enrolled bit NOT NULL,
+  enrolled boolean NOT NULL,
   residency text NOT NULL
   );
 
@@ -318,8 +318,10 @@ CREATE TABLE class (
 CREATE TABLE course (
   idcourse SERIAL PRIMARY KEY,
   grade_option_type text NOT NULL,
-  lab bit NOT NULL,
-  consent_prereq bit NOT NULL
+  min_units integer NOT NULL,
+  max_units integer NOT NULL,
+  lab boolean NOT NULL,
+  consent_prereq boolean NOT NULL
   );
 
 
@@ -328,7 +330,7 @@ CREATE TABLE course (
 -- -----------------------------------------------------
 CREATE TABLE coursenumber (
   idcoursenumber SERIAL PRIMARY KEY,
-  number text NOT NULL
+  number text NOT NULL UNIQUE
   );
 
 
@@ -339,26 +341,6 @@ CREATE TABLE course_coursenumber (
   idcourse_coursenumber SERIAL PRIMARY KEY,
   idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE,
   idcoursenumber integer REFERENCES coursenumber(idcoursenumber) ON DELETE CASCADE
-  );
-
-
--- -----------------------------------------------------
--- Table CSE132B.units
--- -----------------------------------------------------
-CREATE TABLE units (
-  idunits SERIAL PRIMARY KEY,
-  min integer NOT NULL,
-  max integer NOT NULL
-  );
-
-
--- -----------------------------------------------------
--- Table CSE132B.course_units
--- -----------------------------------------------------
-CREATE TABLE course_units (
-  idcourse_units SERIAL PRIMARY KEY,
-  idcourse integer REFERENCES course(idcourse) ON DELETE CASCADE,
-  idunits integer REFERENCES units(idunits) ON DELETE CASCADE
   );
 
 
