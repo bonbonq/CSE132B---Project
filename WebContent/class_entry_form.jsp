@@ -128,7 +128,6 @@ try
 		ps1.setString(1, title);
 		if (action.equals("update"))
 		{
-			System.out.println("YOYOYOYOYO");
 			idclass = Integer.parseInt(request.getParameter("idclass"));
 			System.out.println(idclass);
 			ps1.setInt(2, idclass);
@@ -168,7 +167,7 @@ try
 		int idquarter = rs3.getInt("idquarter");
 		
 		if (action.equals("insert"))
-			sql4 = "INSERT INTO quarter_course_class__instance (idquarter, idcourse, idclass) VALUES (?, ?, ?)";
+			sql4 = "INSERT INTO quarter_course_class__instance (idquarter, idcourse, idclass) VALUES (?, ?, ?) RETURNING idinstance";
 		else
 			sql4 = "UPDATE quarter_course_class__instance SET idquarter = ?, idcourse = ? WHERE idclass = ?";
 		
@@ -176,7 +175,18 @@ try
 		ps4.setInt(1, idquarter);
 		ps4.setInt(2, idcourse);
 		ps4.setInt(3, idclass);
-		ps4.executeUpdate();
+		int idinstance = -1;
+		if (action.equals("insert"))
+		{
+			ps4.execute();
+			rs4 = ps4.getResultSet();
+			rs4.next();
+			idinstance = rs4.getInt("idinstance");
+		}
+		else
+		{
+			ps4.executeUpdate();
+		}
 		conn.commit();
 		
 		if (action.equals("insert"))
@@ -189,6 +199,7 @@ try
 			session.setAttribute("idquarter", idquarter);
 			session.setAttribute("idcourse", idcourse);
 			session.setAttribute("sessionok", "okay");
+			session.setAttribute("idinstance", idinstance);
 		
 		%>
 		<h3>Class added successfully</h3>

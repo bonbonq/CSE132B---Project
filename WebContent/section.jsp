@@ -30,6 +30,7 @@
 	String quarter = (String) session.getAttribute("quarter");
 	Integer year = (Integer) session.getAttribute("year");
 	Integer idclass = (Integer) session.getAttribute("idclass");
+	Integer idinstance = (Integer) session.getAttribute("idinstance");
 	%>
 	<h2>Section Add Form</h2>
 	<h3>Department:<%=dept%></h3>
@@ -162,6 +163,12 @@
 			ps2.setInt(2, idclass);
 			ps2.setInt(3, idsection);
 			ps2.executeUpdate();
+			
+			sql3 = "INSERT INTO instance_section (idinstance, idsection) VALUES (?, ?)";
+			ps3 = conn.prepareStatement(sql3);
+			ps3.setInt(1, idinstance);
+			ps3.setInt(2, idsection);
+			ps3.executeUpdate();
 			conn.commit();
 			session.setAttribute("idsection", idsection);
 			%>
