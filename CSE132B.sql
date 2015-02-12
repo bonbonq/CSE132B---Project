@@ -405,6 +405,8 @@ CREATE TABLE student_instance (
   idstudent_instance SERIAL PRIMARY KEY,
   idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
   idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE ON UPDATE CASCADE,
+  units integer NOT NULL,
+  grade_option_type text NOT NULL,
   grade text NOT NULL
   );
 
@@ -417,6 +419,17 @@ CREATE TABLE section (
   enrollment_limit integer NOT NULL
   );
 
+
+-- -----------------------------------------------------
+-- Table CSE132B.instance_section
+-- -----------------------------------------------------
+CREATE TABLE instance_section (
+  idinstance_section SERIAL PRIMARY KEY,
+  idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE ON UPDATE CASCADE,
+  idsection integer REFERENCES section(idsection) ON DELETE CASCADE ON UPDATE CASCADE
+  );
+  
+  
 
 -- -----------------------------------------------------
 -- Table CSE132B.faculty_class_section
