@@ -25,7 +25,6 @@
 		</form>
 		<%
 	}
-	
 	String dept = (String) session.getAttribute("dept");
 	String courseno = (String) session.getAttribute("courseno");
 	String quarter = (String) session.getAttribute("quarter");
@@ -63,8 +62,10 @@
 		String action = request.getParameter("action");
 		if (action != null && action.equals("view"))
 		{
-			sql1 = "SELECT idsection, class.idclass, number, title, name, season, year FROM department, class, quarter_course_class__instance, course_coursenumber, quarter, department_course, coursenumber, faculty_class_section" + 
+			sql1 = "SELECT section.idsection, enrollment_limit, faculty_class_section.faculty_name, class.idclass, number, class.title, name, season, year " + 
+					" FROM section, faculty, department, class, quarter_course_class__instance, course_coursenumber, quarter, department_course, coursenumber, faculty_class_section" + 
 					" WHERE class.idclass = quarter_course_class__instance.idclass" +
+					" AND section.idsection = faculty_class_section.idsection" + 
 					" AND faculty_class_section.idclass = quarter_course_class__instance.idclass" + 
 					" AND department.iddepartment = department_course.iddepartment" +
 					" AND department_course.idcourse = course_coursenumber.idcourse" +
@@ -81,21 +82,25 @@
 					<th>Course Number</th>
 					<th>Course Title</th>
 					<th>Department</th>
+					<th>Instructor</th>
+					<th>Enrollment Limit</th>
 					<th>Quarter</th>
 					<th>Year</th>
 				</tr>
 			<%
-			int sid, cid;
-			String cno, ct, dep, q, y;
+			int sid, cid, el;
+			String cno, ct, dep, q, y, i;
 			while (rs1.next())
 			{
-				sid = rs1.getInt(1);
-				cid = rs1.getInt(2);
-				cno = rs1.getString(3);
-				ct = rs1.getString(4);
-				dep = rs1.getString(5);
-				q = rs1.getString(6);
-				y = rs1.getString(7);
+				sid = rs1.getInt("idsection");
+				cid = rs1.getInt("idclass");
+				cno = rs1.getString("number");
+				ct = rs1.getString("title");
+				dep = rs1.getString("name");
+				q = rs1.getString("season");
+				y = rs1.getString("year");
+				el = rs1.getInt("enrollment_limit");
+				i = rs1.getString("faculty_name");
 			%>
 				
 				<tr>
@@ -104,6 +109,8 @@
 					<td><%=cno%></td>
 					<td><%=ct%></td>
 					<td><%=dep%></td>
+					<td><%=i%></td>
+					<td><%=el%></td>
 					<td><%=q%></td>
 					<td><%=y%></td>
 					<td>
@@ -113,6 +120,14 @@
 							<input type="submit" value="Delete">
 						</form>
 					</td>
+					<td>
+					<form action="section.jsp" method="POST">
+						<input type="hidden" name="action" value="updatepre">
+						<input type="hidden" name="idsection" value="<%=sid%>">
+						<input type="hidden" name="department" value="<%=dep%>">
+						<input type="submit" value="Update">
+					</form>
+				</td>
 				</tr>
 			<%
 			} 
@@ -169,6 +184,54 @@
 			</form>
 			<%
 		}
+		else if (action != null && action.equals("update"))
+		{
+			int idsection = Integer.parseInt(request.getParameter("idsection"));
+			int enrollmentLimit = Integer.parseInt(request.getParameter("enrollment"));
+			sql1 = "UPDATE section SET enrollment_limit = ? WHERE idsection = ?";
+			ps1 = conn.prepareStatement(sql1);
+			ps1.setInt(1, enrollmentLimit);
+			ps1.setInt(2, idsection);
+			ps1.executeUpdate();
+			
+			String faculty = request.getParameter("faculty");
+			sql2 = "UPDATE faculty_class_section SET faculty_name = ? WHERE idsection = ?";
+			ps2 = conn.prepareStatement(sql2);
+			ps2.setString(1, faculty);
+			ps2.setInt(2, idsection);
+			ps2.executeUpdate();
+			conn.commit();
+			response.sendRedirect("section.jsp?action=view");
+		}
+		
+		else if (action != null && action.equals("updatepre"))
+		{
+			String idsection = request.getParameter("idsection");
+			sql1 = "SELECT faculty_name FROM faculty";
+			ps1 = conn.prepareStatement(sql1);
+			rs1 = ps1.executeQuery();
+			%>
+			<form action="section.jsp" method="POST">
+				<label for="faculty">Teaching Faculty:</label>
+				<select name="faculty">
+			<%
+			String name = "";
+			while (rs1.next())
+			{
+				name = rs1.getString("faculty_name");
+					%><option value="<%=name%>"><%=name%></option><%
+			}
+			%>
+				</select>
+				<label for="enrollment">Enrollment Limit</label>
+				<input type="text" name="enrollment">
+				<input type="hidden" name="action" value="update">
+				<input type="hidden" name="idsection" value="<%=idsection%>">
+				<input type="submit">
+			</form>
+			<%
+		}
+		
 		
 		else
 		{
