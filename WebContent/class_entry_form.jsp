@@ -14,6 +14,9 @@
 
 <% 
 
+session.invalidate();
+session = request.getSession();
+
 Connection conn = null;
 PreparedStatement ps1 = null;
 PreparedStatement ps2 = null;
@@ -23,8 +26,10 @@ ResultSet rs1 = null;
 ResultSet rs2 = null;
 ResultSet rs3 = null;
 ResultSet rs4 = null;
-
-
+String sql1 = null;
+String sql2 = null;
+String sql3 = null;
+String sql4 = null;
 
 try
 {
@@ -36,117 +41,147 @@ try
 	String jdbc = request.getParameter("jdbc");
 	String title = request.getParameter("title");
 	
-	if (jdbc != null && jdbc.equals("addsection"))
+	String action = request.getParameter("action");
+	
+	if (action != null && action.equals("insert"))
 	{
-		ps1 = conn.prepareStatement("INSERT INTO class (title) VALUES ('" + title + "') RETURNING idclass");
+		sql1 = "INSERT INTO class (title) VALUES (?) RETURNING idclass";
+		ps1 = conn.prepareStatement(sql1);
+		ps1.setString(1, title);
 		ps1.execute();
 		rs1 = ps1.getResultSet();
 		rs1.next();
-		System.out.println("before1");
-		int classid = rs1.getInt("idclass");
-		System.out.println("after1");
-	    String year = request.getParameter("year");
+		int idclass = rs1.getInt("idclass");
+	    int year = Integer.parseInt(request.getParameter("year"));
 		String courseno = request.getParameter("courseno");
 		String dept = request.getParameter("department");
-		System.out.println(classid);
-		System.out.println(year);
-		System.out.println(courseno);
-		System.out.println(dept);
-		ps2 = conn.prepareStatement("SELECT department_course.idcourse FROM department, department_course, course_coursenumber, coursenumber" + 
-				" WHERE department.name = '" + dept + "'" + 
+		sql2 = "SELECT department_course.idcourse FROM department, department_course, course_coursenumber, coursenumber" + 
+				" WHERE department.name = ?" + 
 				" AND department_course.iddepartment = department.iddepartment" + 
 				" AND department_course.idcourse = course_coursenumber.idcourse" + 
 				" AND course_coursenumber.idcoursenumber = coursenumber.idcoursenumber" + 
-				" AND coursenumber.number = '" + courseno + "'");
+				" AND coursenumber.number = ?";
+		
+		ps2 = conn.prepareStatement(sql2);
+		ps2.setString(1, dept);
+		ps2.setString(2, courseno);
 		rs2 = ps2.executeQuery();
 		rs2.next();
-		System.out.println("before2");
-		int courseid = rs2.getInt("idcourse");
-		System.out.println("after2");
+		int idcourse = rs2.getInt("idcourse");
 		String quarter = request.getParameter("quarter");
-		System.out.println("quarter");
-		ps3 = conn.prepareStatement("SELECT idquarter FROM quarter WHERE year = " + year + " AND season = '" + quarter + "'");
+		
+		sql3 = "SELECT idquarter FROM quarter WHERE year = ? AND season = ?";
+		ps3 = conn.prepareStatement(sql3);
+		ps3.setInt(1, year);
+		ps3.setString(2, quarter);
 		rs3 = ps3.executeQuery();
 		rs3.next();
-		System.out.println("before3");
-		int quarterid = rs3.getInt("idquarter");
-		System.out.println("after3");
-		ps4 = conn.prepareStatement("INSERT INTO quarter_course_class__instance (idquarter, idcourse, idclass) VALUES (" + quarterid + ", " + courseid + ", " + classid + ")");
+		int idquarter = rs3.getInt("idquarter");
 		
+		sql4 = "INSERT INTO quarter_course_class__instance (idquarter, idcourse, idclass) VALUES (?, ?, ?)";
+		ps4 = conn.prepareStatement(sql4);
+		ps4.setInt(1, idquarter);
+		ps4.setInt(2, idcourse);
+		ps4.setInt(3, idclass);
 		ps4.executeUpdate();
+		conn.commit();
+		session.setAttribute("dept", dept);
+		session.setAttribute("quarter", quarter);
+		session.setAttribute("year", year);
+		session.setAttribute("courseno", courseno);
+		session.setAttribute("idclass", idclass);
+		session.setAttribute("idquarter", idquarter);
+		session.setAttribute("idcourse", idcourse);
+		session.setAttribute("sessionok", "okay");
 		
-		conn.commit();%>
-		
+		%>
+		<h3>Class added successfully</h3>
+		<h3>Summary:</h3>
 		<h3>Department: <%=dept%></h3>
 		<h4>Course Number: <%=courseno%></h4>
-		<h4>Section <%=classid%> successfully added</h4>
-		<form action="section.jsp">
-		<input type="hidden" name="todo" value="section">
-		<input type="hidden" name="dept" value="<%=dept%>">
-		<input type="hidden" name="courseno" value="<%=courseno%>">
-		<input type="hidden" name="sectionid" value="<%=classid%>">
-		<input type="submit" value="Add Sections">
-		</form><%
-	}
-	
-	else if (todo == null)
-	{
-		ps1 = conn.prepareStatement("SELECT name FROM department");
-		rs1 = ps1.executeQuery();
-		%><form action="class_entry_form.jsp">
-		<label for="department">Department:</label>
-		<select name="department"><%
-		String name = null;
-		while (rs1.next())
-		{	
-			name = rs1.getString("name");
-			%> <option value="<%=name%>"><%=name%></option>
-			<%
-		}%></select><input type="hidden" name="todo" value="course">
-		<input type="submit"></form>
+		<h4>Quarter: <%=quarter%></h4>
+		<h4>Class ID: <%=idclass%></h4>
+		<h4>Class Title: <%=title %></h4>
+		
+		<form action="section.jsp" method="POST">
+			<input type="submit" value="Add Sections">
+		</form>
+		<form action="class_entry_form.jsp" method="POST">
+			<input type="submit" value="Add Another Class">
+		</form>
 		<%
 	}
 	
-	else if (todo.equals("course"))
+	else if (action != null && action.equals("create"))
 	{
 		String dept = request.getParameter("department");
-		%><h3>Department: <%=dept%></h3><%
-		ps1 = conn.prepareStatement("SELECT coursenumber.number FROM department, department_course, course_coursenumber, coursenumber " +
-		     " WHERE department.name = '" + dept + "'" +
-		     " AND department.iddepartment = department_course.iddepartment " + 
-		     " AND department_course.idcourse = course_coursenumber.idcourse " + 
-		     " AND course_coursenumber.idcoursenumber = coursenumber.idcoursenumber ");
+		%>
+		<h3>Department: <%=dept%></h3>
+		<%
+		
+		sql1 = "SELECT coursenumber.number FROM department, department_course, course_coursenumber, coursenumber " +
+			     " WHERE department.name = ?" +
+			     " AND department.iddepartment = department_course.iddepartment " + 
+			     " AND department_course.idcourse = course_coursenumber.idcourse " + 
+			     " AND course_coursenumber.idcoursenumber = coursenumber.idcoursenumber ";
+		ps1 = conn.prepareStatement(sql1);
+		ps1.setString(1, dept);
 		rs1 = ps1.executeQuery();
-		%><form action="class_entry_form.jsp">
-		<label for="courseno">Course Number</label>
-		<select name="courseno"><%
-
+		%>
+		<form action="class_entry_form.jsp" method="POST">
+			<label for="courseno">Course Number</label>
+			<select name="courseno">
+		<%
 		while (rs1.next())
 		{
 			String num = rs1.getString("number");
 			%>
-			<option value="<%=num%>"><%=num%></option>
-		<%
+				<option value="<%=num%>"><%=num%></option>
+			<%
 		}
-		%></select><input type="submit">
-		<label for="title">Course Title:</label>
-		<input type="text" name="title">
-		<label for="quarter">Quarter:</label>
-		<input type="radio" name="quarter" value="Fall">Fall
-		<input type="radio" name="quarter" value="Winter">Winter
-		<input type="radio" name="quarter" value="Spring">Spring
-		<input type="radio" name="quarter" value="Summer">Summer
-		<select name="year">
-		<option value="2015">2015</option>
-		<option value="2016">2016</option>
-		<option value="2017">2017</option>
-		<option value="2018">2018</option>
+		%>
+			</select><input type="submit">
+			<label for="title">Course Title:</label>
+			<input type="text" name="title">
+			<label for="quarter">Quarter:</label>
+			<input type="radio" name="quarter" value="Fall">Fall
+			<input type="radio" name="quarter" value="Winter">Winter
+			<input type="radio" name="quarter" value="Spring">Spring
+			<input type="radio" name="quarter" value="Summer">Summer
+			<select name="year">
+				<option value="2015">2015</option>
+				<option value="2016">2016</option>
+				<option value="2017">2017</option>
+				<option value="2018">2018</option>
+			</select>
 		
-		</select>
+			<input type="hidden" name="action" value="insert">
+			<input type="hidden" name="department" value="<%=dept %>">	
+		</form>
+		<%
+	}
+	else
+	{
+		ps1 = conn.prepareStatement("SELECT name FROM department");
+		rs1 = ps1.executeQuery();
+		%>
+		<form action="class_entry_form.jsp">
+			<label for="department">Department:</label>
+			<select name="department">
+		<%
 		
-		<input type="hidden" name="jdbc" value="addsection">
-		<input type="hidden" name="department" value="<%=dept %>">
-		
+		String name = null;
+		while (rs1.next())
+		{	
+			name = rs1.getString("name");
+			%> 
+				<option value="<%=name%>"><%=name%></option>
+			<%
+		}
+		%>
+			</select>
+			<input type="hidden" name="action" value="create">
+			<input type="submit">
 		</form>
 		<%
 	}
@@ -154,6 +189,7 @@ try
 
 catch (SQLException e)
 {
+	conn.rollback();
 	e.printStackTrace();
 }
 
@@ -175,13 +211,15 @@ finally
 		rs3.close();
 	if (rs4 != null)
 		rs4.close();
-	
+
 	if (conn != null)
 	{
 		conn.setAutoCommit(false);
 		conn.close();
 	}
 }
+	
+	
 %>
 </body>
 </html>
