@@ -92,10 +92,6 @@ else if(action!=null && action.equals("insert")){
 	}
 	else
 		%><h1>insert0_2 failed.</h1><%
-	
-
-	System.out.println("currently_enrolled " + currently_enrolled);
-	System.out.println("enrollment_limit " + enrollment_limit);
 
 	
 	/* Add to student_instance */
@@ -183,9 +179,7 @@ else if(action!=null && action.equals("update")){
 	update.setInt(4, Integer.parseInt(request.getParameter("idstudent_instance")));
 	
 	if (update.executeUpdate()==1) {
-		%>
-		<h1>Successfully Updated!</h1>
-		<%
+		response.sendRedirect("precourse_enrollment.jsp");
 	}
 	else {
 		%>
@@ -203,9 +197,7 @@ else if(action!=null && action.equals("enrolled_update")){
 	update.setInt(2, Integer.parseInt(request.getParameter("idstudent_section__enrolled")));
 	
 	if (update.executeUpdate()==1) {
-		%>
-		<h1>Successfully Updated!</h1>
-		<%
+		response.sendRedirect("precourse_enrollment.jsp");
 	}
 	else {
 		%>
@@ -223,9 +215,7 @@ else if(action!=null && action.equals("waitlist_update")){
 	update.setInt(2, Integer.parseInt(request.getParameter("idstudent_section__waitlist")));
 	
 	if (update.executeUpdate()==1) {
-		%>
-		<h1>Successfully Updated!</h1>
-		<%
+		response.sendRedirect("precourse_enrollment.jsp");
 	}
 	else {
 		%>
@@ -251,9 +241,7 @@ else if(action!=null && action.equals("delete")) {
 	delete.setInt(1, Integer.parseInt(request.getParameter(id_parameter_name)));
 	
 	if (delete.executeUpdate()==1) {
-		%>
-		<h1>Successfully Deleted!</h1>
-		<%
+		response.sendRedirect("precourse_enrollment.jsp");
 	}
 	else {
 		%>
@@ -273,9 +261,7 @@ else if(action!=null && action.equals("enrolled_delete")) {
 	delete.setInt(1, Integer.parseInt(request.getParameter(id_parameter_name)));
 	
 	if (delete.executeUpdate()==1) {
-		%>
-		<h1>Successfully Deleted!</h1>
-		<%
+		response.sendRedirect("precourse_enrollment.jsp");
 	}
 	else {
 		%>
@@ -295,9 +281,7 @@ else if(action!=null && action.equals("waitlist_delete")) {
 	delete.setInt(1, Integer.parseInt(request.getParameter(id_parameter_name)));
 	
 	if (delete.executeUpdate()==1) {
-		%>
-		<h1>Successfully Deleted!</h1>
-		<%
+		response.sendRedirect("precourse_enrollment.jsp");
 	}
 	else {
 		%>
@@ -381,7 +365,6 @@ ResultSet waitlist_rs = null;
 try{
 	conn.setAutoCommit(false);
 	/* The below statements are not closed, this might cause issues later... */
-	System.out.println(idinstance);
 	PreparedStatement instance_stmt = conn.prepareStatement("SELECT * FROM student_instance NATURAL JOIN student WHERE idinstance=?");
 	instance_stmt.setInt(1, idinstance);
 	if (instance_stmt.execute()) {
