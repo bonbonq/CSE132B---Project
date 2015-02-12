@@ -114,6 +114,16 @@
 								<input type="submit" value="Delete">
 							</form>
 						</td>
+						<td>
+							<form action="subsection.jsp" method="POST">
+							<input type="hidden" name="action" value="updatepre">
+							<input type="hidden" name="idsection" value="<%=sid%>">
+							<input type="hidden" name="type" value="<%=t%>">
+							<input type="hidden" name="idweekly" value="<%=wid%>">
+							<input type="submit" value="Update">
+							</form>
+						</td>
+					
 					</tr>
 				<%
 				} 
@@ -156,8 +166,17 @@
 							<form action="subsection.jsp" method="POST">
 								<input type="hidden" name="action" value="delete">
 								<input type="hidden" name="id" value="<%=wid%>">
-								<input type="hidden" name="type" value="review">
+								<input type="hidden" name="type" value="<%=t%>">
 								<input type="submit" value="Delete">
+							</form>
+						</td>
+						<td>
+							<form action="subsection.jsp" method="POST">
+							<input type="hidden" name="action" value="updatepre">
+							<input type="hidden" name="idsection" value="<%=sid%>">
+							<input type="hidden" name="type" value="review">
+							<input type="hidden" name="idreviewsession" value="<%=wid%>">
+							<input type="submit" value="Update">
 							</form>
 						</td>
 					</tr>
@@ -167,6 +186,278 @@
 				</table>
 				<%
 			}
+			else if (action != null && action.equals("updatepre"))
+			{
+				type = request.getParameter("type");
+				String idweekly = request.getParameter("idweekly");
+				String idreviewsession = request.getParameter("idreviewsession");
+				System.out.println(type);
+				System.out.println(idweekly);
+				System.out.println(idreviewsession);
+				
+				int myid = -1;
+				String idname = "";
+				%>
+				<form action="subsection.jsp" method="POST">
+				<%
+			
+				if (type != null && (type.equals("lecture") || type.equals("discussion")))
+				{
+					idname = "idweekly";
+					myid = Integer.parseInt(idweekly);
+					%>
+					<h3>Updating <%=type%> <%=idweekly%>:</h3>
+			
+					Days of Week:
+					<input type="checkbox" name="days" value="M">M
+					<input type="checkbox" name="days" value="Tu">Tu
+					<input type="checkbox" name="days" value="W">W
+					<input type="checkbox" name="days" value="Th">Th
+					<input type="checkbox" name="days" value="F">F
+					<input type="checkbox" name="days" value="Sa">Sa
+					<input type="checkbox" name="days" value="Su">Su
+					<%
+				}
+			
+				else if (type != null && type.equals("review"))
+				{
+					idname = "idreviewsession";
+					myid = Integer.parseInt(idreviewsession);
+					%>
+					<h3>Updating Review Session <%=idreviewsession %>:</h3>		
+					<select name="month">
+						<option value="01">1</option>
+						<option value="02">2</option>
+						<option value="03">3</option>
+						<option value="04">4</option>
+						<option value="05">5</option>
+						<option value="06">6</option>
+						<option value="07">7</option>
+						<option value="08">8</option>
+						<option value="09">9</option>
+						<option value="10">10</option>
+						<option value="11">11</option>
+						<option value="12">12</option>
+					</select>
+					/	
+					<select name="day">
+						<option value="01">1</option>
+						<option value="02">2</option>
+						<option value="03">3</option>
+						<option value="04">4</option>
+						<option value="05">5</option>
+						<option value="06">6</option>
+						<option value="07">7</option>
+						<option value="08">8</option>
+						<option value="09">9</option>
+						<option value="10">10</option>
+						<option value="11">11</option>
+						<option value="12">12</option>
+						<option value="13">13</option>
+						<option value="14">14</option>
+						<option value="15">15</option>
+						<option value="16">16</option>
+						<option value="17">17</option>
+						<option value="18">18</option>
+						<option value="19">19</option>
+						<option value="20">20</option>
+						<option value="21">21</option>
+						<option value="22">22</option>
+						<option value="23">23</option>
+						<option value="24">24</option>
+						<option value="25">25</option>
+						<option value="26">26</option>
+						<option value="27">27</option>
+						<option value="28">28</option>
+						<option value="29">29</option>
+						<option value="30">30</option>
+						<option value="31">31</option>
+					</select>
+					/
+					<select name="year">
+						<option value="2015">2015</option>
+						<option value="2016">2016</option>
+						<option value="2017">2017</option>
+					</select>
+					<%
+				}	
+				%>
+				Start Time:
+				<select name="starth">
+					<option value="01">1</option>
+					<option value="02">2</option>
+					<option value="03">3</option>
+					<option value="04">4</option>
+					<option value="05">5</option>
+					<option value="06">6</option>
+					<option value="07">7</option>
+					<option value="08">8</option>
+					<option value="09">9</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="11">12</option>
+				</select>
+				:
+				<select name="startm">
+					<option value="00">00</option>
+					<option value="10">10</option>
+					<option value="20">20</option>
+					<option value="30">30</option>
+					<option value="40">40</option>
+					<option value="50">50</option>
+				</select>
+				<select name="startmode">
+					<option value="am">AM</option>
+					<option value="pm">PM</option>
+				</select>
+				End Time:
+				<select name="endh">
+					<option value="01">01</option>
+					<option value="02">02</option>
+					<option value="03">03</option>
+					<option value="04">04</option>
+					<option value="05">05</option>
+					<option value="06">06</option>
+					<option value="07">07</option>
+					<option value="08">08</option>
+					<option value="09">09</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="12">12</option>
+				</select>
+				:
+				<select name="endm">
+					<option value="00">00</option>
+					<option value="10">10</option>
+					<option value="20">20</option>
+					<option value="30">30</option>
+					<option value="40">40</option>
+					<option value="50">50</option>
+				</select>
+				<select name="endmode">
+					<option value="am">AM</option>
+					<option value="pm">PM</option>
+				</select>
+			
+				<label for="building">Location:</label>
+				<input type="text" name="building">
+				<label for="room">Room:</label>
+				<input type="text" name="room">
+				<input type="hidden" name="action" value="update">
+				<input type="hidden" name="type" value="<%=type%>">
+				<input type="hidden" name="<%=idname%>" value="<%=myid%>">
+				<input type="submit">
+			</form>
+			<%
+			System.out.println(idname);
+			System.out.println(myid);
+		}
+		else if (action != null && action.equals("update"))
+		{
+			String idweekly = request.getParameter("idweekly");
+			String idreviewsession = request.getParameter("idreviewsession");
+			String building = request.getParameter("building");
+			String room = request.getParameter("room");
+			String starth = request.getParameter("starth");
+			String startm = request.getParameter("startm");
+			String startmode = request.getParameter("startmode");
+			String endh = request.getParameter("endh");
+			String endm = request.getParameter("endm");
+			String endmode = request.getParameter("endmode");
+		
+			if (startmode.equals("pm"))
+			{
+				int starthint = Integer.parseInt(starth);
+				starthint += 12;
+				starthint %= 24;
+				starth = "" + starthint;
+			}
+		
+			if (endmode.equals("pm"))
+			{
+				int endhint = Integer.parseInt(endh);
+				endhint += 12;
+				endh = "" + endhint;
+			}
+
+			String startTimeString = starth + ":" + startm + ":00";
+			String endTimeString = endh + ":" + endm + ":00";
+			
+			String daysString = null;
+			String dateString = null;
+		
+			String dayType = "";
+			String dayString = "";
+		
+			if (type != null && (type.equals("lecture") || (type.equals("discussion"))))
+			{
+				String dummyDate = "2014-01-01";
+				java.sql.Date dummyDateObj = java.sql.Date.valueOf(dummyDate);
+				java.sql.Timestamp startTime = java.sql.Timestamp.valueOf(dummyDate + " " + startTimeString);
+				java.sql.Timestamp endTime = java.sql.Timestamp.valueOf(dummyDate + " " + endTimeString);
+				String [] days = request.getParameterValues("days");
+				int dayslength = days.length;
+				dayType = "Days of Week";
+				for (int i = 0; i < dayslength; i++)
+					dayString += days[i];
+			
+				sql1 = "UPDATE weekly SET building = ?, room = ?, day_of_week = ?, start_time = ?, end_time = ?, type = ? WHERE idweekly = ?";
+				ps1 = conn.prepareStatement(sql1);
+				ps1.setString(1, building);
+				ps1.setString(2, room);
+				ps1.setDate(3, dummyDateObj);
+				ps1.setTimestamp(4, startTime);
+				ps1.setTimestamp(5, endTime);
+				ps1.setString(6, type);
+				ps1.setInt(7, Integer.parseInt(idweekly));
+				ps1.executeUpdate();
+				conn.commit();
+				
+				response.sendRedirect("subsection.jsp?action=view");
+			}
+		
+			else if (type != null && type.equals("review"))
+			{
+				String month = request.getParameter("month");
+				String day = request.getParameter("day");
+				String year = request.getParameter("year");
+				dayType = "Date";
+				dayString = year + "-" + month + "-" + day;
+				java.sql.Date revDate = java.sql.Date.valueOf(dayString);
+				java.sql.Timestamp startTime = java.sql.Timestamp.valueOf(dayString + " " + startTimeString);
+				java.sql.Timestamp endTime = java.sql.Timestamp.valueOf(dayString + " " + endTimeString);
+			
+				sql1 = "UPDATE reviewsession SET time = ?, start_time = ?, end_time = ?, building = ?, room = ? WHERE idreviewsession = ?";
+				sql1 = "INSERT INTO reviewsession (time, start_time, end_time, building, room) VALUES (?, ?, ?, ?, ?) RETURNING idreviewsession";
+				ps1 = conn.prepareStatement(sql1);
+				ps1.setDate(1, revDate);
+				ps1.setTimestamp(2, startTime);
+				ps1.setTimestamp(3, endTime);
+				ps1.setString(4, building);
+				ps1.setString(5, room);
+				ps1.executeUpdate();
+				conn.commit();
+				response.sendRedirect("subsection.jsp?action=view");
+			}
+			%>
+			<h3>Successfully added a <%=type%></h3>
+			<h3>Summary:</h3>
+			<h4><%=dayType%>: <%=dayString%></h4>
+			<h4>Start Time: <%=startTimeString%></h4>
+			<h4>End Time: <%=endTimeString%></h4>
+			<form action="subsection.jsp" method="POST">
+				<input type="submit" value="Add more subsections">
+			</form>
+			<form action="section.jsp" method="POST">
+				<input type="submit" value="Add a new section">
+			</form>
+			<form action="class_entry_form.jsp">
+				<input type="submit" value="Add a new class">
+			</form>
+			<%
+					
+		}
+		
 			
 			else if (action != null && action.equals("delete"))
 			{
