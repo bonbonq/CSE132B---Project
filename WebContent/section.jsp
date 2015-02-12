@@ -12,8 +12,10 @@
 <body>
 
 <%
+	
 	session.removeAttribute("idsection");
 	String sessionok = (String) session.getAttribute("sessionok");
+	sessionok = "okay";
 	if (sessionok == null || !(sessionok.equals("okay")))
 	{
 		%>
@@ -59,7 +61,76 @@
 		conn.setAutoCommit(false);
 		
 		String action = request.getParameter("action");
-		if (action != null && action.equals("insert"))
+		if (action != null && action.equals("view"))
+		{
+			sql1 = "SELECT idsection, class.idclass, number, title, name, season, year FROM department, class, quarter_course_class__instance, course_coursenumber, quarter, department_course, coursenumber, faculty_class_section" + 
+					" WHERE class.idclass = quarter_course_class__instance.idclass" +
+					" AND faculty_class_section.idclass = quarter_course_class__instance.idclass" + 
+					" AND department.iddepartment = department_course.iddepartment" +
+					" AND department_course.idcourse = course_coursenumber.idcourse" +
+					" AND quarter_course_class__instance.idquarter = quarter.idquarter" +
+					" AND quarter_course_class__instance.idcourse = course_coursenumber.idcourse" +
+					" AND course_coursenumber.idcoursenumber = coursenumber.idcoursenumber";
+			ps1 = conn.prepareStatement(sql1);
+			rs1 = ps1.executeQuery();
+			%>
+			<table>
+				<tr>
+					<th>Section ID</th>
+					<th>Class ID</th>
+					<th>Course Number</th>
+					<th>Course Title</th>
+					<th>Department</th>
+					<th>Quarter</th>
+					<th>Year</th>
+				</tr>
+			<%
+			int sid, cid;
+			String cno, ct, dep, q, y;
+			while (rs1.next())
+			{
+				sid = rs1.getInt(1);
+				cid = rs1.getInt(2);
+				cno = rs1.getString(3);
+				ct = rs1.getString(4);
+				dep = rs1.getString(5);
+				q = rs1.getString(6);
+				y = rs1.getString(7);
+			%>
+				
+				<tr>
+					<td><%=sid%></td>
+					<td><%=cid%></td>
+					<td><%=cno%></td>
+					<td><%=ct%></td>
+					<td><%=dep%></td>
+					<td><%=q%></td>
+					<td><%=y%></td>
+					<td>
+						<form action="section.jsp" method="POST">
+							<input type="hidden" name="action" value="delete">
+							<input type="hidden" name="idsection" value="<%=sid%>">
+							<input type="submit" value="Delete">
+						</form>
+					</td>
+				</tr>
+			<%
+			} 
+			%>
+			</table>
+			<%
+		}
+		else if (action != null && action.equals("delete"))
+		{
+			int idsection = Integer.parseInt(request.getParameter("idsection"));
+			sql1 = "DELETE FROM section WHERE idsection = ?";
+			ps1 = conn.prepareStatement(sql1);
+			ps1.setInt(1, idsection);
+			ps1.executeUpdate();
+			conn.commit();
+			response.sendRedirect("section.jsp?action=view");
+		}
+		else if (action != null && action.equals("insert"))
 		{
 			int enrollmentLimit = Integer.parseInt(request.getParameter("enrollment"));
 			sql1 = "INSERT INTO section (enrollment_limit) VALUES (?) RETURNING idsection";

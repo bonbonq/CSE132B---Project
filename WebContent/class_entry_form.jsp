@@ -95,10 +95,6 @@ try
 		<%
 		
 	}
-	else if (action != null && action.equals("update"))
-	{
-		
-	}
 	else if (action != null && action.equals("delete"))
 	{
 	 	int idclass = Integer.parseInt(request.getParameter("idclass"));
