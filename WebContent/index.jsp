@@ -21,6 +21,7 @@
 	<h3><a href='faculty_isteaching.jsp'>&nbsp;&nbsp;Faculty Currently Teaching Course Form xxud</a></h3>
 	<h3><a href='faculty_willteach.jsp'>&nbsp;&nbsp;Faculty Future Teaching Course Form xxud</a></h3>
 <h2><a href='precourse_enrollment.jsp'>Course Enrollment xxud</a></h2>
+<h2><a href='student_pastclass.jsp'>Student Past Class Form xxud</a></h2>
 <h2><a href='thesis_commitee_submission.jsp'>Thesis Committee Submission x</a></h2>
 <h2><a href='probation_info_submission.jsp'>Probation Info Submission x</a></h2>
 <h2><a href='review_session_info_submission.jsp'>Review Session Info Submission</a></h2>

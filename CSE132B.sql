@@ -326,6 +326,16 @@ CREATE TABLE class (
 
 
 -- -----------------------------------------------------
+-- Table CSE132B.student_pastclass
+-- -----------------------------------------------------
+CREATE TABLE student_pastclass (
+  idstudent_pastclass SERIAL PRIMARY KEY,
+  idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
+  idclass integer REFERENCES class(idclass) ON DELETE CASCADE ON UPDATE CASCADE
+  );
+
+
+-- -----------------------------------------------------
 -- Table CSE132B.course
 -- -----------------------------------------------------
 CREATE TABLE course (
