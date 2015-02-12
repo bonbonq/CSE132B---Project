@@ -14,6 +14,7 @@
 <body>
 <%
 	String sessionok = (String) session.getAttribute("sessionok");
+	sessionok = "okay";
 	if (sessionok == null || !(sessionok.equals("okay")))
 	{
 		%><h2>ERROR: Session expired or no valid section chosen. Please return to home page and try again.</h2>
@@ -37,58 +38,192 @@
 		<h3>Section ID: <%=idsection%></h3>
 		<%
 		
-		if (action != null && action.equals("insert"))
-		{
-			Connection conn = null;
-			PreparedStatement ps1 = null;
-			PreparedStatement ps2 = null;
-			PreparedStatement ps3 = null;
-			PreparedStatement ps4 = null;
-			ResultSet rs1 = null;
-			ResultSet rs2 = null;
-			ResultSet rs3 = null;
-			ResultSet rs4 = null;
-			String sql1 = null;
-			String sql2 = null;
-			String sql3 = null;
-			String sql4 = null;
-			
-			String building = request.getParameter("building");
-			String room = request.getParameter("room");
-			String starth = request.getParameter("starth");
-			String startm = request.getParameter("startm");
-			String startmode = request.getParameter("startmode");
-			String endh = request.getParameter("endh");
-			String endm = request.getParameter("endm");
-			String endmode = request.getParameter("endmode");
-			
-			if (startmode.equals("pm"))
-			{
-				int starthint = Integer.parseInt(starth);
-				starthint += 12;
-				starthint %= 24;
-				starth = "" + starthint;
-			}
-			
-			if (endmode.equals("pm"))
-			{
-				int endhint = Integer.parseInt(endh);
-				endhint += 12;
-				endh = "" + endhint;
-			}
-	
-			String startTimeString = starth + ":" + startm + ":00";
-			String endTimeString = endh + ":" + endm + ":00";
-			
-			String daysString = null;
-			String dateString = null;
+		Connection conn = null;
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		PreparedStatement ps3 = null;
+		PreparedStatement ps4 = null;
+		ResultSet rs1 = null;
+		ResultSet rs2 = null;
+		ResultSet rs3 = null;
+		ResultSet rs4 = null;
+		String sql1 = null;
+		String sql2 = null;
+		String sql3 = null;
+		String sql4 = null;
 		
-			try
+		try
+		{
+			Class.forName("org.postgresql.Driver");
+			conn = DriverManager.getConnection("jdbc:postgresql://localhost/CSE132B");
+			conn.setAutoCommit(false);
+		
+			if (action != null && action.equals("view"))
 			{
-				Class.forName("org.postgresql.Driver");
-				conn = DriverManager.getConnection("jdbc:postgresql://localhost/CSE132B");
-				conn.setAutoCommit(false);
+				sql2 = "SELECT * FROM section_reviewsession, reviewsession WHERE reviewsession.idreviewsession = section_reviewsession.idreviewsession";
+				ps2 = conn.prepareStatement(sql2);
+				rs2 = ps2.executeQuery();
+			
+				sql1 = "SELECT * FROM section_weekly, weekly WHERE weekly.idweekly = section_weekly.idweekly";
+				ps1 = conn.prepareStatement(sql1);
+				rs1 = ps1.executeQuery();
+			
+				%>
+				<h3>Lectures and Discussions</h3>
+				<table>
+					<tr>
+						<th>Section ID</th>
+						<th>Weekly ID</th>
+						<th>Days of Week</th>
+						<th>Start Time</th>
+						<th>End Time</th>
+						<th>Building</th>
+						<th>Room Number</th>
+						<th>Type</th>
+					</tr>
+				<%
+				int sid, wid;
+				String dow, b, rn, t;
+				java.sql.Timestamp st1, et1, st2, et2;
+				java.sql.Date d;
+				while (rs1.next())
+				{
+					sid = rs1.getInt("idsection");
+					wid = rs1.getInt("idweekly");
+					dow = rs1.getString("day_of_week");
+					st1 = rs1.getTimestamp("start_time");
+					et1 = rs1.getTimestamp("end_time");
+					b = rs1.getString("building");
+					rn = rs1.getString("room");
+					t = rs1.getString("type");
+				%> 
+					<tr>
+						<td><%=sid%></td>
+						<td><%=wid%></td>
+						<td><%=dow%></td>
+						<td><%=st1%></td>
+						<td><%=et1%></td>
+						<td><%=b%></td>
+						<td><%=rn%></td>
+						<td><%=t%></td>
+						<td>
+							<form action="subsection.jsp" method="POST">
+								<input type="hidden" name="action" value="delete">
+								<input type="hidden" name="id" value="<%=wid%>">
+								<input type="hidden" name="type" value="weekly">
+								<input type="submit" value="Delete">
+							</form>
+						</td>
+					</tr>
+				<%
+				} 
+				%>
+				</table>
+				<h3>Review Sessions</h3>
+				<table>
+					<tr>
+						<th>Section ID</th>
+						<th>Weekly ID</th>
+						<th>Date</th>
+						<th>Start Time</th>
+						<th>End Time</th>
+						<th>Building</th>
+						<th>Room Number</th>
+						<th>Type</th>
+					</tr>
+				<%
+				while (rs2.next())
+				{
+					sid = rs2.getInt("idsection");
+					wid = rs2.getInt("idreviewsession");
+					d = rs2.getDate("time");
+					st2 = rs2.getTimestamp("start_time");
+					et2 = rs2.getTimestamp("end_time");
+					b = rs2.getString("building");
+					rn = rs2.getString("room");
+					t = rs2.getString("type");
+				%>
+					<tr>
+						<td><%=sid%></td>
+						<td><%=wid%></td>
+						<td><%=d%></td>
+						<td><%=st2%></td>
+						<td><%=et2%></td>
+						<td><%=b%></td>
+						<td><%=rn%></td>
+						<td><%=t%></td>
+						<td>
+							<form action="subsection.jsp" method="POST">
+								<input type="hidden" name="action" value="delete">
+								<input type="hidden" name="id" value="<%=wid%>">
+								<input type="hidden" name="type" value="review">
+								<input type="submit" value="Delete">
+							</form>
+						</td>
+					</tr>
+				<%
+				} 
+				%>
+				</table>
+				<%
+			}
+			
+			else if (action != null && action.equals("delete"))
+			{
+				String typet = request.getParameter("type");
+				int id = Integer.parseInt(request.getParameter("id"));
+				if (typet != null && typet.equals("weekly"))
+				{
+					sql1 = "DELETE FROM weekly WHERE idweekly = ?";
+					ps1 = conn.prepareStatement(sql1);
+					ps1.setInt(1, id);
+					ps1.executeUpdate();
+					conn.commit();
+				}
+				else if (typet != null && typet.equals("review"))
+				{
+					sql1 = "DELETE FROM reviewsession WHERE idrevewsession = ";
+					ps1 = conn.prepareStatement(sql1);
+					ps1.setInt(1, id);
+					ps1.executeUpdate();
+					conn.commit();
+				}	
+				response.sendRedirect("subsection.jsp?action=view");
+			}
+			
+			else if (action != null && action.equals("insert"))
+			{
+			
+				String building = request.getParameter("building");
+				String room = request.getParameter("room");
+				String starth = request.getParameter("starth");
+				String startm = request.getParameter("startm");
+				String startmode = request.getParameter("startmode");
+				String endh = request.getParameter("endh");
+				String endm = request.getParameter("endm");
+				String endmode = request.getParameter("endmode");
+			
+				if (startmode.equals("pm"))
+				{
+					int starthint = Integer.parseInt(starth);
+					starthint += 12;
+					starthint %= 24;
+					starth = "" + starthint;
+				}
+			
+				if (endmode.equals("pm"))
+				{
+					int endhint = Integer.parseInt(endh);
+					endhint += 12;
+					endh = "" + endhint;
+				}
+	
+				String startTimeString = starth + ":" + startm + ":00";
+				String endTimeString = endh + ":" + endm + ":00";
 				
+				String daysString = null;
+				String dateString = null;
+			
 				String dayType = "";
 				String dayString = "";
 			
@@ -170,8 +305,187 @@
 				</form>
 				<%
 			}
+			
+			else if (action != null && action.equals("create"))
+			{
+				%>
+				<form action="subsection.jsp" method="POST">
+				<%
+			
+				if (type != null && (type.equals("lecture") || type.equals("discussion")))
+				{
+					%>
+					<h3>Adding a <%=type%>:</h3>
+			
+					Days of Week:
+					<input type="checkbox" name="days" value="M">M
+					<input type="checkbox" name="days" value="Tu">Tu
+					<input type="checkbox" name="days" value="W">W
+					<input type="checkbox" name="days" value="Th">Th
+					<input type="checkbox" name="days" value="F">F
+					<input type="checkbox" name="days" value="Sa">Sa
+					<input type="checkbox" name="days" value="Su">Su
+			
+					<input type="hidden" name="action" value="insert">
+					<input type="hidden" name="type" value="<%=type%>">	
+					<%
+				}
+			
+				else if (type != null && type.equals("review"))
+				{
+					%>
+					<h3>Adding a Review Session:</h3>		
+					<select name="month">
+						<option value="01">1</option>
+						<option value="02">2</option>
+						<option value="03">3</option>
+						<option value="04">4</option>
+						<option value="05">5</option>
+						<option value="06">6</option>
+						<option value="07">7</option>
+						<option value="08">8</option>
+						<option value="09">9</option>
+						<option value="10">10</option>
+						<option value="11">11</option>
+						<option value="12">12</option>
+					</select>
+					/	
+					<select name="day">
+						<option value="01">1</option>
+						<option value="02">2</option>
+						<option value="03">3</option>
+						<option value="04">4</option>
+						<option value="05">5</option>
+						<option value="06">6</option>
+						<option value="07">7</option>
+						<option value="08">8</option>
+						<option value="09">9</option>
+						<option value="10">10</option>
+						<option value="11">11</option>
+						<option value="12">12</option>
+						<option value="13">13</option>
+						<option value="14">14</option>
+						<option value="15">15</option>
+						<option value="16">16</option>
+						<option value="17">17</option>
+						<option value="18">18</option>
+						<option value="19">19</option>
+						<option value="20">20</option>
+						<option value="21">21</option>
+						<option value="22">22</option>
+						<option value="23">23</option>
+						<option value="24">24</option>
+						<option value="25">25</option>
+						<option value="26">26</option>
+						<option value="27">27</option>
+						<option value="28">28</option>
+						<option value="29">29</option>
+						<option value="30">30</option>
+						<option value="31">31</option>
+					</select>
+					/
+					<select name="year">
+						<option value="2015">2015</option>
+						<option value="2016">2016</option>
+						<option value="2017">2017</option>
+					</select>
+					
+					<input type="hidden" name="action" value="insert">
+					<input type="hidden" name="type" value="review">
+					<%
+				}	
+				%>
+				Start Time:
+				<select name="starth">
+					<option value="01">1</option>
+					<option value="02">2</option>
+					<option value="03">3</option>
+					<option value="04">4</option>
+					<option value="05">5</option>
+					<option value="06">6</option>
+					<option value="07">7</option>
+					<option value="08">8</option>
+					<option value="09">9</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="11">12</option>
+				</select>
+				:
+				<select name="startm">
+					<option value="00">00</option>
+					<option value="10">10</option>
+					<option value="20">20</option>
+					<option value="30">30</option>
+					<option value="40">40</option>
+					<option value="50">50</option>
+				</select>
+				<select name="startmode">
+					<option value="am">AM</option>
+					<option value="pm">PM</option>
+				</select>
+				End Time:
+				<select name="endh">
+					<option value="01">01</option>
+					<option value="02">02</option>
+					<option value="03">03</option>
+					<option value="04">04</option>
+					<option value="05">05</option>
+					<option value="06">06</option>
+					<option value="07">07</option>
+					<option value="08">08</option>
+					<option value="09">09</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="12">12</option>
+				</select>
+				:
+				<select name="endm">
+					<option value="00">00</option>
+					<option value="10">10</option>
+					<option value="20">20</option>
+					<option value="30">30</option>
+					<option value="40">40</option>
+					<option value="50">50</option>
+				</select>
+				<select name="endmode">
+					<option value="am">AM</option>
+					<option value="pm">PM</option>
+				</select>
+			
+				<label for="building">Location:</label>
+				<input type="text" name="building">
+				<label for="room">Room:</label>
+				<input type="text" name="room">
+				<input type="hidden" name="action" value="insert">
+				<input type="submit">
+			</form>
+			<%
+		}
 		
-			catch (SQLException e)
+		else
+		{
+			%>
+			<form action="subsection.jsp" method="POST">
+				<input type="hidden" name="action" value="create">
+				<input type="hidden" name="type" value="lecture">
+				<input type="submit" value="Add Lecture">
+			</form>
+		
+			<form action="subsection.jsp" method="POST">
+				<input type="hidden" name="action" value="create">
+				<input type="hidden" name="type" value="discussion">
+				<input type="submit" value="Add Discussion">
+			</form>
+		
+			<form action="subsection.jsp" method="POST">
+				<input type="hidden" name="action" value="create">
+				<input type="hidden" name="type" value="review">
+				<input type="submit" value="Add Review Session">
+			</form>
+			<%
+		}
+	}
+		catch (SQLException e)
 			{
 				conn.rollback();
 				e.printStackTrace();
@@ -202,187 +516,7 @@
 					conn.close();
 				}
 			}
-		}	
-		
-		else if (action != null && action.equals("create"))
-		{
-			%>
-			<form action="subsection.jsp" method="POST">
-			<%
-			
-			if (type != null && (type.equals("lecture") || type.equals("discussion")))
-			{
-				%>
-				<h3>Adding a <%=type%>:</h3>
-			
-				Days of Week:
-				<input type="checkbox" name="days" value="M">M
-				<input type="checkbox" name="days" value="Tu">Tu
-				<input type="checkbox" name="days" value="W">W
-				<input type="checkbox" name="days" value="Th">Th
-				<input type="checkbox" name="days" value="F">F
-				<input type="checkbox" name="days" value="Sa">Sa
-				<input type="checkbox" name="days" value="Su">Su
-			
-				<input type="hidden" name="action" value="insert">
-				<input type="hidden" name="type" value="<%=type%>">	
-				<%
-			}
-			else if (type != null && type.equals("review"))
-			{
-				%>
-				<h3>Adding a Review Session:</h3>		
-				<select name="month">
-					<option value="01">1</option>
-					<option value="02">2</option>
-					<option value="03">3</option>
-					<option value="04">4</option>
-					<option value="05">5</option>
-					<option value="06">6</option>
-					<option value="07">7</option>
-					<option value="08">8</option>
-					<option value="09">9</option>
-					<option value="10">10</option>
-					<option value="11">11</option>
-					<option value="12">12</option>
-				</select>
-				/
-				<select name="day">
-					<option value="01">1</option>
-					<option value="02">2</option>
-					<option value="03">3</option>
-					<option value="04">4</option>
-					<option value="05">5</option>
-					<option value="06">6</option>
-					<option value="07">7</option>
-					<option value="08">8</option>
-					<option value="09">9</option>
-					<option value="10">10</option>
-					<option value="11">11</option>
-					<option value="12">12</option>
-					<option value="13">13</option>
-					<option value="14">14</option>
-					<option value="15">15</option>
-					<option value="16">16</option>
-					<option value="17">17</option>
-					<option value="18">18</option>
-					<option value="19">19</option>
-					<option value="20">20</option>
-					<option value="21">21</option>
-					<option value="22">22</option>
-					<option value="23">23</option>
-					<option value="24">24</option>
-					<option value="25">25</option>
-					<option value="26">26</option>
-					<option value="27">27</option>
-					<option value="28">28</option>
-					<option value="29">29</option>
-					<option value="30">30</option>
-					<option value="31">31</option>
-				</select>
-				/
-				<select name="year">
-					<option value="2015">2015</option>
-					<option value="2016">2016</option>
-					<option value="2017">2017</option>
-				</select>
-				
-				<input type="hidden" name="action" value="insert">
-				<input type="hidden" name="type" value="review">
-				<% 
-			
-			}
-			
-			%>
-			Start Time:
-			<select name="starth">
-				<option value="01">1</option>
-				<option value="02">2</option>
-				<option value="03">3</option>
-				<option value="04">4</option>
-				<option value="05">5</option>
-				<option value="06">6</option>
-				<option value="07">7</option>
-				<option value="08">8</option>
-				<option value="09">9</option>
-				<option value="10">10</option>
-				<option value="11">11</option>
-				<option value="11">12</option>
-			</select>
-			:
-			<select name="startm">
-				<option value="00">00</option>
-				<option value="10">10</option>
-				<option value="20">20</option>
-				<option value="30">30</option>
-				<option value="40">40</option>
-				<option value="50">50</option>
-			</select>
-			<select name="startmode">
-				<option value="am">AM</option>
-				<option value="pm">PM</option>
-			</select>
-			End Time:
-			<select name="endh">
-				<option value="01">01</option>
-				<option value="02">02</option>
-				<option value="03">03</option>
-				<option value="04">04</option>
-				<option value="05">05</option>
-				<option value="06">06</option>
-				<option value="07">07</option>
-				<option value="08">08</option>
-				<option value="09">09</option>
-				<option value="10">10</option>
-				<option value="11">11</option>
-				<option value="12">12</option>
-			</select>
-			:
-			<select name="endm">
-				<option value="00">00</option>
-				<option value="10">10</option>
-				<option value="20">20</option>
-				<option value="30">30</option>
-				<option value="40">40</option>
-				<option value="50">50</option>
-			</select>
-			<select name="endmode">
-				<option value="am">AM</option>
-				<option value="pm">PM</option>
-			</select>
-		
-			<label for="building">Location:</label>
-			<input type="text" name="building">
-			<label for="room">Room:</label>
-			<input type="text" name="room">
-			<input type="hidden" name="action" value="insert">
-			<input type="submit">
-		</form>
-		<%
 	}
-	else
-	{
-		%>
-		<form action="subsection.jsp" method="POST">
-			<input type="hidden" name="action" value="create">
-			<input type="hidden" name="type" value="lecture">
-			<input type="submit" value="Add Lecture">
-		</form>
-		
-		<form action="subsection.jsp" method="POST">
-			<input type="hidden" name="action" value="create">
-			<input type="hidden" name="type" value="discussion">
-			<input type="submit" value="Add Discussion">
-		</form>
-		
-		<form action="subsection.jsp" method="POST">
-			<input type="hidden" name="action" value="create">
-			<input type="hidden" name="type" value="review">
-			<input type="submit" value="Add Review Session">
-		</form>
-		<%
-	}
-}
-%>
+	%>
 </body>
 </html>
