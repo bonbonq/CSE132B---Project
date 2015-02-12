@@ -6,6 +6,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Insert title here</title>
 </head>
+<%@page import="java.util.HashSet"%>
 <%@page import="java.util.*"%>
 <%@page import="java.io.*"%>
 <%@page import="java.sql.*" %>
@@ -53,11 +54,87 @@ else {
 	response.sendRedirect("course_entry_form.jsp");
 }
 
-System.out.println(idcourse);
 
+/* ========================= */
+/* EDIT FORM DATA GENERATION */
+/* ========================= */
+
+ResultSet rs = null;
+ResultSet courses = null;
+boolean consent = false;
+HashSet<Integer> selected = new HashSet<Integer>();
+//The following will always run regardless of action
+try{
+	conn.setAutoCommit(false);
+	/* The below statements are not closed, this might cause issues later... */
+	PreparedStatement rs1 = conn.prepareStatement("SELECT prereq_idcourse, number FROM prereqs, course_coursenumber, coursenumber WHERE prereqs.idcourse=? AND prereqs.idcourse=course_coursenumber.idcourse AND course_coursenumber.idcoursenumber=coursenumber.idcoursenumber", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+	rs1.setInt(1, idcourse);
+	PreparedStatement rs2 = conn.prepareStatement("SELECT DISTINCT * FROM course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+	PreparedStatement rs3 = conn.prepareStatement("SELECT * FROM course WHERE idcourse=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+	rs3.setInt(1, idcourse);
+	
+	rs = rs1.executeQuery();
+	courses = rs2.executeQuery();
+	ResultSet approval_rs = rs3.executeQuery();
+	approval_rs.next();
+	consent = approval_rs.getBoolean("consent_prereq");
+	
+	if (rs.isBeforeFirst()) {
+		while(rs.next()) {
+			selected.add(rs.getInt("prereq_idcourse"));
+		}
+	}
+	
+	conn.commit();
+	conn.setAutoCommit(true);
+	
+} catch(SQLException e) {
+	conn.rollback();
+	e.printStackTrace();
+	String message = "Failure: Unable to retrieve dropdown info - " + e.getMessage();
+	%>
+	<h1><%=message %></h1>
+	<%
+}
 %>
 
+
+
+
+
+<!-- HTML Body Start -->
 <body>
 
+<!-- Edit Form -->
+	<h2>Edit Prerequisites Form</h2>
+	
+	<form action="course_entry_form.jsp" method="POST">
+		<br>
+		<input type="hidden" name="idcourse" value="<%=idcourse %>">
+		<input type="checkbox" name="prereq" value=0  <%=consent ? "checked" : "" %>  > Consent of Instructor
+		<%
+		if (courses.isBeforeFirst())
+		{
+			while(courses.next()){
+				%>
+				<br>
+				<input type="checkbox" name="prereq" value=<%=courses.getInt("idcourse")%> <%=selected.remove(courses.getInt("idcourse")) ? "checked" : "" %>> <%=courses.getString("number")%>
+				<%
+			}
+		}
+		%>
+		<p>
+		<button type="submit" name="action" value="prereq_update">Submit</button> 
+		<a href='course_entry_form.jsp'><button>Back</button></a>
+		<p>
+	</form>
+
 </body>
+<!-- HTML Body End -->
+
+<%
+
+if (conn != null)
+	conn.close();
+%>
 </html>

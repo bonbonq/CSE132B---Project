@@ -442,6 +442,65 @@ else if(action!=null && action.equals("departmentcourse_update")){
 	}
 }
 
+else if(action!=null && action.equals("prereq_update")){
+	
+	PreparedStatement update1 = conn.prepareStatement(	
+			"DELETE FROM prereqs WHERE idcourse=?");
+	update1.setInt(1, Integer.parseInt(request.getParameter("idcourse")));
+	if (update1.executeUpdate()==1)
+		System.out.println("Prereq courses have been deleted");
+	
+		
+	boolean consent = false;
+	String[] prereqs_edit = request.getParameterValues("prereq");
+	if (prereqs_edit!=null) {
+		for (String prereq_num : prereqs_edit) {
+			int  prereq_idcourse = Integer.parseInt(prereq_num);
+			if (prereq_idcourse==0)
+				consent = true;
+			else
+			{
+				PreparedStatement update2 = conn.prepareStatement(	
+						"INSERT INTO prereqs (idcourse, prereq_idcourse)" +
+								"SELECT ?,? " +
+								"WHERE NOT EXISTS (" +
+									"SELECT idprereqs FROM prereqs WHERE idcourse=? AND prereq_idcourse=?" +
+								") ;" );
+				update2.setInt(1, Integer.parseInt(request.getParameter("idcourse")));
+				update2.setInt(2, prereq_idcourse);
+				update2.setInt(3, Integer.parseInt(request.getParameter("idcourse")));
+				update2.setInt(4, prereq_idcourse);
+				
+				if (update2.executeUpdate()==1)
+					%><h1>Successfully Updated Prereq Courses!</h1><%
+				else 
+					%><h1>Prereq Course Update has failed!</h1><%	
+			}
+		}
+	}
+	
+	PreparedStatement update3 = null;
+	if (consent) {
+		update3 = conn.prepareStatement(	
+				"Update course SET " +
+				"consent_prereq = True " +
+				"WHERE idcourse=?");
+		update3.setInt(1, Integer.parseInt(request.getParameter("idcourse")));
+	}
+	else {
+		update3 = conn.prepareStatement(	
+				"Update course SET " +
+				"consent_prereq = False " +
+				"WHERE idcourse=?");
+		update3.setInt(1, Integer.parseInt(request.getParameter("idcourse")));
+	}
+	if (update3.executeUpdate()==1)
+		%><h1>Successfully Updated Consent!</h1><%
+	else 
+		%><h1>Consent Update has failed!</h1><%
+
+}
+
 /* ============= */
 /* Delete Action */
 /* ============= */
