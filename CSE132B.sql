@@ -281,6 +281,19 @@ CREATE TABLE quarter (
   season text NOT NULL
   );
 
+INSERT INTO quarter (year, season) VALUES(2013, 'Fall');
+INSERT INTO quarter (year, season) VALUES(2013, 'Winter');
+INSERT INTO quarter (year, season) VALUES(2013, 'Spring');
+INSERT INTO quarter (year, season) VALUES(2013, 'Summer');
+INSERT INTO quarter (year, season) VALUES(2014, 'Fall');
+INSERT INTO quarter (year, season) VALUES(2014, 'Winter');
+INSERT INTO quarter (year, season) VALUES(2014, 'Spring');
+INSERT INTO quarter (year, season) VALUES(2014, 'Summer');
+INSERT INTO quarter (year, season) VALUES(2015, 'Fall');
+INSERT INTO quarter (year, season) VALUES(2015, 'Winter');
+INSERT INTO quarter (year, season) VALUES(2015, 'Spring');
+INSERT INTO quarter (year, season) VALUES(2015, 'Summer');
+
 
 -- -----------------------------------------------------
 -- Table CSE132B.student_quarter__attends
@@ -420,7 +433,7 @@ CREATE TABLE faculty_class_section (
 -- Table CSE132B.faculty_instance_teaches
 -- -----------------------------------------------------
 CREATE TABLE faculty_instance_teaches (
-  idfaculty_instance_hastaught SERIAL PRIMARY KEY,
+  idfaculty_instance_teaches SERIAL PRIMARY KEY,
   faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE ON UPDATE CASCADE,
   idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE ON UPDATE CASCADE
   );
@@ -430,7 +443,7 @@ CREATE TABLE faculty_instance_teaches (
 -- Table CSE132B.faculty_instance_willteach
 -- -----------------------------------------------------
 CREATE TABLE faculty_instance_willteach (
-  idfaculty_instance_hastaught SERIAL PRIMARY KEY,
+  idfaculty_instance_willteach SERIAL PRIMARY KEY,
   faculty_name text REFERENCES faculty(faculty_name) ON DELETE CASCADE ON UPDATE CASCADE,
   idinstance integer REFERENCES quarter_course_class__instance(idinstance) ON DELETE CASCADE ON UPDATE CASCADE
   );

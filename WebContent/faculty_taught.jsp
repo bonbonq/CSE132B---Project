@@ -116,7 +116,7 @@ else if(action!=null && action.equals("update")){
 			"idinstance=?" +
 			"WHERE idfaculty_instance_hastaught=?");
 	update.setInt(1, Integer.parseInt(request.getParameter("idinstance")));
-	update.setInt(2, Integer.parseInt(request.getParameter("ididfaculty_instance_hastaught")));
+	update.setInt(2, Integer.parseInt(request.getParameter("idfaculty_instance_hastaught")));
 	
 	if (update.executeUpdate()==1) {
 		%>
@@ -184,18 +184,18 @@ try{
 	PreparedStatement course_stmt = null;
 	if (winter){
 		/* if currently winter quarter */
-		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber WHERE year<?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE year<?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		course_stmt.setInt(1, current_year);
 	}
 	else if (spring) {
 		/* if currently spring quarter */
-		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber WHERE (year<? OR (year=? AND season='winter'))", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE (year<? OR (year=? AND season='Winter'))", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		course_stmt.setInt(1, current_year);
 		course_stmt.setInt(2, current_year);
 	}
 	else if (fall) {
 		/* if currently fall quarter */
-		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber WHERE (year<? OR (year=? AND season='winter') OR (year=? AND season='spring'))", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+		course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE (year<? OR (year=? AND season='Winter') OR (year=? AND season='Spring'))", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		course_stmt.setInt(1, current_year);
 		course_stmt.setInt(2, current_year);
 		course_stmt.setInt(3, current_year);
@@ -228,7 +228,7 @@ ResultSet rs = null;
 try{
 	conn.setAutoCommit(false);
 	/* The below statements are not closed, this might cause issues later... */
-	rs = conn.prepareStatement("SELECT * FROM faculty_instance_hastaught NATURAL JOIN quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber").executeQuery();
+	rs = conn.prepareStatement("SELECT * FROM faculty_instance_hastaught NATURAL JOIN quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber").executeQuery();
 	conn.commit();
 	conn.setAutoCommit(true);
 	
@@ -267,7 +267,7 @@ try{
 				{
 					while(course_rs.next()){
 						%>
-						<option value=<%=course_rs.getString("idinstance")%>><%=course_rs.getString("idcoursenumber")%> - <%=course_rs.getString("year")%> <%=course_rs.getString("season")%></option>
+						<option value=<%=course_rs.getString("idinstance")%>><%=course_rs.getString("number")%> - <%=course_rs.getString("year")%> <%=course_rs.getString("season")%></option>
 						<%
 					}
 				}
@@ -282,6 +282,8 @@ try{
 	
 	<br>
 	<br>
+	
+	
 	<!-- Edit Form -->
 	<h2>Edit Form</h2>
 	
@@ -300,14 +302,14 @@ try{
 		  			<tr>
 					    <td><%=rs.getString("faculty_name") %></td>
 					    <td>
-					    	<select name="course">
+					    	<select name="idinstance">
 								<%
 								course_rs.beforeFirst();
 								if (course_rs.isBeforeFirst())
 								{
 									while(course_rs.next()){
 										%>
-										<option value=<%=course_rs.getString("idinstance")%>  <%= rs.getString("idinstance").equals(course_rs.getString("idinstance")) ? "selected" : "" %>>  ><%=course_rs.getString("idcoursenumber")%> - <%=course_rs.getString("year")%> <%=course_rs.getString("season")%></option>
+										<option value=<%=course_rs.getString("idinstance")%>  <%= rs.getString("idinstance").equals(course_rs.getString("idinstance")) ? "selected" : "" %>> <%=course_rs.getString("number")%> - <%=course_rs.getString("year")%> <%=course_rs.getString("season")%></option>
 										<%
 									}
 								}
