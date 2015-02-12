@@ -16,9 +16,9 @@
 	<h3><a href='undergraduate_entry_form.jsp'>&nbsp;&nbsp;Undergraduate Entry Form xxud</a></h3>
 	<h3><a href='graduate_entry_form.jsp'>&nbsp;&nbsp;Graduate Entry Form xx</a></h3>
 <h2><a href='faculty_entry_form.jsp'>Faculty Entry Form x</a></h2>
-	<h3><a href='faculty_taught.jsp'>&nbsp;&nbsp;Faculty Previous Taught Course Form xx</a></h3>
-	<h3><a href='faculty_isteaching.jsp'>&nbsp;&nbsp;Faculty Currently Teaching Course Form xx</a></h3>
-	<h3><a href='faculty_willteach.jsp'>&nbsp;&nbsp;Faculty Future Teaching Course Form xx</a></h3>
+	<h3><a href='faculty_taught.jsp'>&nbsp;&nbsp;Faculty Previous Taught Course Form xxud</a></h3>
+	<h3><a href='faculty_isteaching.jsp'>&nbsp;&nbsp;Faculty Currently Teaching Course Form xxud</a></h3>
+	<h3><a href='faculty_willteach.jsp'>&nbsp;&nbsp;Faculty Future Teaching Course Form xxud</a></h3>
 <h2><a href='precourse_enrollment.jsp'>Course Enrollment x</a></h2>
 <h2><a href='past_class_taken.jsp'>Past Classes Taken x</a></h2>
 <h2><a href='thesis_commitee_submission.jsp'>Thesis Committee Submission x</a></h2>
