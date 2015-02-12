@@ -8,7 +8,7 @@
 </head>
 <body>
 <h1>Home Page</h1>
-<h2><a href='course_entry_form.jsp'>Course Entry Form xx</a></h2>
+<h2><a href='course_entry_form.jsp'>Course Entry Form xxud</a></h2>
 <h2><a href='class_entry_form.jsp'>Class Entry Form x</a></h2>
 <h2><a href='student_entry_form.jsp'>Student Entry Form xxud</a></h2>
 	<h3><a href='previous_degree_form.jsp'>&nbsp;&nbsp;Previous Degree Entry Form xxud</a></h3>
