@@ -42,14 +42,16 @@ try {
 
 String action = request.getParameter("action");
 int idquarter = 0;
+int idinstance = 0;
 
 /* ============================== */
-/* Continue from precourse action */
+/* Continue from course action */
 /* ============================== */
 
-if (action!=null && action.equals("precourse")) {
-	idquarter = Integer.parseInt(request.getParameter("idquarter"));
-	if (idquarter==0)
+if (action!=null && action.equals("course")) {
+	idquarter = Integer.parseInt(request.getParameter("quarter"));
+	idinstance = Integer.parseInt(request.getParameter("idinstance"));
+	if (idquarter==0 || idinstance==0)
 		response.sendRedirect("precourse_enrollment.jsp");
 }
 else {
@@ -61,14 +63,21 @@ else {
 /* =========================== */
 
 ResultSet instance_rs = null;
+ResultSet faculty_rs = null;
+ResultSet degree_rs = null;
 
 //The following will always run regardless of action
 try{
 	conn.setAutoCommit(false);
-	PreparedStatement instance_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE idquarter=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-	instance_stmt.setInt(1, idquarter);
+	PreparedStatement instance_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN course NATURAL JOIN class WHERE idinstance=?");
+	instance_stmt.setInt(1, idinstance);
+	
+	PreparedStatement faculty_stmt = conn.prepareStatement("SELECT * FROM faculty");
+	PreparedStatement degree_stmt = conn.prepareStatement("SELECT * FROM degree WHERE type='MS' OR type='PHD'");
 	/* The below two statements are not closed, this might cause issues later... */
 	instance_rs = instance_stmt.executeQuery();
+	faculty_rs = faculty_stmt.executeQuery();
+	degree_rs = degree_stmt.executeQuery();
 	
 	conn.commit();
 	conn.setAutoCommit(true);
@@ -89,28 +98,41 @@ try{
 	<h2>Course Enrollment Form</h2>
 
 	<!-- Insertion Form -->
-	<form action="course_enrollment.jsp" method="POST">
+	<form action="postcourse_enrollment.jsp" method="POST">
 		
 		<input type="hidden" name="idquarter" value="<%=idquarter %>">
+		<input type="hidden" name="idinstance" value="<%=idinstance %>">
 		
 		<div>
-			Course number:
-			<select name="idinstance" required>
-				<%
-				if (instance_rs.isBeforeFirst())
-				{
-					while(instance_rs.next()){
-						%>
-						<option value=<%=instance_rs.getString("idinstance")%>><%=instance_rs.getString("number")%></option>
-						<%
-					}
-				}
-				%>
-			</select>
-		</div>	
+			PID: <input type="text" name="idstudent" required>
+			<br>
+		</div>
 		<p>
 		
-		<button type="submit" name="action" value="course">Submit</button>
+		<div>
+			If multiple sections in course:
+			<br>
+			Section Number: <input type="text" name="section_number">
+			<br>
+		</div>
+		<p>
+		
+		<div>
+			<br>
+			Units: <input type="number" name="units" required>
+			<br>
+		</div>
+		<p>
+		
+		<div>
+			Grade Type:
+			<br>
+			<input type="radio" name="grade_option_type" value="letter" checked>Letter</input><br>
+			<input type="radio" name="grade_option_type" value="su" >S/U</input>
+		</div>
+		<p>
+		
+		<button type="submit" name="action" value="insert">Submit</button>
 		
 	</form>
 

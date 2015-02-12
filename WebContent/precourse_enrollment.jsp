@@ -66,7 +66,7 @@ try{
 		
 		<div>
 			Choose Quarter for Enrollment:
-			<select name="quarter">
+			<select name="idquarter">
 				<%
 				if (quarter_rs.isBeforeFirst())
 				{

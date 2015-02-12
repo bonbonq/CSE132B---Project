@@ -293,8 +293,175 @@ if (action!=null && action.equals("insert")) {
         
 }
 
+/* ============= */
+/* Update Action */
+/* ============= */
+else if(action!=null && action.equals("course_update")){
+	
+	PreparedStatement update = conn.prepareStatement(	
+			"Update course SET " +
+			"grade_option_type = ?, min_units=?, max_units=?, lab=?, consent_prereq=? " +
+			"WHERE idcourse=?");
+	update.setString(1, request.getParameter("grade_option_type"));
+	update.setInt(2, Integer.parseInt(request.getParameter("min_units")));
+	update.setInt(3, Integer.parseInt(request.getParameter("max_units")));
+	update.setBoolean(4, request.getParameter("lab").equals("True") ? true : false);
+	update.setBoolean(5, request.getParameter("consent_prereq").equals("True") ? true : false);
+	update.setInt(6, Integer.parseInt(request.getParameter("idcourse")));
+	
+	if (update.executeUpdate()==1) {
+		%>
+		<h1>Successfully Updated!</h1>
+		<%
+	}
+	else {
+		%>
+		<h1>Update has failed!</h1>
+		<%
+	}
+}
 
+else if(action!=null && action.equals("coursenumber_update")){
+	
+	PreparedStatement update = conn.prepareStatement(	
+			"UPDATE coursenumber SET " +
+			"number = ? " +
+			"WHERE idcoursenumber=?");
+	update.setString(1, request.getParameter("number"));
+	update.setInt(2, Integer.parseInt(request.getParameter("idcoursenumber")));
+
+	try {
+		if (update.executeUpdate()==1) {
+			%>
+			<h1>Successfully Updated!</h1>
+			<%
+		}
+		else {
+			%>
+			<h1>Update has failed!</h1>
+			<%
+		}
+	} catch (SQLException e) {
+		String message = "Failure: Your entry failed " + e.getMessage();
+	   	%>
+		<h1><%=message %></h1>
+		<%
+	}
+}
+
+else if(action!=null && action.equals("coursenumber_add_update")){
+	
+	PreparedStatement update = conn.prepareStatement(	
+			"INSERT INTO coursenumber (number) SELECT ?");
+	update.setString(1, request.getParameter("number"));
+	
+	try {
+		if (update.executeUpdate()==1) {
+			%>
+			<h1>Successfully Updated!</h1>
+			<%
+		}
+		else {
+			%>
+			<h1>Update has failed!</h1>
+			<%
+		}
+	} catch (SQLException e) {
+		String message = "Failure: Your entry failed " + e.getMessage();
+	   	%>
+		<h1><%=message %></h1>
+		<%
+	}
+}
+
+else if(action!=null && action.equals("course_coursenumber_update")){
+	
+	PreparedStatement update = conn.prepareStatement(	
+			"Update course_coursenumber SET " +
+			"idcoursenumber=? " +
+			"WHERE idcourse_coursenumber=?");
+	update.setInt(1, Integer.parseInt(request.getParameter("idcoursenumber")));
+	update.setInt(2, Integer.parseInt(request.getParameter("idcourse_coursenumber")));
+	
+	if (update.executeUpdate()==1) {
+		%>
+		<h1>Successfully Updated!</h1>
+		<%
+	}
+	else {
+		%>
+		<h1>Update has failed!</h1>
+		<%
+	}
+} 
+
+else if(action!=null && action.equals("course_coursenumber_add_update")){
+	
+	if(request.getParameter("idcourse")!=null && request.getParameter("idcoursenumber")!=null) {
+		PreparedStatement update = conn.prepareStatement(	
+				"INSERT INTO course_coursenumber(idcourse, idcoursenumber) " +
+				"SELECT ?,? " +
+				"WHERE NOT EXISTS (SELECT * FROM course_coursenumber WHERE idcourse=? AND idcoursenumber=?)");
+		update.setInt(1, Integer.parseInt(request.getParameter("idcourse")));
+		update.setInt(2, Integer.parseInt(request.getParameter("idcoursenumber")));
+		update.setInt(3, Integer.parseInt(request.getParameter("idcourse")));
+		update.setInt(4, Integer.parseInt(request.getParameter("idcoursenumber")));
+		
+		if (update.executeUpdate()==1) {
+			%>
+			<h1>Successfully Updated!</h1>
+			<%
+		}
+		else {
+			%>
+			<h1>Update has failed!</h1>
+			<%
+		}
+	}
+
+}
+
+/* ============= */
+/* Delete Action */
+/* ============= */
+
+else if(action!=null && (action.equals("course_delete") || action.equals("coursenumber_delete"))) {
+
+	String table_name = "";
+	String table_id = "";
+	String id_parameter_name = "";
+	
+	if (action.equals("course_delete")){
+		table_name = "course";
+		table_id = "idcourse";
+		id_parameter_name = "idcourse";
+	}
+	else if (action.equals("coursenumber_delete")){
+		table_name = "coursenumber";
+		table_id = "idcoursenumber";
+		id_parameter_name = "idcoursenumber";
+	}
+	
+	
+	PreparedStatement delete = conn.prepareStatement("DELETE FROM " + table_name + " WHERE " + table_id + "=?");
+	delete.setInt(1, Integer.parseInt(request.getParameter(id_parameter_name)));
+	
+	if (delete.executeUpdate()==1) {
+		%>
+		<h1>Successfully Deleted!</h1>
+		<%
+	}
+	else {
+		%>
+		<h1>Delete has failed!</h1>
+		<%
+	}
+}
+
+
+/* =========================== */
 /* Generate Form Fields Action */
+/* =========================== */
 // The following will always run regardless of action
 try{
 	conn.setAutoCommit(false);
@@ -315,6 +482,38 @@ try{
 	<h1><%=message %></h1>
 	<%
 } 
+
+
+/* ========================= */
+/* EDIT FORM DATA GENERATION */
+/* ========================= */
+
+ResultSet course_rs = null;
+ResultSet coursenumber_rs = null;
+ResultSet course_coursenumber_rs = null;
+ResultSet unmatched_rs = null;
+
+//The following will always run regardless of action
+try{
+	conn.setAutoCommit(false);
+	
+	/* The below statements are not closed, this might cause issues later... */
+	course_rs = conn.prepareStatement("SELECT * FROM course ORDER BY idcourse", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).executeQuery();
+	coursenumber_rs = conn.prepareStatement("SELECT * FROM coursenumber ORDER BY idcoursenumber", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).executeQuery();
+	course_coursenumber_rs = conn.prepareStatement("SELECT * FROM course_coursenumber NATURAL JOIN course NATURAL JOIN coursenumber ORDER BY idcourse", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).executeQuery();
+	unmatched_rs = conn.prepareStatement("SELECT idcourse FROM course WHERE idcourse NOT IN (SELECT idcourse FROM course_coursenumber)", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).executeQuery();	
+
+	conn.commit();
+	conn.setAutoCommit(true);
+	
+} catch(SQLException e) {
+	conn.rollback();
+	e.printStackTrace();
+	String message = "Failure: Unable to retrieve dropdown info - " + e.getMessage();
+	%>
+	<h1><%=message %></h1>
+	<%
+}
 	
 %>
 
@@ -347,7 +546,7 @@ try{
 		<p>
 		
 		<div class="form-group">
-			Course Number: (ex. CSE132) 
+			Unique Course Number: (ex. CSE132) 
 			<br>
 			<input type="text" name="course_number" required>
 		</div>
@@ -405,6 +604,193 @@ try{
 		
 	</form>
 
+	<br>
+	<br>
+	
+	<!-- Edit Form -->
+	<h2>Course Edit Form</h2>
+	
+	<table>
+	  <tr>
+	    <th>Course ID - Name</th>
+	    <th>Grade Option Type</th>
+	    <th>Min Units</th>
+	    <th>Max Units</th>
+	    <th>Lab?</th>
+	    <th>Consent Prereq?</th>
+	    <th>Edit Actions</th>
+	  </tr>
+	  <%
+		if (course_rs.isBeforeFirst()) {
+			while(course_rs.next()) { 
+			%>
+				<form action="course_entry_form.jsp" method="POST">
+					<input type="hidden" name="idcourse" value="<%=course_rs.getString("idcourse") %>">
+		  			<tr>
+		  				<td><%=course_rs.getString("idcourse") %></td>
+					    <td>
+					    	<br>
+							<input type="radio" name="grade_option_type" value="letter" <%=course_rs.getString("grade_option_type").equals("letter") ? "checked" : ""  %>  >Letter Grade
+							<br>
+							<input type="radio" name="grade_option_type" value="s_u" <%=course_rs.getString("grade_option_type").equals("s_u") ? "checked" : ""  %>  >S/U
+							<br>
+							<input type="radio" name="grade_option_type" value="both" <%=course_rs.getString("grade_option_type").equals("both") ? "checked" : ""  %>  >Letter Grade and S/U
+							<br>
+					    </td>
+					    <td><input type="number" name="min_units" value="<%=course_rs.getString("min_units") %>" required></td>
+					    <td><input type="number" name="max_units" value="<%=course_rs.getString("max_units") %>" required></td>
+					    <td>
+					    	<br>
+							<input type="radio" name="lab" value="True"  <%=course_rs.getString("lab").trim().equals("t") ? "checked" : ""  %>  >Yes
+							<br>
+							<input type="radio" name="lab" value="False" <%=course_rs.getString("lab").trim().equals("f") ? "checked" : ""  %>  >No
+							<br>
+					    </td>
+					    <td>
+					    	<br>
+							&nbsp;&nbsp;&nbsp;
+							<input type="radio" name="consent_prereq" value="True"  <%=course_rs.getString("consent_prereq").trim().equals("t") ? "checked" : ""  %>  >Yes
+							<br>
+							&nbsp;&nbsp;&nbsp;
+							<input type="radio" name="consent_prereq" value="False" <%=course_rs.getString("consent_prereq").trim().equals("f") ? "checked" : ""  %>  >No
+							<br>
+					    </td>
+					    <td>
+							&nbsp;
+							<button type="submit" name="action" value="course_update">Update</button>
+							&nbsp;
+							<button type="submit" name="action" value="course_delete">Delete</button>
+						</td>
+					</tr>
+			 	</form>
+					
+			<%
+			}
+		}
+	  %>
+	</table>
+	
+	<br>
+	<br>
+	<!-- Edit Form -->
+	<h2>Course Number Edit Form</h2>
+	<form action="course_entry_form.jsp" method="POST">
+		<input type="text" name="number" required>
+		<button type="submit" name="action" value="coursenumber_add_update">Add New Course Number</button>
+	</form>
+	<p>
+	<table>
+	  <tr>
+	    <th>Coursenumber ID</th>
+	    <th>Name</th>
+	    <th>Edit Actions</th>
+	  </tr>
+	  <%
+		if (coursenumber_rs.isBeforeFirst()) {
+			while(coursenumber_rs.next()) { 
+			%>
+				<form action="course_entry_form.jsp" method="POST">
+					<input type="hidden" name="idcoursenumber" value="<%=coursenumber_rs.getString("idcoursenumber") %>">
+		  			<tr>
+					    <td><%=coursenumber_rs.getString("idcoursenumber") %></td>
+					    <td><input type="text" name="number" value="<%=coursenumber_rs.getString("number") %>" required></td>
+					    <td>
+							&nbsp;
+							<button type="submit" name="action" value="coursenumber_update">Update</button>
+							&nbsp;
+							<button type="submit" name="action" value="coursenumber_delete">Delete</button>
+						</td>
+					</tr>
+			 	</form>
+					
+			<%
+			}
+		}
+	  %>
+	</table>
+	
+	<br>
+	<br>
+	<!-- Edit Form -->
+	<h2>Change Course Name Form</h2>
+	
+	<form action="course_entry_form.jsp" method="POST">
+		Course ID: 
+		<select name="idcourse">
+    		<%
+	    	unmatched_rs.beforeFirst();
+			if (unmatched_rs.isBeforeFirst())
+			{
+				while(unmatched_rs.next()){
+					String idcourse = unmatched_rs.getString("idcourse");
+					%>
+					<option value=<%=idcourse%>><%=idcourse%></option>
+					<%
+				}
+			}
+			%>
+    	</select>
+    	Course Number: 
+		<select name="idcoursenumber">
+    		<%
+	    	coursenumber_rs.beforeFirst();
+			if (coursenumber_rs.isBeforeFirst())
+			{
+				while(coursenumber_rs.next()){
+					%>
+					<option value=<%=coursenumber_rs.getString("idcoursenumber")%>><%=coursenumber_rs.getString("number")%></option>
+					<%
+				}
+			}
+			%>
+    	</select>
+    	<button type="submit" name="action" value="course_coursenumber_add_update">Update</button>
+	</form>
+	<p>
+	<table>
+	  <tr>
+	    <th>Course ID&nbsp;&nbsp;</th>
+	    <th>Course Number&nbsp;</th>
+	    <th>Edit Actions</th>
+	  </tr>
+	  <%
+		if (course_coursenumber_rs.isBeforeFirst()) {
+			while(course_coursenumber_rs.next()) { 
+			%>
+				<form action="course_entry_form.jsp" method="POST">
+					<input type="hidden" name="idcourse_coursenumber" value="<%=course_coursenumber_rs.getString("idcourse_coursenumber") %>">
+		  			<tr>
+					    <td><%=course_coursenumber_rs.getString("idcourse") %></td>
+					    <td>
+					    	<select name="idcoursenumber">
+					    		<%
+						    	coursenumber_rs.beforeFirst();
+								if (coursenumber_rs.isBeforeFirst())
+								{
+									while(coursenumber_rs.next()){
+										String idcoursenumber = coursenumber_rs.getString("idcoursenumber");
+										%>
+										<option value=<%=idcoursenumber%>  <%=course_coursenumber_rs.getString("idcoursenumber").equals(idcoursenumber) ? "selected" : ""  %>><%=coursenumber_rs.getString("number")%></option>
+										<%
+									}
+								}
+								%>
+					    	</select>
+					    </td>
+					    <td>
+							&nbsp;
+							<button type="submit" name="action" value="course_coursenumber_update">Update</button>
+							&nbsp;
+							<!-- <button type="submit" name="action" value="course_coursenumber_delete">Delete</button> -->
+						</td>
+					</tr>
+			 	</form>
+					
+			<%
+			}
+		}
+	  %>
+	</table>
 
 </body>
 <!-- HTML Body End -->
