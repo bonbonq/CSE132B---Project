@@ -153,7 +153,7 @@ try
 			if (deptTrue.equals("department"))
 				sql2 = "INSERT INTO faculty_graduate__dept (faculty_name, idstudent) VALUES (?, ?)";
 			else
-				sql2 = "INSERT INTO faculty_graduate__nondept (faculty_name, idstudent) VALUES (?, ?)";
+				sql2 = "INSERT INTO faculty_graduate__nondept (faculty_name, idcandidate) VALUES (?, ?)";
 			ps2 = conn.prepareStatement(sql2);
 			ps2.setString(1, faculty);
 			ps2.setInt(2, Integer.parseInt(pid));
