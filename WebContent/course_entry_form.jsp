@@ -421,6 +421,27 @@ else if(action!=null && action.equals("course_coursenumber_add_update")){
 
 }
 
+else if(action!=null && action.equals("departmentcourse_update")){
+	
+	PreparedStatement update = conn.prepareStatement(	
+			"Update department_course SET " +
+			"iddepartment = ? " +
+			"WHERE iddepartment_course=?");
+	update.setInt(1, Integer.parseInt(request.getParameter("iddepartment")));
+	update.setInt(2, Integer.parseInt(request.getParameter("iddepartment_course")));
+	
+	if (update.executeUpdate()==1) {
+		%>
+		<h1>Successfully Updated!</h1>
+		<%
+	}
+	else {
+		%>
+		<h1>Update has failed!</h1>
+		<%
+	}
+}
+
 /* ============= */
 /* Delete Action */
 /* ============= */
@@ -465,7 +486,7 @@ else if(action!=null && (action.equals("course_delete") || action.equals("course
 // The following will always run regardless of action
 try{
 	conn.setAutoCommit(false);
-	PreparedStatement dept_stmt = conn.prepareStatement("SELECT * FROM department");
+	PreparedStatement dept_stmt = conn.prepareStatement("SELECT * FROM department", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 	PreparedStatement prereq_stmt = conn.prepareStatement("SELECT DISTINCT idcourse,number FROM course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber");
 	/* The below two statements are not closed, this might cause issues later... */
 	department_rs = dept_stmt.executeQuery();
@@ -492,6 +513,7 @@ ResultSet course_rs = null;
 ResultSet coursenumber_rs = null;
 ResultSet course_coursenumber_rs = null;
 ResultSet unmatched_rs = null;
+ResultSet departmentcourse_rs = null;
 
 //The following will always run regardless of action
 try{
@@ -502,7 +524,9 @@ try{
 	coursenumber_rs = conn.prepareStatement("SELECT * FROM coursenumber ORDER BY idcoursenumber", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).executeQuery();
 	course_coursenumber_rs = conn.prepareStatement("SELECT * FROM course_coursenumber NATURAL JOIN course NATURAL JOIN coursenumber ORDER BY idcourse", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).executeQuery();
 	unmatched_rs = conn.prepareStatement("SELECT idcourse FROM course WHERE idcourse NOT IN (SELECT idcourse FROM course_coursenumber)", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).executeQuery();	
+	departmentcourse_rs = conn.prepareStatement("SELECT iddepartment_course, idcourse, number, iddepartment, name FROM course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber NATURAL JOIN department NATURAL JOIN department_course ORDER BY idcourse", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).executeQuery();	
 
+	
 	conn.commit();
 	conn.setAutoCommit(true);
 	
@@ -523,6 +547,7 @@ try{
 <!-- HTML Body Start -->
 <body>
 
+	<a href='index.jsp'><button>Home</button></a>
 	<h2>Course Entry Form</h2>
 
 	<!-- Course Insertion Form -->
@@ -782,6 +807,55 @@ try{
 							<button type="submit" name="action" value="course_coursenumber_update">Update</button>
 							&nbsp;
 							<!-- <button type="submit" name="action" value="course_coursenumber_delete">Delete</button> -->
+						</td>
+					</tr>
+			 	</form>
+					
+			<%
+			}
+		}
+	  %>
+	</table>
+
+	<br>
+	<br>
+	<!-- Course Department Edit Form -->
+	<h2>Course Department Edit Form</h2>
+	
+	<table>
+	  <tr>
+	    <th>Course Name</th>
+	    <th>Department</th>
+	    <th>Edit Actions</th>
+	  </tr>
+	  <%
+		if (departmentcourse_rs.isBeforeFirst()) {
+			while(departmentcourse_rs.next()) { 
+			%>
+				<form action="course_entry_form.jsp" method="POST">
+					<input type="hidden" name="iddepartment_course" value="<%= departmentcourse_rs.getString("iddepartment_course") %>">
+		  			<tr>
+					    <td><%= departmentcourse_rs.getString("number") %></td>
+					    <td>
+					    	<select name="iddepartment">
+								<%
+								department_rs.beforeFirst();
+								if (department_rs.isBeforeFirst())
+								{
+									while(department_rs.next()){
+										%>
+										<option value=<%=department_rs.getString("iddepartment")%>  <%= departmentcourse_rs.getString("iddepartment").equals(department_rs.getString("iddepartment")) ? "selected" : "" %>>  <%=department_rs.getString("name")%></option>
+										<%
+									}
+								}
+								%>
+							</select>
+					    </td>
+					    <td>
+							&nbsp;
+							<button type="submit" name="action" value="departmentcourse_update">Update</button>
+							&nbsp;
+							<!-- <button type="submit" name="action" value="delete">Delete</button> -->
 						</td>
 					</tr>
 			 	</form>
