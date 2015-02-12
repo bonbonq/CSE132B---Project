@@ -487,7 +487,7 @@ else if(action!=null && (action.equals("course_delete") || action.equals("course
 try{
 	conn.setAutoCommit(false);
 	PreparedStatement dept_stmt = conn.prepareStatement("SELECT * FROM department", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-	PreparedStatement prereq_stmt = conn.prepareStatement("SELECT DISTINCT idcourse,number FROM course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber");
+	PreparedStatement prereq_stmt = conn.prepareStatement("SELECT DISTINCT idcourse,number FROM course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 	/* The below two statements are not closed, this might cause issues later... */
 	department_rs = dept_stmt.executeQuery();
 	prereq_rs = prereq_stmt.executeQuery();
@@ -865,7 +865,29 @@ try{
 		}
 	  %>
 	</table>
-
+	
+	<br>
+	<br>
+	<!-- Prereq Edit Form -->
+	<h2>Prereq Edit Form</h2>
+	<form action="edit_prereq_form.jsp" method="POST">
+		Choose Course: 
+		<select name="idcourse">
+	   		<%
+	   		departmentcourse_rs.beforeFirst();
+			if (departmentcourse_rs.isBeforeFirst())
+			{
+				while(departmentcourse_rs.next()){
+					%>
+					<option value=<%=departmentcourse_rs.getString("idcourse")%>><%=departmentcourse_rs.getString("number")%></option>
+					<%
+				}
+			}
+			%>
+	   	</select>
+		<button type="submit" name="action" value="course_entry_form">Edit Prereqs</button>
+	</form>
+	
 </body>
 <!-- HTML Body End -->
 
