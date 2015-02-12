@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
-            <%@ page import="java.sql.*"%>
+<%@ page import="java.sql.*"%>
 <%@ page import="java.util.*"%>
 <%@ page import="java.io.*"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -39,6 +39,11 @@ try
 		%><h3>Department <%=name%> (<%=abbr%>) successfully added</h3><%
 		%><h4>AFTER</h4><%
 	}
+	System.out.println(jdbc);
+	/* ============= */
+	/* INSERT ACTION */
+	/* ============= */
+	
 	if (jdbc != null && jdbc.equals("insert"))
 	{
 		Class.forName("org.postgresql.Driver");
@@ -80,16 +85,125 @@ try
 			response.sendRedirect("department.jsp");
 		}
 	}
+	
+	
+	/* ============= */
+	/* Update Action */
+	/* ============= */
+	else if(jdbc!=null && jdbc.equals("update")){
+		
+		Class.forName("org.postgresql.Driver");
+		conn = DriverManager.getConnection("jdbc:postgresql://localhost/CSE132B");
+		
+		PreparedStatement update = conn.prepareStatement(	
+				"Update department SET " +
+				"name = ?, abbr=? " +
+				"WHERE iddepartment=?");
+		update.setString(1, request.getParameter("name"));
+		update.setString(2, request.getParameter("abbr"));
+		update.setInt(3, Integer.parseInt(request.getParameter("iddepartment")));
+		
+		if (update.executeUpdate()==1) {
+			%>
+			<h1>Successfully Updated!</h1>
+			<%
+		}
+		else {
+			%>
+			<h1>Update has failed!</h1>
+			<%
+		}
+	}
+
+
+
+	/* ============= */
+	/* Delete Action */
+	/* ============= */
+
+	else if(jdbc!=null && jdbc.equals("delete")) {
+		
+		Class.forName("org.postgresql.Driver");
+		conn = DriverManager.getConnection("jdbc:postgresql://localhost/CSE132B");
+		
+		/* Just change these */
+		String table_name = "department";
+		String table_id = "iddepartment";
+		String id_parameter_name = "iddepartment";
+		
+		PreparedStatement delete = conn.prepareStatement("DELETE FROM " + table_name + " WHERE " + table_id + "=?");
+		delete.setInt(1, Integer.parseInt(request.getParameter(id_parameter_name)));
+		
+		if (delete.executeUpdate()==1) {
+			%>
+			<h1>Successfully Deleted!</h1>
+			<%
+		}
+		else {
+			%>
+			<h1>Delete has failed!</h1>
+			<%
+		}
+		
+	}
+	
+	
+	
+	/* ========================= */
+	/* EDIT FORM DATA GENERATION */
+	/* ========================= */
+
+	ResultSet rs = null;
+	Class.forName("org.postgresql.Driver");
+	conn = DriverManager.getConnection("jdbc:postgresql://localhost/CSE132B");
+	rs = conn.prepareStatement("SELECT * FROM department", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE).executeQuery();
+
 
 %>
+<!-- Insert form -->
 <form action="department.jsp">
-<label for="name">Department Name:</label>
-<input type="text" name="name">
-<label for="abbr">Abbreviation:</label>
-<input type="text" name="abbr">
-<input type="hidden" name="jdbc" value="insert">
-<input type="submit">
+	<label for="name">Department Name:</label>
+	<input type="text" name="name">
+	<label for="abbr">Abbreviation:</label>
+	<input type="text" name="abbr">
+	<input type="hidden" name="jdbc" value="insert">
+	<input type="submit">
 </form>
+<br>
+<br>
+<!-- Edit Form -->
+<h2>Edit Form</h2>
+
+<table>
+  <tr>
+    <th>Department Name</th>
+    <th>Department Abbreviation</th>
+    <th>Edit Actions</th>
+  </tr>
+  <%
+	if (rs.isBeforeFirst()) {
+		while(rs.next()) { 
+		%>
+			<form action="department.jsp" method="POST">
+				<input type="hidden" name="iddepartment" value="<%=rs.getString("iddepartment") %>">
+	  			<tr>
+				    <td><input type="text" name="name" value="<%=rs.getString("name") %>" required></td>
+				    <td><input type="text" name="abbr" value="<%=rs.getString("abbr") %>" required></td>
+				    <td>
+						&nbsp;
+						<button type="submit" name="jdbc" value="update">Update</button>
+						&nbsp;
+						<button type="submit" name="jdbc" value="delete">Delete</button>
+					</td>
+				</tr>
+		 	</form>
+				
+		<%
+		}
+	}
+  %>
+</table>
+
 <%
 	}
 	catch (SQLException e)
