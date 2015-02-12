@@ -59,6 +59,7 @@ try{
 <!-- HTML Body Start -->
 <body>
 
+	<a href='index.jsp'><button>Home</button></a>
 	<h2>PreCourse Enrollment Form</h2>
 
 	<!-- Insertion Form -->

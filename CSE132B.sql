@@ -473,7 +473,7 @@ CREATE TABLE student_section__enrolled (
 -- Table CSE132B.student_section__waitlist
 -- -----------------------------------------------------
 CREATE TABLE student_section__waitlist (
-  idstudent_section__enrolled SERIAL PRIMARY KEY,
+  idstudent_section__waitlist SERIAL PRIMARY KEY,
   idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
   idsection integer REFERENCES section(idsection) ON DELETE CASCADE ON UPDATE CASCADE
   );

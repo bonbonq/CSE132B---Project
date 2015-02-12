@@ -86,10 +86,11 @@ try{
 <!-- HTML body part -->
 <body>
 
+	<a href='index.jsp'><button>Home</button></a>
 	<h2>Course Enrollment Form</h2>
 
 	<!-- Insertion Form -->
-	<form action="course_enrollment.jsp" method="POST">
+	<form action="postcourse_enrollment.jsp" method="POST">
 		
 		<input type="hidden" name="idquarter" value="<%=idquarter %>">
 		
