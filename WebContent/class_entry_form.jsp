@@ -36,14 +36,80 @@ try
 	Class.forName("org.postgresql.Driver");
 	conn = DriverManager.getConnection("jdbc:postgresql://localhost/CSE132B");
 	conn.setAutoCommit(false);
-	
-	String todo = request.getParameter("todo");
-	String jdbc = request.getParameter("jdbc");
 	String title = request.getParameter("title");
 	
 	String action = request.getParameter("action");
-	
-	if (action != null && action.equals("insert"))
+	if (action != null && action.equals("view"))
+	{
+		sql1 = "SELECT class.idclass, number, title, name, season, year FROM department, class, quarter_course_class__instance, course_coursenumber, quarter, department_course, coursenumber" + 
+				" WHERE class.idclass = quarter_course_class__instance.idclass" +
+				" AND department.iddepartment = department_course.iddepartment" +
+				" AND department_course.idcourse = course_coursenumber.idcourse" +
+				" AND quarter_course_class__instance.idquarter = quarter.idquarter" +
+				" AND quarter_course_class__instance.idcourse = course_coursenumber.idcourse" +
+				" AND course_coursenumber.idcoursenumber = coursenumber.idcoursenumber";
+		ps1 = conn.prepareStatement(sql1);
+		rs1 = ps1.executeQuery();
+		%>
+		<table>
+			<tr>
+				<th>Class ID</th>
+				<th>Course Number</th>
+				<th>Course Title</th>
+				<th>Department</th>
+				<th>Quarter</th>
+				<th>Year</th>
+			</tr>
+		<%
+		int cid;
+		String cno, ct, dep, q, y;
+		while (rs1.next())
+		{
+			cid = rs1.getInt(1);
+			cno = rs1.getString(2);
+			ct = rs1.getString(3);
+			dep = rs1.getString(4);
+			q = rs1.getString(5);
+			y = rs1.getString(6);
+		%>
+			
+			<tr>
+				<td><%=cid%></td>
+				<td><%=cno%></td>
+				<td><%=ct%></td>
+				<td><%=dep%></td>
+				<td><%=q%></td>
+				<td><%=y%></td>
+				<td>
+					<form action="class_entry_form.jsp" method="POST">
+						<input type="hidden" name="action" value="delete">
+						<input type="hidden" name="idclass" value="<%=cid%>">
+						<input type="submit" value="Delete">
+					</form>
+				</td>
+			</tr>
+		<%
+		} 
+		%>
+		</table>
+		<%
+		
+	}
+	else if (action != null && action.equals("update"))
+	{
+		
+	}
+	else if (action != null && action.equals("delete"))
+	{
+	 	int idclass = Integer.parseInt(request.getParameter("idclass"));
+		sql1 = "DELETE FROM class WHERE idclass = ?";
+		ps1 = conn.prepareStatement(sql1);
+		ps1.setInt(1, idclass);
+		ps1.executeUpdate();
+		conn.commit();
+		response.sendRedirect("class_entry_form.jsp?action=view");
+	}
+	else if (action != null && (action.equals("insert")))
 	{
 		sql1 = "INSERT INTO class (title) VALUES (?) RETURNING idclass";
 		ps1 = conn.prepareStatement(sql1);
