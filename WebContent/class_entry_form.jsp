@@ -39,6 +39,8 @@ try
 	String title = request.getParameter("title");
 	
 	String action = request.getParameter("action");
+	System.out.println("About to go in");
+	System.out.println(action);
 	if (action != null && action.equals("view"))
 	{
 		sql1 = "SELECT class.idclass, number, title, name, season, year FROM department, class, quarter_course_class__instance, course_coursenumber, quarter, department_course, coursenumber" + 
@@ -87,6 +89,14 @@ try
 						<input type="submit" value="Delete">
 					</form>
 				</td>
+				<td>
+					<form action="class_entry_form.jsp" method="POST">
+						<input type="hidden" name="action" value="updatepre">
+						<input type="hidden" name="idclass" value="<%=cid%>">
+						<input type="hidden" name="department" value="<%=dep%>">
+						<input type="submit" value="Update">
+					</form>
+				</td>
 			</tr>
 		<%
 		} 
@@ -105,15 +115,32 @@ try
 		conn.commit();
 		response.sendRedirect("class_entry_form.jsp?action=view");
 	}
-	else if (action != null && (action.equals("insert")))
+	
+	else if (action != null && (action.equals("insert") || action.equals("update")))
 	{
-		sql1 = "INSERT INTO class (title) VALUES (?) RETURNING idclass";
+		int idclass;
+		System.out.println(action);
+		if (action.equals("insert"))
+			sql1 = "INSERT INTO class (title) VALUES (?) RETURNING idclass";
+		else
+			sql1 = "UPDATE class SET title = ? WHERE idclass = ?";
 		ps1 = conn.prepareStatement(sql1);
 		ps1.setString(1, title);
-		ps1.execute();
-		rs1 = ps1.getResultSet();
-		rs1.next();
-		int idclass = rs1.getInt("idclass");
+		if (action.equals("update"))
+		{
+			System.out.println("YOYOYOYOYO");
+			idclass = Integer.parseInt(request.getParameter("idclass"));
+			System.out.println(idclass);
+			ps1.setInt(2, idclass);
+			ps1.executeUpdate();
+		}
+		else
+		{
+			ps1.execute();
+			rs1 = ps1.getResultSet();
+			rs1.next();
+			idclass = rs1.getInt("idclass");
+		}
 	    int year = Integer.parseInt(request.getParameter("year"));
 		String courseno = request.getParameter("courseno");
 		String dept = request.getParameter("department");
@@ -140,21 +167,28 @@ try
 		rs3.next();
 		int idquarter = rs3.getInt("idquarter");
 		
-		sql4 = "INSERT INTO quarter_course_class__instance (idquarter, idcourse, idclass) VALUES (?, ?, ?)";
+		if (action.equals("insert"))
+			sql4 = "INSERT INTO quarter_course_class__instance (idquarter, idcourse, idclass) VALUES (?, ?, ?)";
+		else
+			sql4 = "UPDATE quarter_course_class__instance SET idquarter = ?, idcourse = ? WHERE idclass = ?";
+		
 		ps4 = conn.prepareStatement(sql4);
 		ps4.setInt(1, idquarter);
 		ps4.setInt(2, idcourse);
 		ps4.setInt(3, idclass);
 		ps4.executeUpdate();
 		conn.commit();
-		session.setAttribute("dept", dept);
-		session.setAttribute("quarter", quarter);
-		session.setAttribute("year", year);
-		session.setAttribute("courseno", courseno);
-		session.setAttribute("idclass", idclass);
-		session.setAttribute("idquarter", idquarter);
-		session.setAttribute("idcourse", idcourse);
-		session.setAttribute("sessionok", "okay");
+		
+		if (action.equals("insert"))
+		{
+			session.setAttribute("dept", dept);
+			session.setAttribute("quarter", quarter);
+			session.setAttribute("year", year);
+			session.setAttribute("courseno", courseno);
+			session.setAttribute("idclass", idclass);
+			session.setAttribute("idquarter", idquarter);
+			session.setAttribute("idcourse", idcourse);
+			session.setAttribute("sessionok", "okay");
 		
 		%>
 		<h3>Class added successfully</h3>
@@ -172,11 +206,17 @@ try
 			<input type="submit" value="Add Another Class">
 		</form>
 		<%
+		}
+		else
+		{
+			response.sendRedirect("class_entry_form.jsp?action=view");
+		}
 	}
 	
-	else if (action != null && action.equals("create"))
+	else if (action != null && (action.equals("create") || action.equals("updatepre")))
 	{
 		String dept = request.getParameter("department");
+		String idclass = request.getParameter("idclass");
 		%>
 		<h3>Department: <%=dept%></h3>
 		<%
@@ -189,7 +229,12 @@ try
 		ps1 = conn.prepareStatement(sql1);
 		ps1.setString(1, dept);
 		rs1 = ps1.executeQuery();
+		
+		String myaction;
+		
+
 		%>
+		
 		<form action="class_entry_form.jsp" method="POST">
 			<label for="courseno">Course Number</label>
 			<select name="courseno">
@@ -216,9 +261,20 @@ try
 				<option value="2017">2017</option>
 				<option value="2018">2018</option>
 			</select>
-		
-			<input type="hidden" name="action" value="insert">
-			<input type="hidden" name="department" value="<%=dept %>">	
+			<% 
+			String myaction2;
+			if (!(action.equals("updatepre")))
+			   {
+					myaction2 = "insert";
+			   }
+			   else
+			   { 
+				   myaction2 = "update";
+			   }
+			   %>
+			   <input type="hidden" name="action" value="<%=myaction2%>">
+			   <input type="hidden" name="idclass" value="<%=idclass%>">
+			   <input type="hidden" name="department" value="<%=dept %>">
 		</form>
 		<%
 	}
