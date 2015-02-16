@@ -44,13 +44,38 @@ String action = request.getParameter("action");
 /* ============= */
 if(action!=null && action.equals("insert")){
 	
-	PreparedStatement update = conn.prepareStatement(	
+	PreparedStatement insert = conn.prepareStatement(	
 			"INSERT INTO degree (total_units, name, type) " +
 			"SELECT ?,?,?");
+	insert.setString(1, request.getParameter("total_units"));
+	insert.setString(2, request.getParameter("name"));
+	insert.setString(3, request.getParameter("type"));
+	
+	
+	if (insert.executeUpdate()==1) {
+		%>
+		<h1>Successfully Updated!</h1>
+		<%
+	}
+	else {
+		%>
+		<h1>Update has failed!</h1>
+		<%
+	}
+}
+/* ============= */
+/* Update Action */
+/* ============= */
+else if(action!=null && action.equals("update")){
+	
+	PreparedStatement update = conn.prepareStatement(	
+			"Update degree SET " +
+			"total_units=?, name=?, type=? " +
+			"WHERE iddegree=?");
 	update.setString(1, request.getParameter("total_units"));
 	update.setString(2, request.getParameter("name"));
 	update.setString(3, request.getParameter("type"));
-	
+	update.setInt(4, Integer.parseInt(request.getParameter("iddegree")));
 	
 	if (update.executeUpdate()==1) {
 		%>
@@ -62,6 +87,57 @@ if(action!=null && action.equals("insert")){
 		<h1>Update has failed!</h1>
 		<%
 	}
+}
+
+
+
+/* ============= */
+/* Delete Action */
+/* ============= */
+
+else if(action!=null && action.equals("delete")) {
+
+	/* Just change these */
+	String table_name = "degree";
+	String table_id = "iddegree";
+	String id_parameter_name = "iddegree";
+	
+	PreparedStatement delete = conn.prepareStatement("DELETE FROM " + table_name + " WHERE " + table_id + "=?");
+	delete.setInt(1, Integer.parseInt(request.getParameter(id_parameter_name)));
+	
+	if (delete.executeUpdate()==1) {
+		%>
+		<h1>Successfully Deleted!</h1>
+		<%
+	}
+	else {
+		%>
+		<h1>Delete has failed!</h1>
+		<%
+	}
+	
+}
+/* ========================= */
+/* EDIT FORM DATA GENERATION */
+/* ========================= */
+
+ResultSet rs = null;
+
+//The following will always run regardless of action
+try{
+	conn.setAutoCommit(false);
+	/* The below statements are not closed, this might cause issues later... */
+	rs = conn.prepareStatement("SELECT * FROM degree").executeQuery();
+	conn.commit();
+	conn.setAutoCommit(true);
+	
+} catch(SQLException e) {
+	conn.rollback();
+	e.printStackTrace();
+	String message = "Failure: Unable to retrieve dropdown info - " + e.getMessage();
+	%>
+	<h1><%=message %></h1>
+	<%
 }
 
 %>
@@ -94,6 +170,45 @@ if(action!=null && action.equals("insert")){
 		<button type="submit" name="action" value="insert">Submit</button>
 		
 	</form>
+	
+	<br>
+	<br>
+	
+	<!-- Edit Form -->
+	<h2>Edit Form</h2>
+	
+	<table>
+	  <tr>
+	    <th>Degree Name</th>
+	    <th>Type</th>
+	    <th>Total Units</th>
+	    <th>Edit Actions</th>
+	  </tr>
+	  <%
+		if (rs.isBeforeFirst()) {
+			while(rs.next()) { 
+			%>
+				<form action="degree_requirement_info_submission.jsp" method="POST">
+					<input type="hidden" name="iddegree" value="<%=rs.getString("iddegree") %>">
+		  			<tr>
+					    <td><input type="text" name="name" value="<%=rs.getString("name") %>" required></td>
+					    <td><input type="text" name="type" value="<%=rs.getString("type") %>" required></td>
+					    <td><input type="text" name="total_units" value="<%=rs.getString("total_units") %>" required></td>
+					    <td>
+							&nbsp;
+							<button type="submit" name="action" value="update">Update</button>
+							&nbsp;
+							<button type="submit" name="action" value="delete">Delete</button>
+						</td>
+					</tr>
+			 	</form>
+					
+			<%
+			}
+		}
+	  %>
+	</table>
+	
 </body>
 <!-- HTML Body End -->
 <%
