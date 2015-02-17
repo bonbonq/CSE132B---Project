@@ -12,6 +12,7 @@
 <h2><a href='course_entry_form.jsp'>Course Entry Form xxud</a></h2>
 <h2><a href='class_entry_form.jsp'>Class Entry Form x</a></h2>
 <h2><a href='student_entry_form.jsp'>Student Entry Form xxud</a></h2>
+	<h3><a href='student_enroll_quarter_form.jsp'>&nbsp;&nbsp;Student Quarter Enrollment Form xxud</a></h3>
 	<h3><a href='previous_degree_form.jsp'>&nbsp;&nbsp;Previous Degree Entry Form xxud</a></h3>
 	<h3><a href='student_previous_degree_form.jsp'>&nbsp;&nbsp;Previously Earned Degree Entry Form xxud</a></h3>
 	<h3><a href='undergraduate_entry_form.jsp'>&nbsp;&nbsp;Undergraduate Entry Form xxud</a></h3>

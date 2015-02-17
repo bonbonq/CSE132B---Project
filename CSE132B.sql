@@ -299,7 +299,7 @@ INSERT INTO quarter (year, season) VALUES(2015, 'Summer');
 -- Table CSE132B.student_quarter__attends
 -- -----------------------------------------------------
 CREATE TABLE student_quarter__attends (
-  idstudent_quarter_attends SERIAL PRIMARY KEY,
+  idstudent_quarter__attends SERIAL PRIMARY KEY,
   idstudent integer REFERENCES student(idstudent) ON DELETE CASCADE ON UPDATE CASCADE,
   idquarter integer REFERENCES quarter(idquarter) ON DELETE CASCADE ON UPDATE CASCADE
   );
