@@ -1,0 +1,67 @@
+REPORT 1
+a. Display the classes currently taken by student X:
+	Generate form fields:
+		SELECT * FROM student_quarter__attends NATURAL JOIN student 
+	Generate result:
+		SELECT * from student_instance AS si, quarter_course_class__instance AS instance WHERE instance.idquarter=? AND si.idstudent=? AND si.idinstance=instance.idinstance
+
+b. Display the roster of class Y:
+	Generate form fields:
+		SELECT * from quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber
+	Generate result:
+		SELECT * FROM student_instance NATURAL JOIN student WHERE student_instance.idinstance=?
+
+c. Produce the grade report of student X:
+	Generate form fields:
+		SELECT * FROM student_quarter__attends NATURAL JOIN student
+	Generate result:
+		SELECT * FROM student_instance AS si, quarter_course_class__instance AS instance, quarter AS quarter WHERE si.idinstance=instance.idinstance AND si.idstudent=? AND instance.idquarter=quarter.idquarter ORDER BY quarter.year
+
+d. Assist an undergraduate student X in figuring out remaining degree requirements for a bachelors in Y:
+	Generate form fields:
+		SELECT * FROM undergraduate NATURAL JOIN student WHERE EXISTS (SELECT * FROM student_quarter__attends WHERE idquarter=15 AND idstudent=?);
+		SELECT * FROM degree WHERE type="BS";
+	Generate result:
+		(Generate the student's courses taken)
+		SELECT * FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE  idstudent=?;
+
+		(Generate the degree's requirements)
+		SELECT * FROM degree WHERE iddegree=?;
+		SELECT * FROM lower_division WHERE iddegree=?;
+		SELECT * FROM upper_division WHERE iddegree=?;
+		
+e. Assist a MS student in figuring out remaining degree requirements for a MS in Y:
+	Generate form fields:
+		SELECT * FROM ms NATURAL JOIN student NATURAL JOIN student_quarter__attends WHERE idquarter=15 AND ms.idstudent=student.idstudent AND student_quarter__attends.idstudent=student.idstudent AND student.idstudent=?;
+		SELECT * FROM degree WHERE type="MS";
+	Generate result:
+		(Generate the student's courses taken)
+		SELECT * FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE  idstudent=?;
+
+		(Generate the degree's requirements)
+		SELECT * FROM degree WHERE iddegree=?;
+		SELECT * FROM lower_division WHERE iddegree=?;
+		SELECT * FROM upper_division WHERE iddegree=?;
+		SELECT * FROM concentration NATURAL JOIN concentraion_course WHERE iddegree=?;
+
+REPORT 2
+a. Assist a student X in producing his class schedule:
+	Generate form fields:
+		SELECT * FROM student WHERE EXISTS (SELECT * FROM student_quarter__attends WHERE idquarter=15 AND idstudent=?);
+	Generate result:
+		(Generate the student's section's weekly)
+			SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance NATURAL JOIN instance_section NATURAL JOIN section_weekly NATURAL JOIN weekly WHERE quarter_course_class__instance.idquarter=15 AND student_instance.idstudent=?
+
+		(Generate the all section's weekly)
+			SELECT * FROM quarter_course_class__instance NATURAL JOIN instance_section NATURAL JOIN section_weekly NATURAL JOIN weekly WHERE idquarter=15
+
+b. Assist a professor X in scheduling a review session for a section Y offered in the current quarter during the time period from B to E: 
+	Generate form fields:
+
+
+
+
+
+
+
+

@@ -37,7 +37,7 @@ ResultSet quarter_rs = null;
 //The following will always run regardless of action
 try{
 	conn.setAutoCommit(false);
-	PreparedStatement quarter_stmt = conn.prepareStatement("SELECT * FROM quarter");
+	PreparedStatement quarter_stmt = conn.prepareStatement("SELECT * FROM quarter ORDER BY year");
 	/* The below two statements are not closed, this might cause issues later... */
 	quarter_rs = quarter_stmt.executeQuery();
 	

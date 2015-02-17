@@ -525,8 +525,8 @@ CREATE TABLE weekly (
   building text NOT NULL,
   room text NOT NULL,
   day_of_week text NOT NULL,
-  start_time timestamp without time zone NOT NULL,
-  end_time timestamp without time zone NOT NULL,
+  start_time time without time zone NOT NULL,
+  end_time time without time zone NOT NULL,
   type text NOT NULL
   );
 
@@ -537,8 +537,8 @@ CREATE TABLE weekly (
 CREATE TABLE reviewsession (
   idreviewsession SERIAL PRIMARY KEY,
   "time" DATE NOT NULL,
-  start_time timestamp without time zone NOT NULL,
-  end_time timestamp without time zone NOT NULL,
+  start_time time without time zone NOT NULL,
+  end_time time without time zone NOT NULL,
   building text NOT NULL,
   room text NOT NULL
   );
