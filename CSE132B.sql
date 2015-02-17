@@ -280,7 +280,22 @@ CREATE TABLE quarter (
   year integer NOT NULL,
   season text NOT NULL
   );
-
+INSERT INTO quarter (year, season) VALUES(2009, 'Fall');
+INSERT INTO quarter (year, season) VALUES(2009, 'Winter');
+INSERT INTO quarter (year, season) VALUES(2009, 'Spring');
+INSERT INTO quarter (year, season) VALUES(2009, 'Summer');
+INSERT INTO quarter (year, season) VALUES(2010, 'Fall');
+INSERT INTO quarter (year, season) VALUES(2010, 'Winter');
+INSERT INTO quarter (year, season) VALUES(2010, 'Spring');
+INSERT INTO quarter (year, season) VALUES(2010, 'Summer');
+INSERT INTO quarter (year, season) VALUES(2011, 'Fall');
+INSERT INTO quarter (year, season) VALUES(2011, 'Winter');
+INSERT INTO quarter (year, season) VALUES(2011, 'Spring');
+INSERT INTO quarter (year, season) VALUES(2011, 'Summer');
+INSERT INTO quarter (year, season) VALUES(2012, 'Fall');
+INSERT INTO quarter (year, season) VALUES(2012, 'Winter');
+INSERT INTO quarter (year, season) VALUES(2012, 'Spring');
+INSERT INTO quarter (year, season) VALUES(2012, 'Summer');
 INSERT INTO quarter (year, season) VALUES(2013, 'Fall');
 INSERT INTO quarter (year, season) VALUES(2013, 'Winter');
 INSERT INTO quarter (year, season) VALUES(2013, 'Spring');
