@@ -27,5 +27,8 @@
 <h2><a href='probation_info_submission.jsp'>Probation Info Submission x</a></h2>
 <!-- <h2><a href='review_session_info_submission.jsp'>Review Session Info Submission</a></h2> -->
  <h2><a href='degree_requirement_info_submission.jsp'>Degree Requirements Info Submission xxud</a></h2>
+<h2><a href='review_session_info_submission.jsp'>Review Session Info Submission</a></h2>
+<h2><a href='degree_requirement_info_submission.jsp'>Degree Requirements Info Submission</a></h2>
+<h2><a href='section.jsp'>Section</a></h2>
 </body>
 </html>

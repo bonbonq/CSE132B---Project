@@ -56,12 +56,60 @@ a. Assist a student X in producing his class schedule:
 			SELECT * FROM quarter_course_class__instance NATURAL JOIN instance_section NATURAL JOIN section_weekly NATURAL JOIN weekly WHERE idquarter=15
 
 b. Assist a professor X in scheduling a review session for a section Y offered in the current quarter during the time period from B to E: 
-	Generate form fields:
+	(Generate form fields:)
+	SELECT faculty_class_section.idsection, class.title FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN class NATURAL JOIN faculty_class_section
+WHERE season = "winter"
+AND year = 2015
+
+	(Generate days/times that enrolled students are not free:)
+		SELECT day_of_week, start_time, end_time FROM quarter_course_class__instance NATURAL JOIN student_instance NATURAL JOIN instance_section NATURAL JOIN section_weekly NATURAL JOIN weekly WHERE quarter_course_class__instance.idquarter=15 AND student_instance.idstudent IN (SELECT idstudent FROM student_section__enrolled WHERE idsection = ?)
+		
+REPORT 3:
 
 
+(Generate grade_conversion table)
+create table GRADE_CONVERSION
+( LETTER_GRADE CHAR(2) NOT NULL,
+NUMBER_GRADE DECIMAL(2,1)
+);
+insert into grade_conversion values('A+', 4.3);
+insert into grade_conversion values('A', 4);
+insert into grade_conversion values('A-', 3.7);
+insert into grade_conversion values('B+', 3.4);
+insert into grade_conversion values('B', 3.1);
+insert into grade_conversion values('B-', 2.8);
+insert into grade_conversion values('C+', 2.5);
+insert into grade_conversion values('C', 2.2);
+insert into grade_conversion values('C-', 1.9);
+insert into grade_conversion values('D', 1.6); 
 
+(Generate grade distribution for faculty, course, and quarter)
+SELECT grade, COUNT(*) FROM quarter NATURAL JOIN quarter_course_class_instance NATURAL JOIN faculty_instance_hastaught
+WHERE faculty_name = ?
+AND idcourse = ?
+AND season = ?
+AND year = ?
+GROUP BY grade
+ORDER BY grade
 
+(Generate grade distribution for faculty)
+SELECT grade, COUNT(*) FROM quarter NATURAL JOIN quarter_course_class_instance NATURAL JOIN faculty_instance_hastaught
+WHERE faculty_name = ?
+AND idcourse = ?
+GROUP BY grade
+ORDER BY grade
 
+(Generate grade distribution for course)
+SELECT grade, COUNT(*) FROM quarter NATURAL JOIN quarter_course_class_instance NATURAL JOIN faculty_instance_hastaught
+WHERE idcourse = ?
+GROUP BY grade
+ORDER BY grade
 
+(Generate grade point average for faculty and course)
+SELECT AVG(number_grade) FROM grade_conversion, quarter NATURAL JOIN quarter_course_class_instance NATURAL JOIN faculty_instance_hastaught
+WHERE faculty_name = ?
+AND idcourse = ?
+AND LETTER_GRADE = grade
+GROUP BY number_grade
 
 
