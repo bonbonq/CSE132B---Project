@@ -63,7 +63,7 @@ try
 	{
 		//Create SQL statement based on selections from UI
 		String [] categories = {"faculty_name", "idcourse", "season", "year"};
-		String [] category_names = {"Faculty Name", "Course ID", "Season:", "Year"};
+		String [] category_names = {"Faculty Name", "Course ID", "Quarter", "Year"};
 		String category = "";
 		String data = "";
 		String addition = "";
@@ -80,6 +80,7 @@ try
 				addition += " = ? ";
 				category = category_names[i];
 				data = hiddens[i] + "";
+				count++;
 				%>
 					<h2><%=category%>: <%=data%></h2>
 				<%
@@ -129,11 +130,8 @@ try
 		if (rs5.next())
 		{
 			double gpa = rs5.getDouble("gpa");
-			%><h2>Grade Point Average: <%=gpa%></h2><%
-		}
-		else
-			%><h2>No GPA to report</h2>
-		<table>
+			%><h2>Grade Point Average: <%=gpa%></h2>
+			<table>
 		<tr>
 			<th>Grade</th>
 			<th>Received</th>
@@ -155,8 +153,11 @@ try
 		%>
 		</table>
 		<%
+		}
+		else
+			%><h2>No GPA or grades to report</h2><%
+	
 	}
-
 		sql1 = "SELECT faculty_name FROM faculty";
 		ps1 = conn.prepareStatement(sql1);
 		rs1 = ps1.executeQuery();
@@ -175,6 +176,7 @@ try
 		
 		%>
 		<form action="high_grade.jsp" method="POST">
+			Faculty:
 			<select name="faculty">
 			<% 
 				String faculty;
@@ -185,33 +187,36 @@ try
 				}
 			%>
 			</select>
+			Course ID:
 			<select name="course">
 			<%
 				int course;
-				while (rs1.next())
+				while (rs2.next())
 				{
-					course = rs1.getInt("idcourse");
+					course = rs2.getInt("idcourse");
 					%><option><%=course%></option><%
 				}
 			
 			%>
 			</select>
+			Quarter:
 			<select name="season">
 			<% 
 				String season;
-				while (rs1.next())
+				while (rs3.next())
 				{
-					season = rs1.getString("season");
+					season = rs3.getString("season");
 					%><option><%=season%></option><%
 				}
 			%>
 			</select>
+			Year:
 			<select name="year">
 			<%
 				int year;
-				while (rs1.next())
+				while (rs4.next())
 				{
-					year = rs1.getInt("year");
+					year = rs4.getInt("year");
 					%><option><%=year%></option><%
 				}
 			%>
