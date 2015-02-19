@@ -18,16 +18,19 @@ PreparedStatement ps1 = null;
 PreparedStatement ps2 = null;
 PreparedStatement ps3 = null;
 PreparedStatement ps4 = null;
+PreparedStatement ps5 = null;
 ResultSet rs0 = null;
 ResultSet rs1 = null;
 ResultSet rs2 = null;
 ResultSet rs3 = null;
 ResultSet rs4 = null;
+ResultSet rs5 = null;
 String sql0 = null;
 String sql1 = null;
 String sql2 = null;
 String sql3 = null;
 String sql4 = null;
+String sql5 = null;
 
 try
 {
@@ -83,6 +86,13 @@ try
 			}
 				
 		}
+		
+		sql5 = "SELECT AVG(number_grade) AS gpa FROM grade_conversion, quarter NATURAL JOIN quarter_course_class__instance NATURAL JOIN faculty_instance_hastaught NATURAL JOIN student_instance" + 
+			 addition +
+			" AND LETTER_GRADE = grade" + 
+			" GROUP BY number_grade";
+		ps5 = conn.prepareStatement(sql5);
+		
 		sql0 = "SELECT grade, COUNT(*) FROM quarter NATURAL JOIN quarter_course_class__instance NATURAL JOIN faculty_instance_hastaught NATURAL JOIN student_instance" + 
 			addition + 
 			" GROUP BY grade" + 
@@ -99,16 +109,30 @@ try
 			if ((filters.substring(i, i + 1)).equals("1"))
 			{
 				if (i == 1 || i == 3)
+				{
 					ps0.setInt(index, Integer.parseInt(hiddens[i]));
+					ps5.setInt(index, Integer.parseInt(hiddens[i]));
+				}
 				else
+				{
 					ps0.setString(index, hiddens[i]);
+					ps5.setString(index, hiddens[i]);
+				}
 				index++;
 			}
 		}
 		
 		//Execute statement and present
 		rs0 = ps0.executeQuery();
-		%>
+		rs5 = ps5.executeQuery();
+		
+		if (rs5.next())
+		{
+			double gpa = rs5.getDouble("gpa");
+			%><h2>Grade Point Average: <%=gpa%></h2><%
+		}
+		else
+			%><h2>No GPA to report</h2>
 		<table>
 		<tr>
 			<th>Grade</th>
@@ -191,9 +215,16 @@ try
 					%><option><%=year%></option><%
 				}
 			%>
+			
 			</select>
+			
 			<input type="hidden" name="action" value="display">
 			<input type="submit">
+		</form>
+		<br>
+		<br>
+		<form action="index.jsp">
+			<input type="submit" value="Back To Index">
 		</form>
 		<%
 	
@@ -217,6 +248,8 @@ finally
 		ps3.close();
 	if (ps4 != null)
 		ps4.close();
+	if (ps5 != null)
+		ps5.close();
 	if (rs0 != null)
 		rs0.close();
 	if (rs1 != null)
@@ -227,7 +260,8 @@ finally
 		rs3.close();
 	if (rs4 != null)
 		rs4.close();
-
+	if (rs5 != null)
+		rs5.close();
 	if (conn != null)
 	{
 		conn.setAutoCommit(false);
