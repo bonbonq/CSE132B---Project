@@ -54,7 +54,7 @@ if (action!=null && action.equals("submit")) {
 	try{
 		conn.setAutoCommit(false);
 		pstmt1 = conn.prepareStatement(
-				"SELECT * from student_instance AS si, quarter_course_class__instance AS instance, course_coursenumber AS c_cn, coursenumber AS cn, instance_section AS instance_section WHERE si.idstudent=? AND si.idinstance=instance.idinstance AND instance.idcourse=c_cn.idcourse AND cn.idcoursenumber=c_cn.idcoursenumber AND instance_section.idinstance=si.idinstance AND instance.idquarter=15",
+				"SELECT * from student_instance AS si, quarter_course_class__instance AS instance, course_coursenumber AS c_cn, coursenumber AS cn, instance_section AS instance_section WHERE si.idstudent=? AND si.idinstance=instance.idinstance AND instance.idcourse=c_cn.idcourse AND cn.idcoursenumber=c_cn.idcoursenumber AND instance_section.idinstance=si.idinstance AND instance.idquarter=2",
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		pstmt1.setInt(1, Integer.parseInt(request.getParameter("ss_num")));
 		result_rs = pstmt1.executeQuery();
@@ -83,7 +83,7 @@ try{
 	conn.setAutoCommit(false);
 	int current_year = Calendar.getInstance().get(Calendar.YEAR);
 	pstmt2 = conn.prepareStatement(
-			"SELECT * FROM student_quarter__attends NATURAL JOIN student WHERE idquarter=15",
+			"SELECT * FROM student_quarter__attends NATURAL JOIN student WHERE idquarter=2",
 			ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 	/* The below two statements are not closed, this might cause issues later... */
 	form_rs = pstmt2.executeQuery();
