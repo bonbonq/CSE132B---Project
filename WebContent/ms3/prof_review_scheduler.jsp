@@ -4,10 +4,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>MS3</title>
+<title>Prof Review Scheduler</title>
 </head>
 <body>
-<h1>Milestone 3 Links</h1>
-<h2><a href='student_current_class.jsp'>Student's Current Class</a></h2>
+
 </body>
 </html>

@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Home</title>
+<title>MS1/2</title>
 </head>
 <body>
 <h1>Home Page</h1>
