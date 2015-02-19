@@ -7,7 +7,7 @@ CREATE TABLE student (
   first_name text NOT NULL,
   last_name text NOT NULL,
   middle_name text,
-  ss_num text NOT NULL,
+  ss_num text NOT NULL UNIQUE,
   enrolled boolean NOT NULL,
   residency text NOT NULL
   );

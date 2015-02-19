@@ -1,9 +1,9 @@
 REPORT 1
 a. Display the classes currently taken by student X:
 	Generate form fields:
-		SELECT * FROM student_quarter__attends NATURAL JOIN student 
+		SELECT * FROM student_quarter__attends NATURAL JOIN student WHERE idquarter=15 
 	Generate result:
-		SELECT * from student_instance AS si, quarter_course_class__instance AS instance WHERE instance.idquarter=? AND si.idstudent=? AND si.idinstance=instance.idinstance
+		SELECT * from student_instance AS si, quarter_course_class__instance AS instance, course_coursenumber AS c_cn, coursenumber AS cn, instance_section AS instance_section WHERE si.idstudent=? AND si.idinstance=instance.idinstance AND instance.idcourse=c_cn.idcourse AND cn.idcoursenumber=c_cn.idcoursenumber AND instance_section.idinstance=si.idinstance AND instance.idquarter=15 
 
 b. Display the roster of class Y:
 	Generate form fields:
