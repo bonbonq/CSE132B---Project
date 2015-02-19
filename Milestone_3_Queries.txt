@@ -93,20 +93,20 @@ GROUP BY grade
 ORDER BY grade
 
 (Generate grade distribution for faculty)
-SELECT grade, COUNT(*) FROM quarter NATURAL JOIN quarter_course_class_instance NATURAL JOIN faculty_instance_hastaught
+SELECT grade, COUNT(*) AS received FROM quarter NATURAL JOIN quarter_course_class_instance NATURAL JOIN faculty_instance_hastaught NATURAL JOIN student_instance
 WHERE faculty_name = ?
 AND idcourse = ?
 GROUP BY grade
 ORDER BY grade
 
 (Generate grade distribution for course)
-SELECT grade, COUNT(*) FROM quarter NATURAL JOIN quarter_course_class_instance NATURAL JOIN faculty_instance_hastaught
+SELECT grade, COUNT(*) FROM quarter NATURAL JOIN quarter_course_class_instance NATURAL JOIN faculty_instance_hastaught NATURAL JOIN student_instance
 WHERE idcourse = ?
 GROUP BY grade
 ORDER BY grade
 
 (Generate grade point average for faculty and course)
-SELECT AVG(number_grade) FROM grade_conversion, quarter NATURAL JOIN quarter_course_class_instance NATURAL JOIN faculty_instance_hastaught
+SELECT AVG(number_grade) FROM grade_conversion, quarter NATURAL JOIN quarter_course_class_instance NATURAL JOIN faculty_instance_hastaught NATURAL JOIN student_instance
 WHERE faculty_name = ?
 AND idcourse = ?
 AND LETTER_GRADE = grade
