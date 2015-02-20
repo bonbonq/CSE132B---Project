@@ -19,14 +19,14 @@ c. Produce the grade report of student X:
 
 d. Assist an undergraduate student X in figuring out remaining degree requirements for a bachelors in Y:
 	Generate form fields:
-		SELECT * FROM undergraduate NATURAL JOIN student WHERE EXISTS (SELECT * FROM student_quarter__attends WHERE idquarter=2 AND idstudent=?);
+		SELECT * FROM undergraduate NATURAL JOIN student WHERE EXISTS (SELECT * FROM student_quarter__attends WHERE idquarter=2);
 		SELECT * FROM degree WHERE type="BS";
 	Generate result:
 		(Generate the student's courses taken)
 		SELECT * FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE  idstudent=?;
 
 		(Generate the degree's requirements)
-		SELECT * FROM degree WHERE iddegree=?;
+		SELECT * FROM department_degree AS dd,degree, department WHERE degree.iddegree=dd.iddegree AND department.iddepartment=dd.iddepartment AND degree.iddegree=?;
 		SELECT * FROM lower_division WHERE iddegree=?;
 		SELECT * FROM upper_division WHERE iddegree=?;
 		
