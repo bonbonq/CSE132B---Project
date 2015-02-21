@@ -11,11 +11,12 @@
 </head>
 <body>
 <h2>Class Entry Form</h2>
+<a href="index.jsp"><button>Home</button></a>
+<a href="class_entry_form.jsp"><button>Add Classes</button></a>
+<a href="class_entry_form.jsp?action=view"><button>View All Classes</button></a>
 
 <% 
 
-session.invalidate();
-session = request.getSession();
 
 Connection conn = null;
 PreparedStatement ps1 = null;
@@ -53,6 +54,10 @@ try
 		ps1 = conn.prepareStatement(sql1);
 		rs1 = ps1.executeQuery();
 		%>
+		<h2>Viewing All Classes</h2>
+		<form action="class_entry_form.jsp" method="GET">
+			<input type="submit" value="Add Classes">
+		</form><br>
 		<table>
 			<tr>
 				<th>Class ID</th>
@@ -139,35 +144,17 @@ try
 			rs1 = ps1.getResultSet();
 			rs1.next();
 			idclass = rs1.getInt("idclass");
+			System.out.println("idclass:" + idclass);
 		}
-	    int year = Integer.parseInt(request.getParameter("year"));
-		String courseno = request.getParameter("courseno");
-		String dept = request.getParameter("department");
-		sql2 = "SELECT department_course.idcourse FROM department, department_course, course_coursenumber, coursenumber" + 
-				" WHERE department.name = ?" + 
-				" AND department_course.iddepartment = department.iddepartment" + 
-				" AND department_course.idcourse = course_coursenumber.idcourse" + 
-				" AND course_coursenumber.idcoursenumber = coursenumber.idcoursenumber" + 
-				" AND coursenumber.number = ?";
-		
-		ps2 = conn.prepareStatement(sql2);
-		ps2.setString(1, dept);
-		ps2.setString(2, courseno);
-		rs2 = ps2.executeQuery();
-		rs2.next();
-		int idcourse = rs2.getInt("idcourse");
-		String quarter = request.getParameter("quarter");
-		
-		sql3 = "SELECT idquarter FROM quarter WHERE year = ? AND season = ?";
-		ps3 = conn.prepareStatement(sql3);
-		ps3.setInt(1, year);
-		ps3.setString(2, quarter);
-		rs3 = ps3.executeQuery();
-		rs3.next();
-		int idquarter = rs3.getInt("idquarter");
-		
+
+		String course = request.getParameter("idcourse");
+		int idcourse = Integer.parseInt(course.split(",")[0]);
+		course = course.split(",")[1];
+		String quarter = request.getParameter("idquarter");
+		int idquarter = Integer.parseInt(quarter.split(",")[0]);
+		quarter = quarter.split(",")[1];
 		if (action.equals("insert"))
-			sql4 = "INSERT INTO quarter_course_class__instance (idquarter, idcourse, idclass) VALUES (?, ?, ?) RETURNING idinstance";
+			sql4 = "INSERT INTO quarter_course_class__instance (idquarter, idcourse, idclass) VALUES (?, ?, ?)";
 		else
 			sql4 = "UPDATE quarter_course_class__instance SET idquarter = ?, idcourse = ? WHERE idclass = ?";
 		
@@ -175,53 +162,36 @@ try
 		ps4.setInt(1, idquarter);
 		ps4.setInt(2, idcourse);
 		ps4.setInt(3, idclass);
-		int idinstance = -1;
-		if (action.equals("insert"))
-		{
-			ps4.execute();
-			rs4 = ps4.getResultSet();
-			rs4.next();
-			idinstance = rs4.getInt("idinstance");
-		}
-		else
-		{
-			ps4.executeUpdate();
-		}
+		ps4.executeUpdate();
+		
 		conn.commit();
 		
 		if (action.equals("insert"))
 		{
-			session.setAttribute("dept", dept);
-			session.setAttribute("quarter", quarter);
-			session.setAttribute("year", year);
-			session.setAttribute("courseno", courseno);
-			session.setAttribute("idclass", idclass);
-			session.setAttribute("idquarter", idquarter);
-			session.setAttribute("idcourse", idcourse);
-			session.setAttribute("sessionok", "okay");
-			session.setAttribute("idinstance", idinstance);
+			%>
+			<h3>Class added successfully</h3>
+			<%
+		}
+		else
+		{
+			%>
+			<h3>Class information updated successfully</h3>
+			<%
+		}
+		
+		String dept = request.getParameter("department");
 		
 		%>
-		<h3>Class added successfully</h3>
 		<h3>Summary:</h3>
 		<h3>Department: <%=dept%></h3>
-		<h4>Course Number: <%=courseno%></h4>
+		<h4>Course Number: <%=course%></h4>
 		<h4>Quarter: <%=quarter%></h4>
 		<h4>Class ID: <%=idclass%></h4>
-		<h4>Class Title: <%=title %></h4>
-		
-		<form action="section.jsp" method="POST">
-			<input type="submit" value="Add Sections">
-		</form>
+		<h4>Class Title: <%=title%></h4>
 		<form action="class_entry_form.jsp" method="POST">
 			<input type="submit" value="Add Another Class">
 		</form>
 		<%
-		}
-		else
-		{
-			response.sendRedirect("class_entry_form.jsp?action=view");
-		}
 	}
 	
 	else if (action != null && (action.equals("create") || action.equals("updatepre")))
@@ -230,9 +200,15 @@ try
 		String idclass = request.getParameter("idclass");
 		%>
 		<h3>Department: <%=dept%></h3>
+		<br>
 		<%
-		
-		sql1 = "SELECT coursenumber.number FROM department, department_course, course_coursenumber, coursenumber " +
+		if (action.equals("updatepre"))
+		{
+			%>
+			<h4>Updating information for class <%=idclass%></h4>
+			<%
+		}
+		sql1 = "SELECT course_coursenumber.idcourse, coursenumber.number FROM department, department_course, course_coursenumber, coursenumber " +
 			     " WHERE department.name = ?" +
 			     " AND department.iddepartment = department_course.iddepartment " + 
 			     " AND department_course.idcourse = course_coursenumber.idcourse " + 
@@ -240,64 +216,117 @@ try
 		ps1 = conn.prepareStatement(sql1);
 		ps1.setString(1, dept);
 		rs1 = ps1.executeQuery();
-		
-		String myaction;
-		
 
-		%>
+		String season;
+		int year, idquarter;
+		sql2 = "SELECT * FROM quarter ORDER BY year";
+		ps2 = conn.prepareStatement(sql2);
+		rs2 = ps2.executeQuery();
 		
-		<form action="class_entry_form.jsp" method="POST">
-			<label for="courseno">Course Number</label>
-			<select name="courseno">
-		<%
-		while (rs1.next())
+		System.out.println("rs1:" + rs1.isBeforeFirst());
+		System.out.println("rs2: " + rs1.isBeforeFirst());
+		
+		if (!(rs1.isBeforeFirst()) || !(rs2.isBeforeFirst()))
 		{
-			String num = rs1.getString("number");
-			%>
-				<option value="<%=num%>"><%=num%></option>
+			%><h3>Cannot Process Request</h3>
+			<h4>Please fix errors noted below:</h4>
 			<%
+			if (!(rs1.isBeforeFirst()))
+			{
+			%>
+			<h3>Department currently not offering any courses</h3>
+			<form action="course_entry_form.jsp" method="POST">
+				<input type="submit" value="Add Courses">
+			</form>
+			<form action="class_entry_form.jsp" method="POST">
+				<input type="submit" value="Select Another Department">
+			</form>
+			<%
+			}
+			if (!(rs2.isBeforeFirst()))
+			{
+				%>
+				<h3>No quarters found in database</h3>
+				<form action="quarter_entry_form" method="POST">
+					<input type="submit" value="Add Quarters">
+				</form>
+				<%
+			}
 		}
-		%>
-			</select><input type="submit">
-			<label for="title">Course Title:</label>
-			<input type="text" name="title">
-			<label for="quarter">Quarter:</label>
-			<input type="radio" name="quarter" value="Fall">Fall
-			<input type="radio" name="quarter" value="Winter">Winter
-			<input type="radio" name="quarter" value="Spring">Spring
-			<input type="radio" name="quarter" value="Summer">Summer
-			<select name="year">
-				<option value="2009">2009</option>
-				<option value="2010">2010</option>
-				<option value="2011">2011</option>
-				<option value="2012">2012</option>
-				<option value="2013">2013</option>
-				<option value="2014">2014</option>
-				<option value="2015">2015</option>
-			</select>
+		else
+		{
+			%>
+			<form>
+				<label for="idcourse">Course Number:</label>
+				<select name="idcourse">
+			<%
+		
+			int idcourse;
+			String num;
+			String quarterString;
+			while (rs1.next())
+			{
+				idcourse = rs1.getInt("idcourse");
+				num = rs1.getString("number");
+				%>
+					<option value="<%=idcourse%>,<%=num%>"><%=num%></option>
+				<%
+			}
+			%>
+				</select>
+				<br><br>
+				
+				<label for="title">Course Title:</label>
+				<input type="text" name="title">
+				<br><br>
+				<label for="idquarter">Quarter:</label>
+				<select name="idquarter">
+			<%
+			
+			while (rs2.next())
+			{
+				idquarter = rs2.getInt("idquarter");
+				season = rs2.getString("season");
+				year = rs2.getInt("year");
+				quarterString = season + " " + year;
+			%>
+					<option value="<%=idquarter%>,<%=quarterString%>"><%=season%> <%=year%></option>
 			<% 
-			String myaction2;
+			}
+			%>
+				</select>
+				<br><br>
+			<%
+			
+			String myaction;
 			if (!(action.equals("updatepre")))
-			   {
-					myaction2 = "insert";
-			   }
-			   else
-			   { 
-				   myaction2 = "update";
-			   }
-			   %>
-			   <input type="hidden" name="action" value="<%=myaction2%>">
-			   <input type="hidden" name="idclass" value="<%=idclass%>">
-			   <input type="hidden" name="department" value="<%=dept %>">
+				myaction = "insert";
+			else
+			{
+				myaction = "update";
+				%>
+				<input type="hidden" name="idclass" value="<%=idclass%>">
+				<%
+			}
+	
+			   	%>
+			   	<input type="hidden" name="action" value="<%=myaction%>">
+			   	<input type="hidden" name="department" value="<%=dept %>">
+			   	<input type="submit">
+		</form>
+		<form action="class_entry_form.jsp">
+			<input type="submit" value="Select Different Department">
 		</form>
 		<%
+		}
 	}
 	else
 	{
 		ps1 = conn.prepareStatement("SELECT name FROM department");
 		rs1 = ps1.executeQuery();
 		%>
-		<form action="class_entry_form.jsp">
+			<form action="class_entry_form.jsp" method="GET"><br>
+		
 			<label for="department">Department:</label>
 			<select name="department">
 		<%
@@ -315,6 +344,7 @@ try
 			<input type="hidden" name="action" value="create">
 			<input type="submit">
 		</form>
+		
 		<%
 	}
 }
