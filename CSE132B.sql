@@ -278,7 +278,8 @@ CREATE TABLE student_ap (
 CREATE TABLE quarter (
   idquarter SERIAL PRIMARY KEY,
   year integer NOT NULL,
-  season text NOT NULL
+  season text NOT NULL,
+  quarter_number integer NOT NULL
   );
 
 INSERT INTO quarter (year, season) VALUES(2009, 'Winter');
