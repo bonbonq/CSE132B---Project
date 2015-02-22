@@ -13,29 +13,14 @@
 </head>
 <body>
 <%
-	String sessionok = (String) session.getAttribute("sessionok");
-	sessionok = "okay";
-	if (sessionok == null || !(sessionok.equals("okay")))
-	{
-		%><h2>ERROR: Session expired or no valid section chosen. Please return to home page and try again.</h2>
-		<form action="index.jsp" method="POST">
-			<input type="submit" value="Return to home page">
-		</form>
-		<%
-	}
-	else
-	{		
+	
 		String action = request.getParameter("action");
-		String type = request.getParameter("type");
-		String dept = (String) session.getAttribute("dept");
-		String courseno = (String) session.getAttribute("courseno");
-		Integer idsection = (Integer) session.getAttribute("idsection");
 		
 		%>
+		<a href= "index.jsp"><button>Home</button></a>
+		<a href="subsection.jsp"><button>Add Lecture, Discussion, Review Session</button></a>
+		<a href="subsection.jsp?action=view"><button>View All Lectures, Discussions, Review Sessions</button></a>
 		<h2>Sub-section Add Form</h2>
-		<h3>Department:<%=dept%></h3>
-		<h3>Course Number: <%=courseno%></h3>
-		<h3>Section ID: <%=idsection%></h3>
 		<%
 		
 		Connection conn = null;
@@ -60,6 +45,17 @@
 		
 			if (action != null && action.equals("view"))
 			{
+				String success = (String) session.getAttribute("success");
+				Integer idsection = (Integer) session.getAttribute("idsection");
+				if (success != null && !(success.equals("")))
+				{
+					%>
+					<h3><%=success%> Of Section <%=idsection%> Successful!</h3>
+					<%
+				}
+				session.removeAttribute("success");
+				session.removeAttribute("idsection");
+				
 				sql2 = "SELECT * FROM section_reviewsession, reviewsession WHERE reviewsession.idreviewsession = section_reviewsession.idreviewsession";
 				ps2 = conn.prepareStatement(sql2);
 				rs2 = ps2.executeQuery();
@@ -133,7 +129,7 @@
 				<table>
 					<tr>
 						<th>Section ID</th>
-						<th>Weekly ID</th>
+						<th>Review ID</th>
 						<th>Date</th>
 						<th>Start Time</th>
 						<th>End Time</th>
@@ -151,7 +147,7 @@
 					et2 = rs2.getTimestamp("end_time");
 					b = rs2.getString("building");
 					rn = rs2.getString("room");
-					t = rs2.getString("type");
+					t = "review session";
 				%>
 					<tr>
 						<td><%=sid%></td>
@@ -188,7 +184,7 @@
 			}
 			else if (action != null && action.equals("updatepre"))
 			{
-				type = request.getParameter("type");
+				String type = request.getParameter("type");
 				String idweekly = request.getParameter("idweekly");
 				String idreviewsession = request.getParameter("idreviewsession");
 				System.out.println(type);
@@ -275,9 +271,19 @@
 					</select>
 					/
 					<select name="year">
-						<option value="2015">2015</option>
-						<option value="2016">2016</option>
-						<option value="2017">2017</option>
+					<%
+				int year;
+				sql3 = "SELECT DISTINCT year FROM quarter ORDER BY year";
+				ps3 = conn.prepareStatement(sql3);
+				rs3 = ps3.executeQuery();
+				while (rs3.next())
+				{
+					year = rs3.getInt("year");
+				%>
+					<option value="<%=year%>"><%=year%></option>
+				<% 
+				}
+				%>
 					</select>
 					<%
 				}	
@@ -354,6 +360,7 @@
 		}
 		else if (action != null && action.equals("update"))
 		{
+			String type = request.getParameter("type");
 			String idweekly = request.getParameter("idweekly");
 			String idreviewsession = request.getParameter("idreviewsession");
 			String building = request.getParameter("building");
@@ -428,13 +435,13 @@
 				java.sql.Timestamp endTime = java.sql.Timestamp.valueOf(dayString + " " + endTimeString);
 			
 				sql1 = "UPDATE reviewsession SET time = ?, start_time = ?, end_time = ?, building = ?, room = ? WHERE idreviewsession = ?";
-				sql1 = "INSERT INTO reviewsession (time, start_time, end_time, building, room) VALUES (?, ?, ?, ?, ?) RETURNING idreviewsession";
 				ps1 = conn.prepareStatement(sql1);
 				ps1.setDate(1, revDate);
 				ps1.setTimestamp(2, startTime);
 				ps1.setTimestamp(3, endTime);
 				ps1.setString(4, building);
 				ps1.setString(5, room);
+				ps1.setInt(6, Integer.parseInt(idreviewsession));
 				ps1.executeUpdate();
 				conn.commit();
 				response.sendRedirect("subsection.jsp?action=view");
@@ -471,9 +478,9 @@
 					ps1.executeUpdate();
 					conn.commit();
 				}
-				else if (typet != null && typet.equals("review"))
+				else if (typet != null && typet.equals("review session"))
 				{
-					sql1 = "DELETE FROM reviewsession WHERE idrevewsession = ";
+					sql1 = "DELETE FROM reviewsession WHERE idreviewsession = ?";
 					ps1 = conn.prepareStatement(sql1);
 					ps1.setInt(1, id);
 					ps1.executeUpdate();
@@ -484,7 +491,8 @@
 			
 			else if (action != null && action.equals("insert"))
 			{
-			
+				int idsection_insert = Integer.parseInt(request.getParameter("idsection"));
+				String type = request.getParameter("type");
 				String building = request.getParameter("building");
 				String room = request.getParameter("room");
 				String starth = request.getParameter("starth");
@@ -544,7 +552,7 @@
 					int idweekly = rs1.getInt("idweekly");
 					sql2 = "INSERT INTO section_weekly (idsection, idweekly) VALUES (?,?)";
 					ps2 = conn.prepareStatement(sql2);
-					ps2.setInt(1, idsection);
+					ps2.setInt(1, idsection_insert);
 					ps2.setInt(2, idweekly);
 					ps2.executeUpdate();
 					conn.commit();
@@ -574,120 +582,92 @@
 					int idreview = rs1.getInt("idreviewsession");
 					sql2 = "INSERT INTO section_reviewsession (idsection, idreviewsession) VALUES (?,?)";
 					ps2 = conn.prepareStatement(sql2);
-					ps2.setInt(1, idsection);
+					ps2.setInt(1, idsection_insert);
 					ps2.setInt(2, idreview);
 					ps2.executeUpdate();
 					conn.commit();
 				}
-				%>
-				<h3>Successfully added a <%=type%></h3>
-				<h3>Summary:</h3>
-				<h4><%=dayType%>: <%=dayString%></h4>
-				<h4>Start Time: <%=startTimeString%></h4>
-				<h4>End Time: <%=endTimeString%></h4>
-				<form action="subsection.jsp" method="POST">
-					<input type="submit" value="Add more subsections">
-				</form>
-				<form action="section.jsp" method="POST">
-					<input type="submit" value="Add a new section">
-				</form>
-				<form action="class_entry_form.jsp">
-					<input type="submit" value="Add a new class">
-				</form>
-				<%
+				session.setAttribute("success", "Insert");
+				session.setAttribute("idsection", idsection_insert);
+				response.sendRedirect("subsection.jsp?action=view");
 			}
 			
-			else if (action != null && action.equals("create"))
+			else if (action != null && (action.equals("create") || action.equals("create_specific")))
 			{
-				%>
-				<form action="subsection.jsp" method="POST">
-				<%
-			
-				if (type != null && (type.equals("lecture") || type.equals("discussion")))
+				int idsection_create = Integer.parseInt(request.getParameter("idsection"));
+				
+				sql2 = "SELECT * FROM quarter_course_class__instance, class, quarter, course_coursenumber, coursenumber, faculty_class_section" +
+				      " WHERE faculty_class_section.idsection = ?" +
+				      " AND faculty_class_section.idclass = quarter_course_class__instance.idclass" +
+				      " AND quarter_course_class__instance.idclass = class.idclass" + 
+				      " AND quarter_course_class__instance.idquarter = quarter.idquarter" + 
+				      " AND quarter_course_class__instance.idcourse = course_coursenumber.idcourse" + 
+				      " AND course_coursenumber.idcoursenumber = coursenumber.idcoursenumber";
+				ps2 = conn.prepareStatement(sql2);
+				ps2.setInt(1, idsection_create);
+				rs2 = ps2.executeQuery();
+				rs2.next();
+				String quarter = rs2.getString("season") + " " + rs2.getString("year");
+				String title = rs2.getString("title");
+				String idcourse = rs2.getString("idcourse");
+				String courseno_create = rs2.getString("number");
+				while (rs2.next())
 				{
-					%>
-					<h3>Adding a <%=type%>:</h3>
-			
-					Days of Week:
-					<input type="checkbox" name="days" value="M">M
-					<input type="checkbox" name="days" value="Tu">Tu
-					<input type="checkbox" name="days" value="W">W
-					<input type="checkbox" name="days" value="Th">Th
-					<input type="checkbox" name="days" value="F">F
-					<input type="checkbox" name="days" value="Sa">Sa
-					<input type="checkbox" name="days" value="Su">Su
-			
-					<input type="hidden" name="action" value="insert">
-					<input type="hidden" name="type" value="<%=type%>">	
-					<%
+					courseno_create += " / ";
+					courseno_create += rs2.getString("number");
 				}
 			
-				else if (type != null && type.equals("review"))
-				{
-					%>
-					<h3>Adding a Review Session:</h3>		
-					<select name="month">
-						<option value="01">1</option>
-						<option value="02">2</option>
-						<option value="03">3</option>
-						<option value="04">4</option>
-						<option value="05">5</option>
-						<option value="06">6</option>
-						<option value="07">7</option>
-						<option value="08">8</option>
-						<option value="09">9</option>
-						<option value="10">10</option>
-						<option value="11">11</option>
-						<option value="12">12</option>
-					</select>
-					/	
-					<select name="day">
-						<option value="01">1</option>
-						<option value="02">2</option>
-						<option value="03">3</option>
-						<option value="04">4</option>
-						<option value="05">5</option>
-						<option value="06">6</option>
-						<option value="07">7</option>
-						<option value="08">8</option>
-						<option value="09">9</option>
-						<option value="10">10</option>
-						<option value="11">11</option>
-						<option value="12">12</option>
-						<option value="13">13</option>
-						<option value="14">14</option>
-						<option value="15">15</option>
-						<option value="16">16</option>
-						<option value="17">17</option>
-						<option value="18">18</option>
-						<option value="19">19</option>
-						<option value="20">20</option>
-						<option value="21">21</option>
-						<option value="22">22</option>
-						<option value="23">23</option>
-						<option value="24">24</option>
-						<option value="25">25</option>
-						<option value="26">26</option>
-						<option value="27">27</option>
-						<option value="28">28</option>
-						<option value="29">29</option>
-						<option value="30">30</option>
-						<option value="31">31</option>
-					</select>
-					/
-					<select name="year">
-						<option value="2015">2015</option>
-						<option value="2016">2016</option>
-						<option value="2017">2017</option>
-					</select>
-					
-					<input type="hidden" name="action" value="insert">
-					<input type="hidden" name="type" value="review">
-					<%
-				}	
+				
 				%>
-				Start Time:
-				<select name="starth">
+				
+				<h4>Course and Class Information</h4>
+				<ul>
+					<li>Course ID: <%=idcourse%></li>
+					<li>Course Number(s): <%=courseno_create%></li>
+					<li>Class ID: <%=idsection_create%></li>
+					<li>Title: <%=title%></li>
+					<li>Quarter: <%=quarter%></li>
+				</ul>
+				<%
+				if (action.equals("create"))
+				{
+				%>
+					<a href="subsection.jsp?idsection=<%=idsection_create%>&action=create_specific&type=lecture"><button>Add Lecture</button></a>
+					<a href="subsection.jsp?idsection=<%=idsection_create%>&action=create_specific&type=discussion"><button>Add Discussion</button></a>
+					<a href="subsection.jsp?idsection=<%=idsection_create%>&action=create_specific&type=review"><button>Add Review Session</button></a>
+				<%
+				}
+				else
+				{
+			String type = request.getParameter("type");
+			%>
+			<form action="subsection.jsp" method="POST">
+			<%
+		
+			if (type != null && (type.equals("lecture") || type.equals("discussion")))
+			{
+				%>
+				<h3>Adding a <%=type%>:</h3>
+		
+				Days of Week:
+				<input type="checkbox" name="days" value="M">M
+				<input type="checkbox" name="days" value="Tu">Tu
+				<input type="checkbox" name="days" value="W">W
+				<input type="checkbox" name="days" value="Th">Th
+				<input type="checkbox" name="days" value="F">F
+				<input type="checkbox" name="days" value="Sa">Sa
+				<input type="checkbox" name="days" value="Su">Su
+		
+				<input type="hidden" name="action" value="insert">
+				<input type="hidden" name="type" value="<%=type%>">	
+				<%
+			}
+		
+			else if (type != null && type.equals("review"))
+			{
+				%>
+				<h3>Adding a Review Session:</h3>		
+				<select name="month">
 					<option value="01">1</option>
 					<option value="02">2</option>
 					<option value="03">3</option>
@@ -699,83 +679,181 @@
 					<option value="09">9</option>
 					<option value="10">10</option>
 					<option value="11">11</option>
-					<option value="11">12</option>
+					<option value="12">12</option>
 				</select>
-				:
-				<select name="startm">
-					<option value="00">00</option>
-					<option value="10">10</option>
-					<option value="20">20</option>
-					<option value="30">30</option>
-					<option value="40">40</option>
-					<option value="50">50</option>
-				</select>
-				<select name="startmode">
-					<option value="am">AM</option>
-					<option value="pm">PM</option>
-				</select>
-				End Time:
-				<select name="endh">
-					<option value="01">01</option>
-					<option value="02">02</option>
-					<option value="03">03</option>
-					<option value="04">04</option>
-					<option value="05">05</option>
-					<option value="06">06</option>
-					<option value="07">07</option>
-					<option value="08">08</option>
-					<option value="09">09</option>
+				/	
+				<select name="day">
+					<option value="01">1</option>
+					<option value="02">2</option>
+					<option value="03">3</option>
+					<option value="04">4</option>
+					<option value="05">5</option>
+					<option value="06">6</option>
+					<option value="07">7</option>
+					<option value="08">8</option>
+					<option value="09">9</option>
 					<option value="10">10</option>
 					<option value="11">11</option>
 					<option value="12">12</option>
-				</select>
-				:
-				<select name="endm">
-					<option value="00">00</option>
-					<option value="10">10</option>
+					<option value="13">13</option>
+					<option value="14">14</option>
+					<option value="15">15</option>
+					<option value="16">16</option>
+					<option value="17">17</option>
+					<option value="18">18</option>
+					<option value="19">19</option>
 					<option value="20">20</option>
+					<option value="21">21</option>
+					<option value="22">22</option>
+					<option value="23">23</option>
+					<option value="24">24</option>
+					<option value="25">25</option>
+					<option value="26">26</option>
+					<option value="27">27</option>
+					<option value="28">28</option>
+					<option value="29">29</option>
 					<option value="30">30</option>
-					<option value="40">40</option>
-					<option value="50">50</option>
+					<option value="31">31</option>
 				</select>
-				<select name="endmode">
-					<option value="am">AM</option>
-					<option value="pm">PM</option>
+				/
+				<select>
+				<%
+				int year;
+				sql3 = "SELECT DISTINCT year FROM quarter ORDER BY year";
+				ps3 = conn.prepareStatement(sql3);
+				rs3 = ps3.executeQuery();
+				while (rs3.next())
+				{
+					year = rs3.getInt("year");
+				%>
+					<option value="<%=year%>"><%=year%></option>
+				<% 
+				}
+				%>
 				</select>
-			
-				<label for="building">Location:</label>
-				<input type="text" name="building">
-				<label for="room">Room:</label>
-				<input type="text" name="room">
+				<br><br>
 				<input type="hidden" name="action" value="insert">
-				<input type="submit">
-			</form>
-			<%
+				<input type="hidden" name="type" value="review">
+				<%
+			}	
+			%>
+			Start Time:
+			<select name="starth">
+				<option value="01">1</option>
+				<option value="02">2</option>
+				<option value="03">3</option>
+				<option value="04">4</option>
+				<option value="05">5</option>
+				<option value="06">6</option>
+				<option value="07">7</option>
+				<option value="08">8</option>
+				<option value="09">9</option>
+				<option value="10">10</option>
+				<option value="11">11</option>
+				<option value="11">12</option>
+			</select>
+			:
+			<select name="startm">
+				<option value="00">00</option>
+				<option value="10">10</option>
+				<option value="20">20</option>
+				<option value="30">30</option>
+				<option value="40">40</option>
+				<option value="50">50</option>
+			</select>
+			<select name="startmode">
+				<option value="am">AM</option>
+				<option value="pm">PM</option>
+			</select>
+			End Time:
+			<select name="endh">
+				<option value="01">01</option>
+				<option value="02">02</option>
+				<option value="03">03</option>
+				<option value="04">04</option>
+				<option value="05">05</option>
+				<option value="06">06</option>
+				<option value="07">07</option>
+				<option value="08">08</option>
+				<option value="09">09</option>
+				<option value="10">10</option>
+				<option value="11">11</option>
+				<option value="12">12</option>
+			</select>
+			:
+			<select name="endm">
+				<option value="00">00</option>
+				<option value="10">10</option>
+				<option value="20">20</option>
+				<option value="30">30</option>
+				<option value="40">40</option>
+				<option value="50">50</option>
+			</select>
+			<select name="endmode">
+				<option value="am">AM</option>
+				<option value="pm">PM</option>
+			</select>
+		
+			<label for="building">Location:</label>
+			<input type="text" name="building">
+			<label for="room">Room:</label>
+			<input type="text" name="room">
+			<input type="hidden" name="idsection" value="<%=idsection_create%>">
+			<input type="hidden" name="action" value="insert">
+			<input type="submit">
+		</form>
+		<%
+				
 		}
+			}
 		
 		else
 		{
 			%>
-			<form action="subsection.jsp" method="POST">
-				<input type="hidden" name="action" value="create">
-				<input type="hidden" name="type" value="lecture">
-				<input type="submit" value="Add Lecture">
-			</form>
-		
-			<form action="subsection.jsp" method="POST">
-				<input type="hidden" name="action" value="create">
-				<input type="hidden" name="type" value="discussion">
-				<input type="submit" value="Add Discussion">
-			</form>
-		
-			<form action="subsection.jsp" method="POST">
-				<input type="hidden" name="action" value="create">
-				<input type="hidden" name="type" value="review">
-				<input type="submit" value="Add Review Session">
-			</form>
+			<h3>Select section:</h3>
 			<%
+			
+			sql1 = "SELECT class.title, faculty_class_section.idclass, faculty_class_section.faculty_name, faculty_class_section.idsection FROM class, faculty_class_section"; 
+			ps1 = conn.prepareStatement(sql1);
+			rs1 = ps1.executeQuery();
+			
+			if (!(rs1.isBeforeFirst()))
+			{
+				%>
+				<h3>Cannot process request: No classes in database</h3>
+				<a href="class_entry_form.jsp"><button>Add Classes</button></a>
+				<%
+			}
+			else
+			{
+				%>
+				<form action="subsection.jsp" method="GET">
+				<select name="idsection"><%
+				int idclass;
+				int idsection_select;
+				String title;
+				String faculty;
+				while (rs1.next())
+				{
+					idclass = rs1.getInt("idclass");
+					idsection_select = rs1.getInt("idsection");
+					title = rs1.getString("title");
+					faculty = rs1.getString("faculty_name");
+					%>
+						<option value="<%=idsection_select%>">CID: <%=idclass%> - SID:<%=idsection_select%> - <%=title%> - <%=faculty%></option>
+					<%
+				}
+				%>
+				</select>
+				<input type="hidden" name="action" value="create">
+				<input type="submit">
+				</form>
+				<%
+			}
+			
 		}
-	}
+		}
+	
 		catch (SQLException e)
 			{
 				conn.rollback();
@@ -807,7 +885,7 @@
 					conn.close();
 				}
 			}
-	}
+	
 	%>
 </body>
 </html>
