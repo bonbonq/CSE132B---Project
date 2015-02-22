@@ -471,7 +471,6 @@ try{
 	<table>
 	  <tr>
 	  	<th>Student</th>
-	    <th>Section ID</th>
 	    <th>Units</th>
 	    <th>Grade Option Type</th>
 	    <th>Grade</th>

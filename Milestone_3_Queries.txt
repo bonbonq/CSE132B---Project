@@ -36,10 +36,10 @@ e. Assist a MS student in figuring out remaining degree requirements for a MS in
 		SELECT * FROM degree WHERE type="MS";
 	Generate result:
 		(Generate the student's courses taken)
-		SELECT * FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE  idstudent=?;
+		SELECT * FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber NATURAL JOIN grade_conversion WHERE idstudent=?;
 
 		(Generate the concentration's requirements)
-		SELECT * FROM concentration NATURAL JOIN concentration_course NATURAL JOIN course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE iddegree=?
+		SELECT * FROM concentration NATURAL JOIN concentration_course NATURAL JOIN course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber;
 
 REPORT 2
 a. Assist a student X in producing his class schedule:

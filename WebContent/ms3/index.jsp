@@ -12,7 +12,7 @@
 <h2><a href='class_roster.jsp'>Class Roster x</a></h2>
 <h2><a href='student_grade_report.jsp'>Student's Grade Report x</a></h2>
 <h2><a href='bs_remaining_req.jsp'>BS Remaining Requirements x</a></h2>
-<h2><a href='ms_remaining_req.jsp'>MS Remaining Requirements</a></h2>
+<h2><a href='ms_remaining_req.jsp'>MS Remaining Requirements x</a></h2>
 <h2><a href='student_schedule.jsp'>Student's Class Scheduler</a></h2>
 <h2><a href='prof_review_scheduler'>Prof's Current Class</a></h2>
 <h2><a href='high_grade.jsp'>High Grade Report</a></h2>
