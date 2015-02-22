@@ -32,17 +32,14 @@ d. Assist an undergraduate student X in figuring out remaining degree requiremen
 		
 e. Assist a MS student in figuring out remaining degree requirements for a MS in Y:
 	Generate form fields:
-		SELECT * FROM ms NATURAL JOIN student NATURAL JOIN student_quarter__attends WHERE idquarter=2 AND ms.idstudent=student.idstudent AND student_quarter__attends.idstudent=student.idstudent AND student.idstudent=?;
+		SELECT * FROM ms NATURAL JOIN student NATURAL JOIN student_quarter__attends WHERE idquarter=2 AND ms.idstudent=student.idstudent AND student_quarter__attends.idstudent=student.idstudent;
 		SELECT * FROM degree WHERE type="MS";
 	Generate result:
 		(Generate the student's courses taken)
 		SELECT * FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE  idstudent=?;
 
-		(Generate the degree's requirements)
-		SELECT * FROM degree WHERE iddegree=?;
-		SELECT * FROM lower_division WHERE iddegree=?;
-		SELECT * FROM upper_division WHERE iddegree=?;
-		SELECT * FROM concentration NATURAL JOIN concentraion_course WHERE iddegree=?;
+		(Generate the concentration's requirements)
+		SELECT * FROM concentration NATURAL JOIN concentration_course NATURAL JOIN course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE iddegree=?
 
 REPORT 2
 a. Assist a student X in producing his class schedule:

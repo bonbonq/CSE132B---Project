@@ -121,7 +121,8 @@ CREATE TABLE minimum_gpa (
 CREATE TABLE concentration (
   idconcentration SERIAL PRIMARY KEY,
   iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE ON UPDATE CASCADE,
-  gpa double precision NOT NULL
+  gpa double precision NOT NULL,
+  name text NOT NULL UNIQUE
   );
 
 
