@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-            <%@ page import="java.sql.*"%>
+<%@ page import="java.sql.*"%>
 <%@ page import="java.util.*"%>
 <%@ page import="java.io.*"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -28,6 +28,10 @@ String sql4 = null;
 
 
 %>
+<a href="index.jsp"><button>Home</button></a>
+<a href="faculty_entry_form.jsp"><button>Add Faculty</button></a>
+<a href="faculty_entry_form.jsp?action=view"><button>View All Faculty</button></a>
+
 <h2>Faculty Entry Form</h2>
 <%
 	try
