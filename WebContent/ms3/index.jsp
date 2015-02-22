@@ -14,7 +14,7 @@
 <h2><a href='bs_remaining_req.jsp'>BS Remaining Requirements x</a></h2>
 <h2><a href='ms_remaining_req.jsp'>MS Remaining Requirements x</a></h2>
 <h2><a href='student_schedule.jsp'>Student's Class Scheduler</a></h2>
-<h2><a href='prof_review_scheduler'>Prof's Current Class</a></h2>
+<h2><a href='prof_review_scheduler.jsp'>Prof's Current Class</a></h2>
 <h2><a href='high_grade.jsp'>High Grade Report</a></h2>
 </body>
 </html>

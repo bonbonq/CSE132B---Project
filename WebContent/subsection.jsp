@@ -80,15 +80,15 @@
 				<%
 				int sid, wid;
 				String dow, b, rn, t;
-				java.sql.Timestamp st1, et1, st2, et2;
+				java.sql.Time st1, et1, st2, et2;
 				java.sql.Date d;
 				while (rs1.next())
 				{
 					sid = rs1.getInt("idsection");
 					wid = rs1.getInt("idweekly");
 					dow = rs1.getString("day_of_week");
-					st1 = rs1.getTimestamp("start_time");
-					et1 = rs1.getTimestamp("end_time");
+					st1 = rs1.getTime("start_time");
+					et1 = rs1.getTime("end_time");
 					b = rs1.getString("building");
 					rn = rs1.getString("room");
 					t = rs1.getString("type");
@@ -143,8 +143,8 @@
 					sid = rs2.getInt("idsection");
 					wid = rs2.getInt("idreviewsession");
 					d = rs2.getDate("time");
-					st2 = rs2.getTimestamp("start_time");
-					et2 = rs2.getTimestamp("end_time");
+					st2 = rs2.getTime("start_time");
+					et2 = rs2.getTime("end_time");
 					b = rs2.getString("building");
 					rn = rs2.getString("room");
 					t = "review session";
@@ -403,16 +403,19 @@
 				java.sql.Timestamp startTime = java.sql.Timestamp.valueOf(dummyDate + " " + startTimeString);
 				java.sql.Timestamp endTime = java.sql.Timestamp.valueOf(dummyDate + " " + endTimeString);
 				String [] days = request.getParameterValues("days");
+				
 				int dayslength = days.length;
 				dayType = "Days of Week";
 				for (int i = 0; i < dayslength; i++)
+				{
 					dayString += days[i];
+				}
 			
 				sql1 = "UPDATE weekly SET building = ?, room = ?, day_of_week = ?, start_time = ?, end_time = ?, type = ? WHERE idweekly = ?";
 				ps1 = conn.prepareStatement(sql1);
 				ps1.setString(1, building);
 				ps1.setString(2, room);
-				ps1.setDate(3, dummyDateObj);
+				ps1.setString(3, dayString);
 				ps1.setTimestamp(4, startTime);
 				ps1.setTimestamp(5, endTime);
 				ps1.setString(6, type);
@@ -530,8 +533,8 @@
 				{
 					String dummyDate = "2014-01-01";
 					java.sql.Date dummyDateObj = java.sql.Date.valueOf(dummyDate);
-					java.sql.Timestamp startTime = java.sql.Timestamp.valueOf(dummyDate + " " + startTimeString);
-					java.sql.Timestamp endTime = java.sql.Timestamp.valueOf(dummyDate + " " + endTimeString);
+					java.sql.Time startTime = java.sql.Time.valueOf(startTimeString);
+					java.sql.Time endTime = java.sql.Time.valueOf(endTimeString);
 					String [] days = request.getParameterValues("days");
 					int dayslength = days.length;
 					dayType = "Days of Week";
@@ -542,9 +545,9 @@
 					ps1 = conn.prepareStatement(sql1);
 					ps1.setString(1, building);
 					ps1.setString(2, room);
-					ps1.setDate(3, dummyDateObj);
-					ps1.setTimestamp(4, startTime);
-					ps1.setTimestamp(5, endTime);
+					ps1.setString(3, dayString);
+					ps1.setTime(4, startTime);
+					ps1.setTime(5, endTime);
 					ps1.setString(6, type);
 					ps1.execute();
 					rs1 = ps1.getResultSet();

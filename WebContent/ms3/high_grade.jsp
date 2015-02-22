@@ -90,7 +90,7 @@ try
 		
 		sql5 = "SELECT AVG(number_grade) AS gpa FROM grade_conversion, quarter NATURAL JOIN quarter_course_class__instance NATURAL JOIN faculty_instance_hastaught NATURAL JOIN student_instance" + 
 			 addition +
-			" AND LETTER_GRADE = grade" + 
+			" AND grade_conversion.grade = student_instance.grade" + 
 			" GROUP BY number_grade";
 		ps5 = conn.prepareStatement(sql5);
 		
