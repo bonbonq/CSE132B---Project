@@ -247,7 +247,7 @@ try
 			{
 				%>
 				<h3>No quarters found in database</h3>
-				<form action="quarter_entry_form" method="POST">
+				<form action="quarter_entry_form.jsp" method="POST">
 					<input type="submit" value="Add Quarters">
 				</form>
 				<%
@@ -324,6 +324,16 @@ try
 	{
 		ps1 = conn.prepareStatement("SELECT name FROM department");
 		rs1 = ps1.executeQuery();
+		if (!(rs1.isBeforeFirst()))
+		{
+			%>
+			<h3>Error: Cannot Process request</h3>
+			<h4>No departments exist</h4>
+			<a href="department.jsp"><button>Add Departments</button></a>
+			<%
+		}
+		else
+		{
 		%>
 			<form action="class_entry_form.jsp" method="GET"><br>
 		
@@ -346,6 +356,7 @@ try
 		</form>
 		
 		<%
+		}
 	}
 }
 

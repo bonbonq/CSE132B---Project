@@ -10,45 +10,29 @@
 <title>Insert title here</title>
 </head>
 <body>
-
+<h2>Class Entry Form</h2>
+<a href="index.jsp"><button>Home</button></a>
+<a href="section.jsp"><button>Add Sections</button></a>
+<a href="section.jsp?action=view"><button>View All Sections</button></a>
 <%
-	
-	session.removeAttribute("idsection");
-	String sessionok = (String) session.getAttribute("sessionok");
-	sessionok = "okay";
-	if (sessionok == null || !(sessionok.equals("okay")))
-	{
-		%>
-		<h2>ERROR: Session expired or no valid section chosen. Please return to home page and try again.</h2>
-		<form action="index.jsp" method="POST">
-			<input type="submit" value="Return to home page">
-		</form>
-		<%
-	}
-	String dept = (String) session.getAttribute("dept");
-	String courseno = (String) session.getAttribute("courseno");
-	String quarter = (String) session.getAttribute("quarter");
-	Integer year = (Integer) session.getAttribute("year");
-	Integer idclass = (Integer) session.getAttribute("idclass");
-	Integer idinstance = (Integer) session.getAttribute("idinstance");
+
+
 	%>
 	<h2>Section Add Form</h2>
-	<h3>Department:<%=dept%></h3>
-	<h3>Class ID: <%=idclass%></h3>
-	<h3>Course Number: <%=courseno%></h3>
-	<h3>Quarter: <%=quarter%></h3>
-	<h3>Year: <%=year%></h3>
 	<%
 	
 	Connection conn = null;
+	PreparedStatement ps0 = null;
 	PreparedStatement ps1 = null;
 	PreparedStatement ps2 = null;
 	PreparedStatement ps3 = null;
 	PreparedStatement ps4 = null;
+	ResultSet rs0 = null;
 	ResultSet rs1 = null;
 	ResultSet rs2 = null;
 	ResultSet rs3 = null;
 	ResultSet rs4 = null;
+	String sql0 = null;
 	String sql1 = null;
 	String sql2 = null;
 	String sql3 = null;
@@ -63,16 +47,27 @@
 		String action = request.getParameter("action");
 		if (action != null && action.equals("view"))
 		{
-			sql1 = "SELECT section.idsection, enrollment_limit, faculty_class_section.faculty_name, class.idclass, number, class.title, name, season, year " + 
-					" FROM section, faculty, department, class, quarter_course_class__instance, course_coursenumber, quarter, department_course, coursenumber, faculty_class_section" + 
+			
+			String success = (String) session.getAttribute("success");
+			Integer idsection_view = (Integer) session.getAttribute("idsection");
+			
+			//flag 1
+			if (success != null)
+			{
+				%>
+				<h3><%=success%> of section ID <%=idsection_view%> was successful!</h3>
+				<%
+			}
+			
+			session.removeAttribute("success");
+			session.removeAttribute("idsection");
+			
+			sql1 = "SELECT faculty_class_section.idsection, enrollment_limit, faculty_class_section.faculty_name, class.idclass, class.title, season, year " + 
+					" FROM section, class, quarter_course_class__instance, quarter, faculty_class_section" + 
 					" WHERE class.idclass = quarter_course_class__instance.idclass" +
-					" AND section.idsection = faculty_class_section.idsection" + 
 					" AND faculty_class_section.idclass = quarter_course_class__instance.idclass" + 
-					" AND department.iddepartment = department_course.iddepartment" +
-					" AND department_course.idcourse = course_coursenumber.idcourse" +
 					" AND quarter_course_class__instance.idquarter = quarter.idquarter" +
-					" AND quarter_course_class__instance.idcourse = course_coursenumber.idcourse" +
-					" AND course_coursenumber.idcoursenumber = coursenumber.idcoursenumber";
+					" AND section.idsection = faculty_class_section.idsection";
 			ps1 = conn.prepareStatement(sql1);
 			rs1 = ps1.executeQuery();
 			%>
@@ -82,7 +77,6 @@
 					<th>Class ID</th>
 					<th>Course Number</th>
 					<th>Course Title</th>
-					<th>Department</th>
 					<th>Instructor</th>
 					<th>Enrollment Limit</th>
 					<th>Quarter</th>
@@ -90,18 +84,36 @@
 				</tr>
 			<%
 			int sid, cid, el;
-			String cno, ct, dep, q, y, i;
+			String cno, ct, i, q, y;
 			while (rs1.next())
 			{
 				sid = rs1.getInt("idsection");
 				cid = rs1.getInt("idclass");
-				cno = rs1.getString("number");
+				sql2 = "SELECT number FROM quarter_course_class__instance, course_coursenumber, coursenumber" +
+				           " WHERE course_coursenumber.idcoursenumber = coursenumber.idcoursenumber" + 
+				           " AND quarter_course_class__instance.idclass = ?" + 
+				           " AND quarter_course_class__instance.idcourse = course_coursenumber.idcourse";
+				ps2 = conn.prepareStatement(sql2);
+				ps2.setInt(1, cid);
+				rs2 = ps2.executeQuery();
+				rs2.next();
+				cno = rs2.getString("number");
+				while (rs2.next())
+				{
+					cno += "/";
+					cno += rs2.getString("number");
+				}
+				
+				ps2.close();
+				rs2.close();
+				
 				ct = rs1.getString("title");
-				dep = rs1.getString("name");
+				i = rs1.getString("faculty_name");
+				el = rs1.getInt("enrollment_limit");
 				q = rs1.getString("season");
 				y = rs1.getString("year");
-				el = rs1.getInt("enrollment_limit");
-				i = rs1.getString("faculty_name");
+				
+				
 			%>
 				
 				<tr>
@@ -109,7 +121,6 @@
 					<td><%=cid%></td>
 					<td><%=cno%></td>
 					<td><%=ct%></td>
-					<td><%=dep%></td>
 					<td><%=i%></td>
 					<td><%=el%></td>
 					<td><%=q%></td>
@@ -125,7 +136,6 @@
 					<form action="section.jsp" method="POST">
 						<input type="hidden" name="action" value="updatepre">
 						<input type="hidden" name="idsection" value="<%=sid%>">
-						<input type="hidden" name="department" value="<%=dep%>">
 						<input type="submit" value="Update">
 					</form>
 				</td>
@@ -144,52 +154,42 @@
 			ps1.setInt(1, idsection);
 			ps1.executeUpdate();
 			conn.commit();
+			session.setAttribute("success", "Delete");
+			session.setAttribute("idsection", idsection);
 			response.sendRedirect("section.jsp?action=view");
 		}
 		else if (action != null && action.equals("insert"))
 		{
 			int enrollmentLimit = Integer.parseInt(request.getParameter("enrollment"));
+			int idclass_insert = Integer.parseInt(request.getParameter("idclass"));
+			int idinstance_insert = Integer.parseInt(request.getParameter("idinstance"));
+			
 			sql1 = "INSERT INTO section (enrollment_limit) VALUES (?) RETURNING idsection";
 			ps1 = conn.prepareStatement(sql1);
 			ps1.setInt(1, enrollmentLimit);
 			ps1.execute();
 			rs1 = ps1.getResultSet();
+			
 			rs1.next();
 			int idsection = rs1.getInt("idsection");
 			String faculty = request.getParameter("faculty");
+			
 			sql2 = "INSERT INTO faculty_class_section (faculty_name, idclass, idsection) VALUES (?, ?, ?)";
 			ps2 = conn.prepareStatement(sql2);
 			ps2.setString(1, faculty);
-			ps2.setInt(2, idclass);
+			ps2.setInt(2, idclass_insert);
 			ps2.setInt(3, idsection);
 			ps2.executeUpdate();
 			
 			sql3 = "INSERT INTO instance_section (idinstance, idsection) VALUES (?, ?)";
 			ps3 = conn.prepareStatement(sql3);
-			ps3.setInt(1, idinstance);
+			ps3.setInt(1, idinstance_insert);
 			ps3.setInt(2, idsection);
 			ps3.executeUpdate();
 			conn.commit();
+			session.setAttribute("success", "Insert");
 			session.setAttribute("idsection", idsection);
-			%>
-			<h3>Successfully added section</h3>
-			<h3>Summary:</h3>
-			<h4>Department: <%=dept%></h4>
-			<h4>Course Number: <%=courseno%></h4>
-			<h4>Class ID: <%=idclass%></h4>
-			<h4>Section ID: <%=idsection%></h4>
-			<h4>Teaching Faculty: <%=faculty%></h4>
-			<h4>Enrollment Limit: <%=enrollmentLimit%></h4>
-			<form action="subsection.jsp" method="POST">
-				<input type="submit" value="Add lecture/discussion/review">
-			</form>
-			<form action="section.jsp" method="POST">
-				<input type="submit" value="Add a new section">
-			</form>
-			<form action="class_entry_form.jsp" method="POST">
-				<input type="submit" value="Add a new class">
-			</form>
-			<%
+			response.sendRedirect("section.jsp?action=view");
 		}
 		else if (action != null && action.equals("update"))
 		{
@@ -208,6 +208,9 @@
 			ps2.setInt(2, idsection);
 			ps2.executeUpdate();
 			conn.commit();
+			
+			session.setAttribute("success", "Update");
+			session.setAttribute("idsection", idsection);
 			response.sendRedirect("section.jsp?action=view");
 		}
 		
@@ -240,33 +243,131 @@
 		}
 		
 		
-		else
+		else if (action != null && action.equals("create"))
 		{
+			int idclass_create = Integer.parseInt(request.getParameter("idclass"));
+		
+			sql2 = "SELECT * FROM quarter_course_class__instance, class, quarter, course_coursenumber, coursenumber" +
+			      " WHERE quarter.idquarter = quarter_course_class__instance.idquarter" + 
+			      " AND quarter_course_class__instance.idclass = class.idclass" + 
+			      " AND class.idclass = ?" +
+			      " AND quarter_course_class__instance.idcourse = course_coursenumber.idcourse" +
+			      " AND course_coursenumber.idcoursenumber = coursenumber.idcoursenumber";
+			ps2 = conn.prepareStatement(sql2);
+			ps2.setInt(1, idclass_create);
+			rs2 = ps2.executeQuery();
+			rs2.next();
+			String quarter = rs2.getString("season") + " " + rs2.getString("year");
+			String title = rs2.getString("title");
+			String idcourse = rs2.getString("idcourse");
+			String courseno = rs2.getString("number");
+			while (rs2.next())
+			{
+				courseno += " / ";
+				courseno += rs2.getString("number");
+			}
+		
+			
+			%>
+			
+			<h4>Course and Class Information</h4>
+			<ul>
+				<li>Course ID: <%=idcourse%></li>
+				<li>Course Number(s): <%=courseno%></li>
+				<li>Class ID: <%=idclass_create%></li>
+				<li>Title: <%=title%></li>
+				<li>Quarter: <%=quarter%></li>
+			</ul>
+			<%
+			String name = "";
 			sql1 = "SELECT faculty_name FROM faculty";
 			ps1 = conn.prepareStatement(sql1);
 			rs1 = ps1.executeQuery();
+			
+			if (!(rs1.isBeforeFirst()))
+			{
+				%>
+				<h3>Error: Cannot Process Request</h3>
+				<h4>No Faculty Members Exist in Database</h4>
+				<a href="faculty_entry_form.jsp"><button>Add Faculty Members</button></a>
+				
+				<%
+			}
+			else
+			{
 			%>
 			<form action="section.jsp" method="POST">
 				<label for="faculty">Teaching Faculty:</label>
 				<select name="faculty">
 			<%
-			String name = "";
 			while (rs1.next())
 			{
 				name = rs1.getString("faculty_name");
 					%><option value="<%=name%>"><%=name%></option><%
 			}
 			%>
-				</select>
+			</select>
+			<%
+			sql3 = "SELECT idinstance FROM quarter_course_class__instance WHERE idclass = ?";
+			ps3 = conn.prepareStatement(sql3);
+			ps3.setInt(1, idclass_create);
+			rs3 = ps3.executeQuery();
+			rs3.next();
+			int idinstance_create = rs3.getInt("idinstance");
+			%>
+				
 				<label for="enrollment">Enrollment Limit</label>
 				<input type="text" name="enrollment">
 				<input type="hidden" name="action" value="insert">
+				<input type="hidden" name="idclass" value="<%=idclass_create%>">
+				<input type="hidden" name="idinstance" value="<%=idinstance_create%>">
+				<input type="hidden" name="quarter" value="<%=quarter%>">
+				<input type="hidden" name="idcourse" value="<%=idcourse%>">
+				<input type="hidden" name="courseno" value="<%=courseno%>">
+				<input type="hidden" name="title" value="<%=title%>">
+				
 				<input type="submit">
 			</form>
 			<%
 		}
+		}
+		else
+		{
+			sql0 = "SELECT * FROM class"; 
+			ps0 = conn.prepareStatement(sql0);
+			rs0 = ps0.executeQuery();
+			
+			if (!(rs0.isBeforeFirst()))
+			{
+				%>
+				<h3>Cannot process request: No classes in database</h3>
+				<a href="class_entry_form.jsp"><button>Add Classes</button></a>
+				<%
+			}
+			else
+			{
+				%>
+				<form action="section.jsp" method="GET">
+				<select name="idclass"><%
+				int idclass;
+				String title;
+				while (rs0.next())
+				{
+					idclass = rs0.getInt("idclass");
+					title = rs0.getString("title");
+					%>
+						<option value="<%=idclass%>"><%=idclass%> - <%=title%></option>
+					<%
+				}
+				%>
+				</select>
+				<input type="hidden" name="action" value="create">
+				<input type="submit">
+				</form>
+				<%
+			}
+		}
 	}
-	
 	
 	catch (SQLException e)
 	{
