@@ -322,6 +322,11 @@ INSERT INTO quarter (year, season) VALUES(2016, 'Spring');
 INSERT INTO quarter (year, season) VALUES(2016, 'Summer');
 INSERT INTO quarter (year, season) VALUES(2016, 'Fall');
 
+INSERT INTO quarter (year, season) VALUES(2008, 'Winter');
+INSERT INTO quarter (year, season) VALUES(2008, 'Spring');
+INSERT INTO quarter (year, season) VALUES(2008, 'Summer');
+INSERT INTO quarter (year, season) VALUES(2008, 'Fall');
+
 
 -- -----------------------------------------------------
 -- Table CSE132B.student_quarter__attends
