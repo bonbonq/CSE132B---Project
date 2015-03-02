@@ -45,7 +45,7 @@ try
 	conn = DriverManager.getConnection("jdbc:postgresql://localhost/CSE132B");
 	conn.setAutoCommit(false);
 	
-	sql0 = "SELECT ss_num, first_name, middle_name, last_name FROM student";
+	sql0 = "SELECT ss_num, first_name, middle_name, last_name FROM student WHERE idstudent IN (SELECT idstudent FROM student_section__enrolled)";
 	ps0 = conn.prepareStatement(sql0);
 	rs0 = ps0.executeQuery();
 	String student_info;
@@ -70,8 +70,8 @@ try
 	//After submitting a student's information
 	if (action != null && action.equals("list"))
 	{
-		String current_season = "Winter";
-		int current_year = 2015;
+		String current_season = "Spring";
+		int current_year = 2009;
 		String ss_num = request.getParameter("ss_num");
 
 		sql1 = "SELECT idstudent FROM student WHERE ss_num = ?";
@@ -117,8 +117,8 @@ try
 			s_minutes = Integer.parseInt(rs2.getTime("start_time").toString().substring(3,5));
 			s_minutes = s_minutes + (s_hours * 60);
 		
-			e_hours = Integer.parseInt(rs2.getTime("start_time").toString().substring(0,2));
-			e_minutes = Integer.parseInt(rs2.getTime("start_time").toString().substring(3,5));
+			e_hours = Integer.parseInt(rs2.getTime("end_time").toString().substring(0,2));
+			e_minutes = Integer.parseInt(rs2.getTime("end_time").toString().substring(3,5));
 			e_minutes = e_minutes + (e_hours * 60);
 		
 			for (int i = 0; i < 7; i++)
@@ -136,6 +136,8 @@ try
 		//Sort start and end times to synchronize by index
 		Collections.sort(start_times);
 		Collections.sort(end_times);
+		for (int i = 0; i < start_times.size(); i++)
+			System.out.println(start_times.get(i));
 		
 		//Generate arrays for binary search of conflicts
 		Integer [] start_times_array = new Integer[start_times.size()];
@@ -160,6 +162,7 @@ try
 		//Sequential search through each class and section of the current quarter (with optimization)
 		while (rs3.next())
 		{
+			System.out.println("each class");
 			if (!first)
 			{
 				idclass_prev = idclass;
@@ -176,7 +179,7 @@ try
 				if (idclass_prev != idclass && class_skip == false)
 				{
 					System.out.println("4");
-					sql4 = "SELECT idcourse, idclass, title" +
+					sql4 = "SELECT idcourse, class.idclass, title" +
 							" FROM quarter_course_class__instance, class" +
 							" WHERE quarter_course_class__instance.idclass = ?" + 
 							" AND quarter_course_class__instance.idclass = class.idclass";
@@ -200,7 +203,7 @@ try
 					else
 					{
 						System.out.println("4.5");
-						sql4 = "SELECT idcourse, idclass, title" +
+						sql4 = "SELECT idcourse, class.idclass, title" +
 								" FROM quarter_course_class__instance, class" +
 								" WHERE quarter_course_class__instance.idclass = ?" + 
 								" AND quarter_course_class__instance.idclass = class.idclass";
@@ -229,8 +232,9 @@ try
 			
 			int start_index, end_index, middle_index;
 			
-			for (int i = 0; i < 7 || section_skip == true; i++)
+			for (int i = 0; i < 7 && section_skip == false; i++)
 			{
+				System.out.println("testing days");
 				if (day_string.indexOf(days[i]) != -1)
 				{
 					s_minutes = s_minutes + (3600 * i);
@@ -241,7 +245,8 @@ try
 					middle_index = start_index;
 					while (start_index < end_index)
 					{
-						middle_index = (end_index - start_index) / 2;
+						System.out.println(start_index + "" + end_index);
+						middle_index = start_index + (end_index - start_index) / 2;
 						if (start_times_array[middle_index] > s_minutes)
 						{
 							end_index = middle_index - 1;
@@ -255,8 +260,8 @@ try
 							if (s_minutes < end_times_array[middle_index])
 							{
 								section_skip = true;
-								break;
 							}
+							break;
 						}
 					}
 					if (section_skip != true)
@@ -287,6 +292,7 @@ try
 					}
 				}		
 			}
+			first = false;
 		}
 	}
 }
