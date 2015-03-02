@@ -88,10 +88,6 @@ try
 			ps1 = conn.prepareStatement(sql1);
 			ps1.setInt(1, idsection);
 			rs1 = ps1.executeQuery();
-			if (!(rs1.isBeforeFirst()))
-			{
-				throw new SQLException("Invalid section number given");	
-			}
 	
 			while(rs1.next())
 			{
@@ -133,10 +129,6 @@ try
 			ps2 = conn.prepareStatement(sql2);
 			ps2.setInt(1, idsection);
 			rs2 = ps2.executeQuery();
-			if (!(rs2.isBeforeFirst()))
-			{
-				throw new SQLException("Invalid section number given");	
-			}
 			
 			while(rs2.next())
 			{
@@ -172,7 +164,9 @@ try
 	}
 	else
 	{
-		sql1 = "SELECT class.title, faculty_class_section.idclass, faculty_class_section.faculty_name, faculty_class_section.idsection FROM class, faculty_class_section"; 
+		sql1 = "SELECT class.title, faculty_class_section.idclass, faculty_class_section.faculty_name, faculty_class_section.idsection " +
+				" FROM class, faculty_class_section" + 
+		" WHERE class.idclass = faculty_class_section.idclass";
 		ps1 = conn.prepareStatement(sql1);
 		rs1 = ps1.executeQuery();	
 	}
@@ -182,6 +176,7 @@ try
 </head>
 
 <body>
+<a href="index.jsp"><button>Home</button></a>
 <h2>Review Session Scheduler</h2>
 <% 
 if (action != null && action.equals("list"))
@@ -200,19 +195,19 @@ if (action != null && action.equals("list"))
 	<ul>
 	<%
 	int h = sday_int;
-	int g = smonth_int;
+	int g = smonth_int - 1;
 	boolean done = false;
 	while (done == false)
 	{
 		for (int i = 0; i < 5 && done == false; i++, h++)
 		{
-			if (h > month_days[g - 1])
+			if (h > month_days[g])
 			{
 				h = 1;
 				g = (g + 1) % 12;
 			}
 			
-			if (g == emonth_int && h >= eday_int)
+			if (g == emonth_int - 1 && h >= eday_int)
 				done = true;
 			
 			for (int j = 8; j < 20; j++)
@@ -226,9 +221,9 @@ if (action != null && action.equals("list"))
 			}	
 		}
 		h += 2;
-		if (h > month_days[g - 1])
+		if (h > month_days[g])
 		{
-			h = h % (month_days[g - 1]);
+			h = h % (month_days[g]);
 			g = (g + 1) % 12;
 		}
 	}
