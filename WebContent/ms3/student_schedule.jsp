@@ -10,6 +10,7 @@
 <title>Student Schedule</title>
 <%
 
+//SQL declarations
 Connection conn = null;
 
 String sql0 = null;
@@ -32,9 +33,11 @@ String sql4 = null;
 PreparedStatement ps4 = null;
 ResultSet rs4 = null;
 
-String action = request.getParameter("action");
+//Data structures for storing queries
 HashMap<String,String> ssn_info = new HashMap<String,String>();
 HashSet<String> class_print = new HashSet<String>();
+
+String action = request.getParameter("action");
 
 try
 {
@@ -49,6 +52,7 @@ try
 	String middle_name;
 	String blank2;
 	
+	//Some students don't have middle names: NULL values in database
 	while (rs0.next())
 	{
 		middle_name = rs0.getString("middle_name");
@@ -63,6 +67,7 @@ try
 		ssn_info.put(rs0.getString("ss_num"), student_info);
 	}
 	
+	//After submitting a student's information
 	if (action != null && action.equals("list"))
 	{
 		String current_season = "Winter";
