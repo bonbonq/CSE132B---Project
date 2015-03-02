@@ -36,10 +36,14 @@ try
 	
 	String idsection_string = request.getParameter("idsection");
 	int idsection;
-	HashSet<String> [] days = null;
+	HashSet<Integer> [] days = null;
 	String [] dayHashValues = {"M", "Tu", "W", "Th", "F"};
 	String [] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-	String [] hours = {"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"};
+	
+	int [] hours = new int[24];
+	for (int i = 0; i < 24; i++)
+		hours[i] = i;
+	//String [] hours = {"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"};
 	int [] month_days = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 	
 	if (action != null && action.equals("list"))
@@ -71,7 +75,7 @@ try
 			String end_hour; 
 			
 			for (int i = 0; i < 5; i++)
-				days[i] = new HashSet<String>();
+				days[i] = new HashSet<Integer>();
 			
 			String dayString;
 			java.sql.Time startTime;
@@ -79,7 +83,8 @@ try
 				
 			sql1 = "SELECT day_of_week, start_time, end_time" +
 				   " FROM section_weekly, weekly " +
-			       " WHERE section_weekly.idsection = ?";
+			       " WHERE section_weekly.idsection = ?" +
+				   " AND section_weekly.idweekly = weekly.idweekly";
 			ps1 = conn.prepareStatement(sql1);
 			ps1.setInt(1, idsection);
 			rs1 = ps1.executeQuery();
@@ -103,19 +108,31 @@ try
 						end_string = endTime.toString();
 					
 						start_hour = start_string.substring(0, 2);
-						end_hour = start_string.substring(0, 2);
+						end_hour = end_string.substring(0, 2);
 						
-						days[i].add(dayHashValues[i]);
+						int start_hour_int = Integer.parseInt(start_hour);
+						int end_hour_int = Integer.parseInt(end_hour);
+						if (end_hour_int < start_hour_int)
+							end_hour_int += 24;
+						int diff = end_hour_int - start_hour_int;
+						System.out.println(end_hour_int + " END HOUR " + start_hour_int + " START HOUR");
+						for (int j = 0; j < diff; j++)
+						{
+							days[i].add((start_hour_int + j) % 24);
+						}
 					}
 				}
 			}
 			
-			sql2 = "SELECT day_of_week, start_time, end_time" +
-					   " FROM section_weekly, weekly " +
-				       " WHERE section_weekly.idsection = ?";
-			ps2 = conn.prepareStatement(sql1);
+			sql2 = "SELECT day_of_week, start_time, end_time" + 
+			" FROM student_section__enrolled, section_weekly, weekly" + 
+			" WHERE student_section__enrolled.idstudent IN " + 
+					"(SELECT idstudent FROM student_section__enrolled WHERE idsection = ?)" +
+			" AND student_section__enrolled.idsection = section_weekly.idsection" + 
+					" AND section_weekly.idweekly = weekly.idweekly";
+			ps2 = conn.prepareStatement(sql2);
 			ps2.setInt(1, idsection);
-			rs2 = ps1.executeQuery();
+			rs2 = ps2.executeQuery();
 			if (!(rs2.isBeforeFirst()))
 			{
 				throw new SQLException("Invalid section number given");	
@@ -124,6 +141,7 @@ try
 			while(rs2.next())
 			{
 				dayString = rs2.getString("day_of_week");
+				System.out.println(dayString);
 				for (int i = 0; i < 5; i++)
 				{
 					index = dayString.indexOf(dayHashValues[i]);
@@ -134,14 +152,23 @@ try
 					
 						start_string = startTime.toString();
 						end_string = endTime.toString();
-						
+					
 						start_hour = start_string.substring(0, 2);
-						end_hour = start_string.substring(0, 2);
-							
-						days[i].add(dayHashValues[i]);
+						end_hour = end_string.substring(0, 2);
+						
+						int start_hour_int = Integer.parseInt(start_hour);
+						int end_hour_int = Integer.parseInt(end_hour);
+						if (end_hour_int < start_hour_int)
+							end_hour_int += 24;
+						int diff = end_hour_int - start_hour_int;
+						
+						for (int j = 0; j <= diff; j++)
+						{
+							days[i].add((start_hour_int + j) % 24);
+						}
 					}
 				}
-			}			
+			}
 	}
 	else
 	{
@@ -158,7 +185,12 @@ try
 <h2>Review Session Scheduler</h2>
 <% 
 if (action != null && action.equals("list"))
-{
+{/*
+	for (int yo = 0; yo < 5; yo++)
+	{
+		for (int jo = 0; jo < 24; jo++)
+			System.out.println(days[yo].contains(jo));
+	}*/
 	idsection = Integer.parseInt(idsection_string);
 	int smonth_int = Integer.parseInt(smonth);
 	int emonth_int = Integer.parseInt(emonth);
