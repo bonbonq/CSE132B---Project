@@ -51,7 +51,7 @@ try
 	
 	for (int i = 0; i < 4; i++)
 	{
-		if (hiddens[i] != null)
+		if (hiddens[i] != null && !(hiddens[i].equals("None")))
 			filters += "1";	
 		else
 			filters += "0";
@@ -61,6 +61,14 @@ try
 
 	if (action != null && action.equals("display"))
 	{
+		if (filters.indexOf("1") == -1)
+		{
+			%>
+			<h3>Error: Please provide at least one filter</h3>
+			<%
+		}
+		else
+		{
 		//Create SQL statement based on selections from UI
 		String [] categories = {"faculty_name", "idcourse", "season", "year"};
 		String [] category_names = {"Faculty Name", "Course ID", "Quarter", "Year"};
@@ -72,10 +80,7 @@ try
 		{
 			if ((filters.substring(i, i + 1)).equals("1"))
 			{
-				if (count == 0)
-					addition += " WHERE ";
-				else
-					addition += " AND ";
+				addition += " AND ";
 				addition += categories[i];
 				addition += " = ? ";
 				category = category_names[i];
@@ -85,19 +90,26 @@ try
 					<h2><%=category%>: <%=data%></h2>
 				<%
 			}
-				
+		
 		}
 		
-		sql5 = "SELECT AVG(number_grade) AS gpa FROM grade_conversion, quarter NATURAL JOIN quarter_course_class__instance NATURAL JOIN faculty_instance_hastaught NATURAL JOIN student_instance" + 
-			 addition +
-			" AND grade_conversion.grade = student_instance.grade" + 
-			" GROUP BY number_grade";
+		sql5 = "SELECT AVG(number_grade) AS gpa" + 
+				" FROM grade_conversion, quarter, quarter_course_class__instance, faculty_class_section, student_instance" +
+				" WHERE quarter.idquarter = quarter_course_class__instance.idquarter" + 
+				" AND quarter_course_class__instance.idclass = faculty_class_section.idclass" + 
+				" AND student_instance.idinstance = quarter_course_class__instance.idquarter" + 
+				" AND student_instance.grade = grade_conversion.grade" + 
+				addition;
 		ps5 = conn.prepareStatement(sql5);
 		
-		sql0 = "SELECT grade, COUNT(*) FROM quarter NATURAL JOIN quarter_course_class__instance NATURAL JOIN faculty_instance_hastaught NATURAL JOIN student_instance" + 
-			addition + 
-			" GROUP BY grade" + 
-			" ORDER BY grade";
+		sql0 = "SELECT grade, COUNT(*) AS received" + 
+		" FROM quarter, quarter_course_class__instance, faculty_class_section, student_instance" +
+		" WHERE quarter.idquarter = quarter_course_class__instance.idquarter" + 
+		" AND quarter_course_class__instance.idclass = faculty_class_section.idclass" + 
+		" AND student_instance.idinstance = quarter_course_class__instance.idquarter" + 
+		addition + 
+		" GROUP BY student_instance.grade " + 
+		" ORDER BY student_instance.grade";
 		
 		System.out.println(sql0);
 		ps0 = conn.prepareStatement(sql0);
@@ -127,8 +139,11 @@ try
 		rs0 = ps0.executeQuery();
 		rs5 = ps5.executeQuery();
 		
-		if (rs5.next())
+		
+		if (rs5.isBeforeFirst())
 		{
+			System.out.println("inside");
+			rs5.next();
 			double gpa = rs5.getDouble("gpa");
 			%><h2>Grade Point Average: <%=gpa%></h2>
 			<table>
@@ -141,8 +156,8 @@ try
 		int received = 0;
 		while (rs0.next())
 		{
-			grade = rs1.getString("grade");
-			received = rs1.getInt("received");
+			grade = rs0.getString("grade");
+			received = rs0.getInt("received");
 			%>
 			<tr>
 				<td><%=grade%></td>
@@ -156,7 +171,7 @@ try
 		}
 		else
 			%><h2>No GPA or grades to report</h2><%
-	
+		}
 	}
 		sql1 = "SELECT faculty_name FROM faculty";
 		ps1 = conn.prepareStatement(sql1);
@@ -178,6 +193,8 @@ try
 		<form action="high_grade.jsp" method="POST">
 			Faculty:
 			<select name="faculty">
+				<option>None</option>
+				
 			<% 
 				String faculty;
 				while (rs1.next())
@@ -189,6 +206,7 @@ try
 			</select>
 			Course ID:
 			<select name="course">
+				<option>None</option>
 			<%
 				int course;
 				while (rs2.next())
@@ -201,6 +219,8 @@ try
 			</select>
 			Quarter:
 			<select name="season">
+				<option>None</option>
+			
 			<% 
 				String season;
 				while (rs3.next())
@@ -212,6 +232,8 @@ try
 			</select>
 			Year:
 			<select name="year">
+				<option>None</option>
+			
 			<%
 				int year;
 				while (rs4.next())
