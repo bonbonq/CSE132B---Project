@@ -199,43 +199,44 @@ if (action != null && action.equals("list"))
 	int h = sday_int;
 	int g = smonth_int - 1;
 	boolean done = false;
-	/*
-	HashMap<Integer,ArrayList<Integer>> daynum_day = new HashMap<Integer,ArrayList<Integer>>();
-	ArrayList<Integer> [] day_lists;
-	for (int i = 0; i < 5; i++)
-		day_lists[i] = new ArrayList<Integer>();
-		
-	int starter = 3;
-	int curr_day = 1;
-	int to_start = 3;
-	for (int i = 0; i < months.length; i++)
+	
+
+HashMap<Integer,Integer> day_codes = new HashMap<Integer,Integer>();
+
+int first = 1;
+int curr_day = first;
+int month_day = first;
+int toggle = 3;
+int i_c = 0;
+while (true)
+{
+	day_codes.put(curr_day, toggle);
+	toggle = toggle + 1;
+	if (toggle == 5)
 	{
-		for (int j = 1; j <= month_days[i]; j++)
-		{
-			for (int k = to_start; k < 5; k++)
-			{
-				day_lists[to_start].add(curr_day++);
-				j++;
-				if (j > month_days[i])
-				{
-					i++;
-					j = 1;
-				}
-			}
-			
-		}
+		month_day = month_day + 2;
+		toggle = 0;
+		if (month_day > month_days[i_c])
+			month_day = (month_day + 1) % month_days[i_c++];
 	}
-	int daynum = 0;
-	for (int i = 1; i < smonth_int; i++)
-	{
-		daynum = daynum + (i * month_days[i]);
-	}
-	daynum = daynum + sday_int;
-	int start = daynum_day.get(daynum);
-	*/
+	curr_day++;
+	month_day++;
+	if (month_day > month_days[i_c])
+		month_day = (month_day + 1) % month_days[i_c++];
+	if (i_c == 12)
+		break;
+}
+
+int day_of_interest = 0;
+for (int i = 0; i < smonth_int - 1; i++)
+{
+	day_of_interest += month_days[i];
+}
+day_of_interest += sday_int;
+int weekday_start = day_codes.get(day_of_interest);
 	while (done == false)
 	{
-		for (int i = 0; i < 5 && done == false; i++, h++)
+		for (int i = weekday_start; i < 5 && done == false; i++, h++)
 		{
 			if (h > month_days[g])
 			{
@@ -262,6 +263,7 @@ if (action != null && action.equals("list"))
 			h = h % (month_days[g]);
 			g = (g + 1) % 12;
 		}
+		weekday_start = 0;
 		//start = 0;
 	}
 	%>
