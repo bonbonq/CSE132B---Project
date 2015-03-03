@@ -60,7 +60,7 @@ if (action!=null && action.equals("submit")) {
 	try{
 		conn.setAutoCommit(false);
 		pstmt1 = conn.prepareStatement(
-				"SELECT * FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber NATURAL JOIN grade_conversion WHERE idstudent=?",
+				"SELECT * FROM student_section__enrolled NATURAL JOIN faculty_class_section NATURAL JOIN student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber NATURAL JOIN quarter WHERE idstudent = ?;",
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		pstmt1.setInt(1, Integer.parseInt(request.getParameter("ss_num")));
 		
@@ -85,6 +85,18 @@ if (action!=null && action.equals("submit")) {
 		<h1><%=message %></h1>
 		<%
 	}
+	Hashtable<String, Double> grade_conversion = new Hashtable<String, Double>();
+  	grade_conversion.put("A+", 4.3);
+	grade_conversion.put("A", 4.0);
+	grade_conversion.put("A-", 3.7);
+	grade_conversion.put("B+", 3.4);
+	grade_conversion.put("B", 3.1);
+	grade_conversion.put("B-", 2.8);
+	grade_conversion.put("C+", 2.5);
+	grade_conversion.put("C", 2.2);
+	grade_conversion.put("C-", 1.9);
+	grade_conversion.put("D", 1.6);
+	grade_conversion.put("F", 0.0);
 	int course_count = 0;
 	double cumulative_gpa = 0.0;
 	if (result_rs!=null) {
@@ -93,10 +105,10 @@ if (action!=null && action.equals("submit")) {
 				String grade = result_rs.getString("grade");
 				if (!grade.equals("PENDING")){
 					if (!grade.equals("S") && !grade.equals("U")) {
-						cumulative_gpa += result_rs.getDouble("number_grade");
+						cumulative_gpa += grade_conversion.get(result_rs.getString("grade"));
 						course_count++;
 					}
-					taken_courses.put(result_rs.getInt("idcourse"), result_rs.getDouble("number_grade"));
+					taken_courses.put(result_rs.getInt("idcourse"), grade_conversion.get(result_rs.getString("grade")));
 				}
 			}
 		}	
