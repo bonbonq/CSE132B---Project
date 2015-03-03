@@ -106,102 +106,120 @@ try
 		rs3 = ps3.executeQuery();
 	
 		String [] days = {"M", "Tu", "W", "Th", "F", "Sa", "Su"};
+		System.out.println("A:" + days.length);
 		ArrayList<Integer> start_times = new ArrayList<Integer>();
 		ArrayList<Integer> end_times = new ArrayList<Integer>();
 		String day_string;
 		int s_hours, s_minutes, e_hours, e_minutes;
-		while (rs2.next())
+		System.out.println("B:" + days.length);
+		
+		if (!(rs2.isBeforeFirst()))
 		{
-			day_string = rs2.getString("day_of_week");
-			s_hours = Integer.parseInt(rs2.getTime("start_time").toString().substring(0,2));
-			s_minutes = Integer.parseInt(rs2.getTime("start_time").toString().substring(3,5));
-			s_minutes = s_minutes + (s_hours * 60);
-		
-			e_hours = Integer.parseInt(rs2.getTime("end_time").toString().substring(0,2));
-			e_minutes = Integer.parseInt(rs2.getTime("end_time").toString().substring(3,5));
-			e_minutes = e_minutes + (e_hours * 60);
-		
-			for (int i = 0; i < 7; i++)
-			{
-				if (day_string.indexOf(days[i]) != -1)
-				{
-					s_minutes = s_minutes + (3600 * i);
-					start_times.add(s_minutes);
-					e_minutes = e_minutes + (3600 * i);
-					end_times.add(e_minutes);
-				}
-			}
+			class_print = null;
 		}
-	
-		//Sort start and end times to synchronize by index
-		Collections.sort(start_times);
-		Collections.sort(end_times);
-		for (int i = 0; i < start_times.size(); i++)
-			System.out.println(start_times.get(i));
-		
-		//Generate arrays for binary search of conflicts
-		Integer [] start_times_array = new Integer[start_times.size()];
-		Integer [] end_times_array = new Integer[end_times.size()];
-		start_times.toArray(start_times_array);
-		end_times.toArray(end_times_array);
-		
-		//Reusable variables for each tuple
-		int idclass_prev = -1;
-		int idsection_prev = -1;
-		int idclass = -1;
-		int idsection = -1;
-		
-		//Class data to print
-		HashSet<Integer> neg_classes = new HashSet<Integer>();
-		
-		//Flags
-		boolean section_skip = false;
-		boolean class_skip = false;
-		boolean first = true;
-		
-		//Sequential search through each class and section of the current quarter (with optimization)
-		while (rs3.next())
+		else
 		{
-			System.out.println("each class");
-			if (!first)
+			while (rs2.next())
 			{
-				idclass_prev = idclass;
-				idsection_prev = idsection;
-			}
-			
-			idclass = rs3.getInt("idclass");
-			idsection = rs3.getInt("idsection");
-			
-			if (!first)
-			{
-				if (idclass_prev == idclass && class_skip == true)
-					continue;
-				if (idclass_prev != idclass && class_skip == false)
+				System.out.println("C:" + days.length);
+				day_string = rs2.getString("day_of_week");
+				s_hours = Integer.parseInt(rs2.getTime("start_time").toString().substring(0,2));
+				s_minutes = Integer.parseInt(rs2.getTime("start_time").toString().substring(3,5));
+				s_minutes = s_minutes + (s_hours * 60);
+				System.out.println("D:" + days.length);
+	
+				e_hours = Integer.parseInt(rs2.getTime("end_time").toString().substring(0,2));
+				e_minutes = Integer.parseInt(rs2.getTime("end_time").toString().substring(3,5));
+				e_minutes = e_minutes + (e_hours * 60);
+				System.out.println("E:" + days.length);
+	
+				for (int i = 0; i < 7; i++)
 				{
-					System.out.println("4");
-					sql4 = "SELECT idcourse, class.idclass, title" +
-							" FROM quarter_course_class__instance, class" +
-							" WHERE quarter_course_class__instance.idclass = ?" + 
-							" AND quarter_course_class__instance.idclass = class.idclass";
-					ps4 = conn.prepareStatement(sql4);
-					ps4.setInt(1, idclass_prev);
-					rs4 = ps4.executeQuery();
-					rs4.next();
-					class_print.add("Course ID: " + rs4.getInt("idcourse") + " - " + "Class ID: " + rs4.getInt("idclass") + " " + rs4.getString("title"));
-					ps4.close();
-					rs4.close();
+					System.out.println("F:" + days.length);
+					//System.out.println(day_string);
+					if (day_string.indexOf(days[i]) != -1)
+					{
+						//System.out.println("inside");
+						s_minutes = s_minutes + (3600 * i);
+						start_times.add(s_minutes);
+						e_minutes = e_minutes + (3600 * i);
+						end_times.add(e_minutes);
+					}		
 				}
-				if (idsection_prev == idsection && section_skip == true)
-					continue;
-				if (idsection_prev != idsection && section_skip == false)
+			}
+		
+	
+			//Sort start and end times to synchronize by index
+			Collections.sort(start_times);
+			Collections.sort(end_times);
+			/*
+			for (int i = 0; i < start_times.size(); i++)
+				System.out.println(start_times.get(i));*/
+			
+			//Generate arrays for binary search of conflicts
+			Integer [] start_times_array = new Integer[start_times.size()];
+			Integer [] end_times_array = new Integer[end_times.size()];
+			//System.out.println(end_times.size());
+			start_times.toArray(start_times_array);
+			end_times.toArray(end_times_array);
+			
+			//Reusable variables for each tuple
+			int idclass_prev = -1;
+			int idsection_prev = -1;
+			int idclass = -1;
+			int idsection = -1;
+			
+			//Class data to print
+			HashSet<Integer> neg_classes = new HashSet<Integer>();
+			
+			//Flags
+			boolean section_skip = false;
+			boolean class_skip = false;
+			boolean first = true;
+			
+			//Sequential search through each class and section of the current quarter (with optimization)
+			while (rs3.next())
+			{
+				//System.out.println("each class");
+				if (!first)
 				{
-					if (idclass_prev == idclass)
-					{
-						class_skip = true;
+					idclass_prev = idclass;
+					idsection_prev = idsection;
+				}
+				
+				idclass = rs3.getInt("idclass");
+				idsection = rs3.getInt("idsection");
+				
+				if (!first)
+				{
+					if (idclass_prev == idclass && class_skip == true)
 						continue;
-					}
-					else
+					if (idclass_prev != idclass && class_skip == false)
 					{
+						System.out.println("4");
+						sql4 = "SELECT idcourse, class.idclass, title" +
+								" FROM quarter_course_class__instance, class" +
+								" WHERE quarter_course_class__instance.idclass = ?" + 
+								" AND quarter_course_class__instance.idclass = class.idclass";
+						ps4 = conn.prepareStatement(sql4);
+						ps4.setInt(1, idclass_prev);
+						rs4 = ps4.executeQuery();
+						rs4.next();
+						class_print.add("Course ID: " + rs4.getInt("idcourse") + " - " + "Class ID: " + rs4.getInt("idclass") + " " + rs4.getString("title"));
+						ps4.close();
+						rs4.close();
+					}
+					if (idsection_prev == idsection && section_skip == true)
+						continue;
+					if (idsection_prev != idsection && section_skip == false)
+					{
+						if (idclass_prev == idclass)
+						{
+							class_skip = true;
+							continue;
+						}
+						else
+						{
 						System.out.println("4.5");
 						sql4 = "SELECT idcourse, class.idclass, title" +
 								" FROM quarter_course_class__instance, class" +
@@ -218,88 +236,96 @@ try
 				}
 			}
 		
-			class_skip = false;
-			section_skip = false;
+				class_skip = false;
+				section_skip = false;
 			
-			day_string = rs3.getString("day_of_week");
-			s_hours = Integer.parseInt(rs3.getTime("start_time").toString().substring(0,2));
-			s_minutes = Integer.parseInt(rs3.getTime("start_time").toString().substring(3,5));
-			s_minutes = s_minutes + (s_hours * 60);
+				day_string = rs3.getString("day_of_week");
+				s_hours = Integer.parseInt(rs3.getTime("start_time").toString().substring(0,2));
+				s_minutes = Integer.parseInt(rs3.getTime("start_time").toString().substring(3,5));
+				s_minutes = s_minutes + (s_hours * 60);
 			
-			e_hours = Integer.parseInt(rs3.getTime("start_time").toString().substring(0,2));
-			e_minutes = Integer.parseInt(rs3.getTime("start_time").toString().substring(3,5));
-			e_minutes = e_minutes + (e_hours * 60);
+				e_hours = Integer.parseInt(rs3.getTime("start_time").toString().substring(0,2));
+				e_minutes = Integer.parseInt(rs3.getTime("start_time").toString().substring(3,5));
+				e_minutes = e_minutes + (e_hours * 60);
 			
-			int start_index, end_index, middle_index;
+				int start_index, end_index, middle_index;
 			
-			for (int i = 0; i < 7 && section_skip == false; i++)
-			{
-				System.out.println("testing days");
-				if (day_string.indexOf(days[i]) != -1)
+				for (int i = 0; i < 7 && section_skip == false; i++)
 				{
-					s_minutes = s_minutes + (3600 * i);
-					e_minutes = e_minutes + (3600 * i);
-					
-					start_index = 0;
-					end_index = start_times_array.length - 1;
-					middle_index = start_index;
-					while (start_index < end_index)
+					//System.out.println("testing days");
+					if (day_string.indexOf(days[i]) != -1)
 					{
-						System.out.println(start_index + "" + end_index);
-						middle_index = (end_index + start_index) / 2;
-						if (start_times_array[middle_index] > s_minutes)
+						s_minutes = s_minutes + (3600 * i);
+						e_minutes = e_minutes + (3600 * i);
+						
+						start_index = 0;
+						end_index = start_times_array.length - 1;
+						middle_index = start_index;
+						while (start_index < end_index)
 						{
-							end_index = middle_index - 1;
-						}
-						else if (start_times_array[middle_index] < s_minutes)
-						{
-							start_index = middle_index + 1;
-						}
-						else
-						{
-							if (s_minutes < end_times_array[middle_index])
+							System.out.println(start_index + "" + end_index);
+							middle_index = (end_index + start_index) / 2;
+							if (start_times_array[middle_index] > s_minutes)
 							{
-								section_skip = true;
+								end_index = middle_index - 1;
 							}
-							break;
-						}
-					}
-					if (section_skip != true)
-					{
-						middle_index =  (end_index + start_index) / 2;
-						if (middle_index == 0)
-						{
-							if (s_minutes < end_times_array[middle_index])
+							else if (start_times_array[middle_index] < s_minutes)
 							{
-								section_skip = true;
+								start_index = middle_index + 1;
+							}
+							else
+							{
+								if (s_minutes < end_times_array[middle_index])
+								{
+									section_skip = true;
+								}
+								break;
 							}
 						}
-						else if (s_minutes < start_times_array[middle_index])
-						{
-							if (s_minutes < end_times_array[middle_index - 1] || e_minutes > start_times_array[middle_index])
+						if (section_skip != true)
+						{	
+							middle_index =  (end_index + start_index) / 2;
+							if (middle_index == 0)
 							{
-								section_skip = true;
+								if (s_minutes < end_times_array[middle_index])
+								{
+									section_skip = true;
+								}
 							}
-						}		
+							else if (middle_index == end_times_array.length)
+							{
+								if (s_minutes < end_times_array[middle_index])
+								{
+									section_skip = true;
+								}
+							}
+							else if (s_minutes < start_times_array[middle_index])
+							{
+								if (s_minutes < end_times_array[middle_index - 1] || e_minutes > start_times_array[middle_index])
+								{
+									section_skip = true;
+								}	
+							}		
 					
-						else if (s_minutes > start_times_array[middle_index])
-						{
-							if (s_minutes < end_times_array[middle_index] || e_minutes > start_times_array[middle_index + 1])
+							else if (s_minutes > start_times_array[middle_index])
 							{
-								section_skip = true;
+								if (s_minutes < end_times_array[middle_index])
+								{
+									section_skip = true;
+								}
 							}
+							else
+							{
+								if (s_minutes < end_times_array[middle_index])
+								{
+									section_skip = true;
+								}
+							}	
 						}
-						else
-						{
-							if (s_minutes < end_times_array[middle_index])
-							{
-								section_skip = true;
-							}
-						}	
-					}
-				}		
+					}		
+				}
+				first = false;
 			}
-			first = false;
 		}
 	}
 }
@@ -363,20 +389,31 @@ while (it_ssn.hasNext())
 <%
 if (action != null && action.equals("list"))
 {
-%>
+	%>
 	Conflicting classes:
-	<ul>
 	<%
-	Iterator<String> it_print = class_print.iterator();
-	while (it_print.hasNext())
+	if (class_print == null)
 	{
 		%>
-		<li><%=it_print.next()%></li>
-		<%	
+		<h3>No conflicting classes</h3>
+		<%
 	}
-	%>
-	</ul>
-<%	
+	else
+	{
+		%>
+		<ul>
+		<%
+		Iterator<String> it_print = class_print.iterator();
+		while (it_print.hasNext())
+		{
+			%>
+			<li><%=it_print.next()%></li>
+			<%
+		}
+		%>
+		</ul>
+		<%
+	}
 }
 %>
 </body>

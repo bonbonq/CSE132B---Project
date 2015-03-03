@@ -19,6 +19,8 @@ ResultSet rs1 = null;
 String sql2 = null;
 PreparedStatement ps2 = null;
 ResultSet rs2 = null;
+String [] dayHashValues = {"M", "Tu", "W", "Th", "F"};
+String [] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 String action = request.getParameter("action");
 
@@ -37,8 +39,8 @@ try
 	String idsection_string = request.getParameter("idsection");
 	int idsection;
 	HashSet<Integer> [] days = null;
-	String [] dayHashValues = {"M", "Tu", "W", "Th", "F"};
-	String [] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+	//String [] dayHashValues = {"M", "Tu", "W", "Th", "F"};
+	//String [] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 	
 	int [] hours = new int[24];
 	for (int i = 0; i < 24; i++)
@@ -197,6 +199,40 @@ if (action != null && action.equals("list"))
 	int h = sday_int;
 	int g = smonth_int - 1;
 	boolean done = false;
+	/*
+	HashMap<Integer,ArrayList<Integer>> daynum_day = new HashMap<Integer,ArrayList<Integer>>();
+	ArrayList<Integer> [] day_lists;
+	for (int i = 0; i < 5; i++)
+		day_lists[i] = new ArrayList<Integer>();
+		
+	int starter = 3;
+	int curr_day = 1;
+	int to_start = 3;
+	for (int i = 0; i < months.length; i++)
+	{
+		for (int j = 1; j <= month_days[i]; j++)
+		{
+			for (int k = to_start; k < 5; k++)
+			{
+				day_lists[to_start].add(curr_day++);
+				j++;
+				if (j > month_days[i])
+				{
+					i++;
+					j = 1;
+				}
+			}
+			
+		}
+	}
+	int daynum = 0;
+	for (int i = 1; i < smonth_int; i++)
+	{
+		daynum = daynum + (i * month_days[i]);
+	}
+	daynum = daynum + sday_int;
+	int start = daynum_day.get(daynum);
+	*/
 	while (done == false)
 	{
 		for (int i = 0; i < 5 && done == false; i++, h++)
@@ -226,6 +262,7 @@ if (action != null && action.equals("list"))
 			h = h % (month_days[g]);
 			g = (g + 1) % 12;
 		}
+		//start = 0;
 	}
 	%>
 	</ul>
