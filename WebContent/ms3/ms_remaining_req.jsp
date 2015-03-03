@@ -104,7 +104,7 @@ if (action!=null && action.equals("submit")) {
 			while(result_rs.next()) { 
 				String grade = result_rs.getString("grade");
 				if (!grade.equals("PENDING")){
-					if (!grade.equals("S") && !grade.equals("U")) {
+					if (!grade.equals("S") && !grade.equals("U") && !grade.equals("P") && !grade.equals("NP")) {
 						cumulative_gpa += grade_conversion.get(result_rs.getString("grade"));
 						course_count++;
 					}
