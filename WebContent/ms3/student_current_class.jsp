@@ -54,7 +54,7 @@ if (action!=null && action.equals("submit")) {
 	try{
 		conn.setAutoCommit(false);
 		pstmt1 = conn.prepareStatement(
-				"SELECT * from student_instance AS si, quarter_course_class__instance AS instance, course_coursenumber AS c_cn, coursenumber AS cn, instance_section AS instance_section WHERE si.idstudent=? AND si.idinstance=instance.idinstance AND instance.idcourse=c_cn.idcourse AND cn.idcoursenumber=c_cn.idcoursenumber AND instance_section.idinstance=si.idinstance AND instance.idquarter=2",
+				"SELECT * FROM student_section__enrolled NATURAL JOIN faculty_class_section NATURAL JOIN student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE idstudent = ? AND idquarter = 2",
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		pstmt1.setInt(1, Integer.parseInt(request.getParameter("ss_num")));
 		result_rs = pstmt1.executeQuery();

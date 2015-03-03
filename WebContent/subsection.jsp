@@ -816,7 +816,9 @@
 			<h3>Select section:</h3>
 			<%
 			
-			sql1 = "SELECT class.title, faculty_class_section.idclass, faculty_class_section.faculty_name, faculty_class_section.idsection FROM class, faculty_class_section"; 
+			sql1 = "SELECT class.title, faculty_class_section.idclass, faculty_class_section.faculty_name, faculty_class_section.idsection" +
+			" FROM class, faculty_class_section" +
+			" WHERE class.idclass = faculty_class_section.idclass"; 
 			ps1 = conn.prepareStatement(sql1);
 			rs1 = ps1.executeQuery();
 			

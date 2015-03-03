@@ -333,7 +333,7 @@
 		}
 		else
 		{
-			sql0 = "SELECT * FROM class"; 
+			sql0 = "SELECT * FROM class NATURAL JOIN quarter_course_class__instance NATURAL JOIN quarter"; 
 			ps0 = conn.prepareStatement(sql0);
 			rs0 = ps0.executeQuery();
 			
@@ -356,7 +356,7 @@
 					idclass = rs0.getInt("idclass");
 					title = rs0.getString("title");
 					%>
-						<option value="<%=idclass%>"><%=idclass%> - <%=title%></option>
+						<option value="<%=idclass%>"><%=idclass%> - <%=title%> - <%=rs0.getString("season")%> <%=rs0.getString("year") %></option>
 					<%
 				}
 				%>

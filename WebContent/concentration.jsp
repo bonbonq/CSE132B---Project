@@ -48,7 +48,7 @@ try
 	
 	if (action != null && action.equals("view"))
 	{
-		sql1 = "SELECT degree.iddegree, name, idconcentration, concentration_name, gpa " +
+		sql1 = "SELECT degree.iddegree, degree.name AS dn, idconcentration, concentration.name AS cn, gpa " +
 	 	" FROM degree, concentration " + 
 		" WHERE degree.iddegree = concentration.iddegree";
 		ps1 = conn.prepareStatement(sql1);
@@ -57,10 +57,10 @@ try
 		while (rs1.next())
 		{
 			System.out.println("inside");
-			degree_names.add(rs1.getString("name"));
+			degree_names.add(rs1.getString("dn"));
 			degree_ids.add(rs1.getInt("iddegree"));
 			concentration_ids.add(rs1.getInt("idconcentration"));
-			concentration_names.add(rs1.getString("concentration_name"));
+			concentration_names.add(rs1.getString("cn"));
 			if (rs1.getDouble("gpa") == 0)
 				gpas.put(rs1.getInt("idconcentration"), rs1.getDouble("gpa"));
 		}
@@ -91,6 +91,7 @@ try
 			}
 			else if (prev == rs2.getInt("idconcentration"))
 			{
+				System.out.println(rs2.getInt("idconcentration"));
 				list.add(cnumber_string);
 				cnumber_string = rs2.getString("number");
 			}
@@ -110,6 +111,9 @@ try
 	}
 	else if (action != null && action.equals("update"))
 	{
+		String [] courses = request.getParameterValues("courses");
+		if (courses == null)
+			response.sendRedirect("concentration.jsp");
 		double x;
 		if (request.getParameter("gpa") != null)
 		{
@@ -135,7 +139,7 @@ try
 		ps1.setInt(1, idconcentration);
 		rs1 = ps1.executeQuery();
 		
-		sql2 = "UPDATE concentration SET concentration_name=? WHERE idconcentration=?";
+		sql2 = "UPDATE concentration SET name=? WHERE idconcentration=?";
 		ps2 = conn.prepareStatement(sql2);
 		ps2.setString(1, concentration_name);
 		ps2.setInt(2, idconcentration);
@@ -145,7 +149,6 @@ try
 		{
 			course_ids_1.add(rs1.getInt("idcourse"));
 		}
-		String [] courses = request.getParameterValues("courses");
 		for (int i = 0; i < courses.length; i++)
 		{
 			course_ids_2.add(Integer.parseInt(courses[i]));
@@ -183,6 +186,13 @@ try
 	}
 	else if (action != null && action.equals("insert"))
 	{
+		String [] courses = request.getParameterValues("courses");
+		System.out.println(courses);
+		if (courses == null)
+		{
+			response.sendRedirect("concentration.jsp");
+			return;
+		}
 		double x;
 		if (request.getParameter("gpa") != null)
 		{
@@ -195,6 +205,7 @@ try
 				System.out.println("encountered error");
 				session.setAttribute("error", "gpa");
 				response.sendRedirect("concentration.jsp");
+				return;
 			}
 		}
 		int degree = Integer.parseInt(request.getParameter("degree"));
@@ -203,21 +214,21 @@ try
 		if (gpa != null)
 			gpa_double = Double.parseDouble(gpa);
 		String cname = request.getParameter("cname");
-		String [] courses = request.getParameterValues("courses");
+		//String [] courses = request.getParameterValues("courses");
 		if (gpa == null)
-			sql1 = "INSERT INTO concentration (iddegree, concentration_name) VALUES (?,?) RETURNING idconcentration";
+			sql1 = "INSERT INTO concentration (iddegree, name) VALUES (?,?) RETURNING idconcentration";
 		else
-			sql1 = "INSERT INTO concentration (iddegree, concentration_name, gpa) VALUES (?,?,?) RETURNING idconcentration";
+			sql1 = "INSERT INTO concentration (iddegree, name, gpa) VALUES (?,?,?) RETURNING idconcentration";
 		ps1 = conn.prepareStatement(sql1);
 		ps1.setInt(1, degree);
 		ps1.setString(2, cname);
 		if (gpa != null)
 			ps1.setDouble(3, gpa_double);
 		ps1.execute();
-		System.out.println("executed");
+		//System.out.println("executed");
 		rs1 = ps1.getResultSet();
 		rs1.next();
-		System.out.println(rs1.getInt("idconcentration"));
+		//System.out.println(rs1.getInt("idconcentration"));
 		
 		sql2 = "INSERT INTO concentration_course (idconcentration, idcourse) VALUES (?,?)";
 		ps2 = conn.prepareStatement(sql2);

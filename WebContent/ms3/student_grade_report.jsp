@@ -50,12 +50,13 @@ String action = request.getParameter("action");
 /* ================== */
 ResultSet result_rs = null;
 if (action!=null && action.equals("submit")) {
+	System.out.println("test");
 
 	//The following will always run regardless of action
 	try{
 		conn.setAutoCommit(false);
 		pstmt1 = conn.prepareStatement(
-				"SELECT * from student_instance AS si, quarter_course_class__instance AS instance, course_coursenumber AS c_cn, coursenumber AS cn, instance_section AS instance_section, quarter WHERE si.idstudent=? AND si.idinstance=instance.idinstance AND instance.idcourse=c_cn.idcourse AND cn.idcoursenumber=c_cn.idcoursenumber AND instance_section.idinstance=si.idinstance AND instance.idquarter<=2 AND instance.idquarter=quarter.idquarter ORDER BY quarter.idquarter",
+				"SELECT * FROM student_section__enrolled NATURAL JOIN faculty_class_section NATURAL JOIN student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber NATURAL JOIN quarter WHERE idstudent = ? ORDER BY quarter.idquarter",
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		pstmt1.setInt(1, Integer.parseInt(request.getParameter("ss_num")));
 		result_rs = pstmt1.executeQuery();
@@ -111,7 +112,7 @@ try{
 <body>
 	
 	<a href='index.jsp'><button>Home</button></a>
-	<h2>Student's Current Class Listing</h2>
+	<h2>Student's Grade Report</h2>
 	
 	<!-- Student Insertion Form -->
 	<form action="student_grade_report.jsp" method="POST">
@@ -161,7 +162,8 @@ try{
 		grade_conversion.put("C+", 2.5);
 		grade_conversion.put("C", 2.2);
 		grade_conversion.put("C-", 1.9);
-		grade_conversion.put("D", 1.6); 
+		grade_conversion.put("D", 1.6);
+		grade_conversion.put("F", 0.0);
 		int prev_id = 0;
 		double total_grade = 0;
 	  	double quarter_grade = 0;
@@ -201,7 +203,8 @@ try{
 						
 				<%
 					// only add the grade if it's got a grade
-					if (result_rs.getString("grade")!="PENDING") {
+					if (!(result_rs.getString("grade").trim().equals("PENDING"))) {
+						System.out.println(result_rs.getString("grade"));
 						quarter_grade += grade_conversion.get(result_rs.getString("grade"));
 						total_grade += grade_conversion.get(result_rs.getString("grade"));
 						num_class++;
