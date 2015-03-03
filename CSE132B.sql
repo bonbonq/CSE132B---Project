@@ -104,6 +104,15 @@ CREATE TABLE upper_division (
   gpa double precision NOT NULL
   );
 
+  -- -----------------------------------------------------
+-- Table CSE132B.technical_elective
+-- -----------------------------------------------------
+CREATE TABLE technical_elective (
+  idtechnical_elective SERIAL PRIMARY KEY,
+  iddegree integer REFERENCES degree(iddegree) ON DELETE CASCADE ON UPDATE CASCADE,
+  units integer NOT NULL,
+  gpa double precision NOT NULL
+  );
 
 -- -----------------------------------------------------
 -- Table CSE132B.minimum_gpa

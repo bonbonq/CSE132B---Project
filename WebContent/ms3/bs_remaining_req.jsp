@@ -32,7 +32,8 @@ PreparedStatement pstmt3 = null;
 PreparedStatement pstmt4 = null;
 PreparedStatement pstmt5 = null;
 PreparedStatement pstmt6 = null;
-
+PreparedStatement pstmt7 = null;
+PreparedStatement pstmt8 = null;
 try {
 	Class.forName("org.postgresql.Driver");
 	conn = DriverManager.getConnection(
@@ -52,16 +53,19 @@ ResultSet result_rs = null;
 ResultSet result_rs_degree = null;
 ResultSet result_rs_lower = null;
 ResultSet result_rs_upper = null;
+ResultSet result_rs_course = null;
+ResultSet result_rs_te = null;
 int total_units = 0;
 int lower_units = 0;
 int upper_units = 0;
+int technical_units = 0;
 if (action!=null && action.equals("submit")) {
 
 	//The following will always run regardless of action
 	try{
 		conn.setAutoCommit(false);
 		pstmt1 = conn.prepareStatement(
-				"SELECT * FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE  idstudent=?;",
+				"SELECT * FROM student_section__enrolled NATURAL JOIN faculty_class_section NATURAL JOIN student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber NATURAL JOIN quarter WHERE idstudent = ?;",
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		pstmt1.setInt(1, Integer.parseInt(request.getParameter("ss_num")));
 		
@@ -80,10 +84,21 @@ if (action!=null && action.equals("submit")) {
 				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		pstmt6.setInt(1, Integer.parseInt(request.getParameter("degree_name")));
 		
+		pstmt7 = conn.prepareStatement(
+				"SELECT * FROM course;",
+				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+		
+		pstmt8 = conn.prepareStatement(
+				"SELECT * FROM technical_elective WHERE iddegree=?;",
+				ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+		pstmt8.setInt(1, Integer.parseInt(request.getParameter("degree_name")));
+		
 		result_rs = pstmt1.executeQuery();
 		result_rs_degree = pstmt4.executeQuery();
 		result_rs_lower = pstmt5.executeQuery();
 		result_rs_upper = pstmt6.executeQuery();
+		result_rs_course = pstmt7.executeQuery();
+		result_rs_te = pstmt8.executeQuery();
 
 		conn.commit();
 		conn.setAutoCommit(true);
@@ -119,32 +134,60 @@ if (action!=null && action.equals("submit")) {
 			}
 		}	
   	}
+	if (result_rs_te!=null) {
+  		if (result_rs_te.isBeforeFirst()) {
+			while(result_rs_te.next()) { 
+				technical_units = result_rs_te.getInt("units");
+			}
+		}	
+  	}
+	
+	// build course hashtable
+	Hashtable<Integer, String> course_ht = new Hashtable<Integer, String>();
+	if (result_rs_course!=null) {
+  		if (result_rs_course.isBeforeFirst()) {
+			while(result_rs_course.next()) { 
+				course_ht.put(result_rs_course.getInt("idcourse"), result_rs_course.getString("type"));
+			}
+		}	
+  	}
 	
 	if (result_rs!=null) {
   		if (result_rs.isBeforeFirst()) {
 			while(result_rs.next()) { 
 				int units = result_rs.getInt("units");
-				String course_number = result_rs.getString("number").split(" ")[1];
+				//String grade = result_rs.getString("grade");
+				//String course_number = result_rs.getString("number").split(" ")[1];
 				String dept = result_rs.getString("number").split(" ")[0].trim();
-				course_number = course_number.replaceAll("[^\\d.]", ""); //Remove non numeric
+				//course_number = course_number.replaceAll("[^\\d.]", ""); //Remove non numeric
+				int idcourse = result_rs.getInt("idcourse");
 				
-				if(abbr.equals(dept)){
-					total_units -= units;
-					// lower division
-					if (Integer.parseInt(course_number) < 100) {
-						lower_units -= units;
-					}
-					// upper division
-					else{
-						upper_units -= units;
-					}
-					if (total_units<0)
-						total_units=0;
-					if (lower_units<0)
-						lower_units=0;
-					if (upper_units<0)
-						upper_units=0;
+				total_units -= units;
+				// lower division
+				if (course_ht.get(idcourse).equals("LD")) {
+					lower_units -= units;
 				}
+				// upper division
+				else if (course_ht.get(idcourse).equals("UD")){
+					upper_units -= units;
+				}
+				// upper division
+				else if (course_ht.get(idcourse).equals("TE")){
+					technical_units -= units;
+				}
+				// upper division
+				else if (course_ht.get(idcourse).equals("UD/TE")){
+					upper_units -= units;
+					technical_units -= units;
+				}
+				if (total_units<0)
+					total_units=0;
+				if (lower_units<0)
+					lower_units=0;
+				if (upper_units<0)
+					upper_units=0;
+				if (technical_units<0)
+					technical_units=0;
 				
 			}
 		}	
@@ -244,6 +287,7 @@ try{
 	<h3>Total Units Left:<%=total_units %></h3>
 	<h3>Lower Division Units Left: <%=lower_units %></h3>
 	<h3>Upper Division Units Left:<%=upper_units %></h3>
+	<h3>Technical Elective Units Left:<%=technical_units %></h3>
 	
 	
 </body>
