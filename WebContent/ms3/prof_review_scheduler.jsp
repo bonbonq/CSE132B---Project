@@ -11,6 +11,9 @@
 <%
 
 Connection conn = null;
+String sql0 = null;
+PreparedStatement ps0 = null;
+ResultSet rs0 = null;
 
 String sql1 = null;
 PreparedStatement ps1 = null;
@@ -164,14 +167,11 @@ try
 				}
 			}
 	}
-	else
-	{
-		sql1 = "SELECT class.title, faculty_class_section.idclass, faculty_class_section.faculty_name, faculty_class_section.idsection " +
+		sql0 = "SELECT class.title, faculty_class_section.idclass, faculty_class_section.faculty_name, faculty_class_section.idsection " +
 				" FROM class, faculty_class_section" + 
 		" WHERE class.idclass = faculty_class_section.idclass";
-		ps1 = conn.prepareStatement(sql1);
-		rs1 = ps1.executeQuery();	
-	}
+		ps0 = conn.prepareStatement(sql0);
+		rs0 = ps0.executeQuery();	
 
 
 %>
@@ -180,116 +180,26 @@ try
 <body>
 <a href="index.jsp"><button>Home</button></a>
 <h2>Review Session Scheduler</h2>
-<% 
-if (action != null && action.equals("list"))
-{/*
-	for (int yo = 0; yo < 5; yo++)
+<%
+	if (rs0.isBeforeFirst())
 	{
-		for (int jo = 0; jo < 24; jo++)
-			System.out.println(days[yo].contains(jo));
-	}*/
-	idsection = Integer.parseInt(idsection_string);
-	int smonth_int = Integer.parseInt(smonth);
-	int emonth_int = Integer.parseInt(emonth);
-	int sday_int = Integer.parseInt(sday);
-	int eday_int = Integer.parseInt(eday);
-	%>
-	<ul>
-	<%
-	int h = sday_int;
-	int g = smonth_int - 1;
-	boolean done = false;
-	
-
-HashMap<Integer,Integer> day_codes = new HashMap<Integer,Integer>();
-
-int first = 1;
-int curr_day = first;
-int month_day = first;
-int toggle = 3;
-int i_c = 0;
-while (true)
-{
-	day_codes.put(curr_day, toggle);
-	toggle = toggle + 1;
-	if (toggle == 5)
-	{
-		month_day = month_day + 2;
-		toggle = 0;
-		if (month_day > month_days[i_c])
-			month_day = (month_day + 1) % month_days[i_c++];
-	}
-	curr_day++;
-	month_day++;
-	if (month_day > month_days[i_c])
-		month_day = (month_day + 1) % month_days[i_c++];
-	if (i_c == 12)
-		break;
-}
-
-int day_of_interest = 0;
-for (int i = 0; i < smonth_int - 1; i++)
-{
-	day_of_interest += month_days[i];
-}
-day_of_interest += sday_int;
-int weekday_start = day_codes.get(day_of_interest);
-	while (done == false)
-	{
-		for (int i = weekday_start; i < 5 && done == false; i++, h++)
-		{
-			if (h > month_days[g])
-			{
-				h = 1;
-				g = (g + 1) % 12;
-			}
-			
-			if (g == emonth_int - 1 && h >= eday_int)
-				done = true;
-			
-			for (int j = 8; j < 20; j++)
-			{
-				if (days != null  && days[i] != null && !(days[i].contains((hours[j]))))
-				{
-				%>
-					<li><%=months[g]%> <%=h%> <%=hours[j]%>:00 - <%=hours[((j + 1) % 24)]%>:00</li>
-				<%
-				}
-			}	
-		}
-		h += 2;
-		if (h > month_days[g])
-		{
-			h = h % (month_days[g]);
-			g = (g + 1) % 12;
-		}
-		weekday_start = 0;
-		//start = 0;
-	}
-	%>
-	</ul>
-	<%
-}
-
-else
-{
-	if (rs1.isBeforeFirst())
-	{
+		System.out.println("inside");
 		if (numerror == true)
 		{
 		%>
 		<h3>Error: Please make sure end date is later than start date</h3>
 		<%
+		action = null;
 		}
 		%>
 		<h3>Select Section:</h3>
 		<form action="prof_review_scheduler.jsp" method="POST">
 		<select name="idsection">
 		<%
-		while (rs1.next())
+		while (rs0.next())
 		{
 		%>
-			<option value="<%=rs1.getInt("idsection")%>">CID: <%=rs1.getInt("idclass")%> - SID: <%=rs1.getInt("idsection")%> - <%=rs1.getString("title") %></option>
+			<option value="<%=rs0.getInt("idsection")%>"> Section ID: <%=rs0.getInt("idsection")%> - <%=rs0.getString("title") %></option>
 			<%
 			}
 			%>
@@ -406,7 +316,116 @@ else
 			<a href="../section.jsp"><button>Add Sections</button></a>
 		<%
 		}
+
+HashMap<Integer,Integer> day_codes = new HashMap<Integer,Integer>();
+
+int first = 1;
+int curr_day = first;
+int month_day = first;
+int toggle = 3;
+int i_c = 0;
+while (true)
+{
+	day_codes.put(curr_day, toggle);
+	toggle = (toggle + 1) % 7;
+	curr_day++;
+	month_day++;
+	if (month_day > month_days[i_c])
+		month_day = month_day % month_days[i_c++];
+	if (i_c == 12)
+		break;
+}
+String [] final_day_strings = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
+for (int i = 1; i <= 365; i++)
+{
+	System.out.println(i);
+	System.out.println(day_codes.get(i));
+}
+
+
+if (action != null && action.equals("list"))
+{/*
+	for (int yo = 0; yo < 5; yo++)
+	{
+		for (int jo = 0; jo < 24; jo++)
+			System.out.println(days[yo].contains(jo));
+	}*/
+	idsection = Integer.parseInt(idsection_string);
+	int smonth_int = Integer.parseInt(smonth);
+	int emonth_int = Integer.parseInt(emonth);
+	int sday_int = Integer.parseInt(sday);
+	int eday_int = Integer.parseInt(eday);
+	%>
+	<h3>Review Sessions for Section <%=idsection%> from <%=smonth_int%>/<%=sday_int%> to <%=emonth_int%>/<%=eday_int%>:</h3>
+	<ul>
+	<%
+	int h = sday_int;
+	int g = smonth_int - 1;
+	boolean done = false;
+	
+int day_of_interest = 0;
+for (int i = 0; i < smonth_int - 1; i++)
+{
+	day_of_interest += month_days[i];
+}
+day_of_interest += sday_int;
+int weekday_start = day_codes.get(day_of_interest);
+	while (done == false)
+	{
+		for (int i = weekday_start; i < 5 && done == false; i++, h++)
+		{
+			if (h > month_days[g])
+			{
+				h = 1;
+				g = (g + 1) % 12;
+			}
+			
+			if (g == emonth_int - 1 && h > eday_int)
+			{
+				done = true;
+				break;
+			}
+			int hour_ap1 = 0;
+			int hour_ap2 = 0;
+			int ap1 = 0;
+			int ap2 = 0;
+			String [] ap_strings = {"AM", "PM"};
+			for (int j = 8; j < 20; j++)
+			{
+				if (days != null  && days[i] != null && !(days[i].contains((hours[j]))))
+				{
+				
+				ap1 = hours[(j % 24)] / 12;
+				ap2 = hours[((j + 1) % 24)] / 12;
+				hour_ap1 = hours[(j % 24)] % 12;
+				hour_ap2 = hours[((j + 1) % 24)] % 12;
+				if (hour_ap1 == 0)
+					hour_ap1 = 12;
+				if (hour_ap2 == 0)
+					hour_ap2 = 12;
+				
+				%>
+					<li><%=months[g]%> <%=h%> <%=final_day_strings[day_codes.get(day_of_interest)]%> <%=hour_ap1%>:00 <%=ap_strings[ap1]%> - <%=hour_ap2%>:00 <%=ap_strings[ap2] %></li>
+				<%
+				}
+			}	
+			day_of_interest++;
+		}
+		h += 2;
+		day_of_interest += 2;
+		if (h > month_days[g])
+		{
+			h = h % (month_days[g]);
+			g = (g + 1) % 12;
+		}
+		weekday_start = 0;
+		//start = 0;
 	}
+	%>
+	</ul>
+	<%
+}
 }
 
 catch (SQLException e)
@@ -419,6 +438,10 @@ finally
 {
 	if (conn != null)
 		conn.close();
+	if (ps0 != null)
+		ps0.close();
+	if (rs0 != null)
+		rs0.close();
 	if (ps1 != null)
 		ps1.close();
 	if (rs1 != null)

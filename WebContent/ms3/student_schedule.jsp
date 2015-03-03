@@ -389,8 +389,9 @@ while (it_ssn.hasNext())
 <%
 if (action != null && action.equals("list"))
 {
+	String ss_num = request.getParameter("ss_num");
 	%>
-	Conflicting classes:
+	<h2>Conflicting classes for Student with SSN <%=ss_num%>:</h2>
 	<%
 	if (class_print == null)
 	{
