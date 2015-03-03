@@ -203,7 +203,7 @@ try{
 						
 				<%
 					// only add the grade if it's got a grade
-					if (!(result_rs.getString("grade").trim().equals("PENDING"))) {
+					if (!(result_rs.getString("grade").trim().equals("PENDING")) && !(result_rs.getString("grade").trim().equals("U")) && !(result_rs.getString("grade").trim().equals("S"))) {
 						System.out.println(result_rs.getString("grade"));
 						quarter_grade += grade_conversion.get(result_rs.getString("grade"));
 						total_grade += grade_conversion.get(result_rs.getString("grade"));
