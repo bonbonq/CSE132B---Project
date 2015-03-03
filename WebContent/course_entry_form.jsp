@@ -67,6 +67,7 @@ if (action!=null && action.equals("insert")) {
 	min_units = Integer.parseInt(request.getParameter("min_units"));
 	max_units = Integer.parseInt(request.getParameter("max_units"));
 	grade_type = request.getParameter("grade_type");
+	String division_type = request.getParameter("type");
 	if(request.getParameter("lab").equals("True")){
 		lab = true;	
 	}
@@ -105,8 +106,8 @@ if (action!=null && action.equals("insert")) {
 			// Create the statement
 			conn.setAutoCommit(false);
 			// Insert the user into table users, only if it does not already exist
-			sql1 =	"INSERT INTO course (grade_option_type, min_units, max_units, lab, consent_prereq)"+
-					"SELECT ?,?,?,?,?" + 
+			sql1 =	"INSERT INTO course (grade_option_type, min_units, max_units, lab, consent_prereq, type)"+
+					"SELECT ?,?,?,?,?,?" + 
 					"WHERE NOT EXISTS (" +
 						"SELECT idcoursenumber FROM coursenumber WHERE number=?" +
 					") " +
@@ -118,7 +119,8 @@ if (action!=null && action.equals("insert")) {
 			pstmt1.setInt(3, max_units);
 			pstmt1.setBoolean(4, lab);
 			pstmt1.setBoolean(5, consent_prereq);
-			pstmt1.setString(6, course_number);
+			pstmt1.setString(6, division_type);
+			pstmt1.setString(7, course_number);
 			
 			sql2 =	"INSERT INTO coursenumber (number)" +
 					"SELECT ?" +
@@ -681,6 +683,20 @@ try{
 			<input type="radio" name="lab" value="True">Yes
 			<br>
 			<input type="radio" name="lab" value="False" checked>No
+		</div>
+		<p>
+		
+		<div class="form-group">
+			Type:
+			<br>
+			<input type="radio" name="type" value="LD" checked>Lower Division
+			<br>
+			<input type="radio" name="type" value="UD">Upper Division
+			<br>
+			<input type="radio" name="type" value="TE">Technical Elective
+			<br>
+			<input type="radio" name="type" value="UD/TE">Upper Division/Technical Elective
+			<br>
 		</div>
 		<p>
 		

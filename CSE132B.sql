@@ -377,7 +377,8 @@ CREATE TABLE course (
   min_units integer NOT NULL,
   max_units integer NOT NULL,
   lab boolean NOT NULL,
-  consent_prereq boolean NOT NULL
+  consent_prereq boolean NOT NULL,
+  type text NOT NULL,
   );
 
 
