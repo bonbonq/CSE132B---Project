@@ -246,7 +246,7 @@ try
 					while (start_index < end_index)
 					{
 						System.out.println(start_index + "" + end_index);
-						middle_index = start_index + (end_index - start_index) / 2;
+						middle_index = (end_index + start_index) / 2;
 						if (start_times_array[middle_index] > s_minutes)
 						{
 							end_index = middle_index - 1;
@@ -266,8 +266,15 @@ try
 					}
 					if (section_skip != true)
 					{
-						middle_index = (end_index - start_index) / 2;
-						if (s_minutes < start_times_array[middle_index])
+						middle_index =  (end_index + start_index) / 2;
+						if (middle_index == 0)
+						{
+							if (s_minutes < end_times_array[middle_index])
+							{
+								section_skip = true;
+							}
+						}
+						else if (s_minutes < start_times_array[middle_index])
 						{
 							if (s_minutes < end_times_array[middle_index - 1] || e_minutes > start_times_array[middle_index])
 							{
