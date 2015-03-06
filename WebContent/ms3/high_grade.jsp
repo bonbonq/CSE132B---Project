@@ -101,7 +101,7 @@ try
 				" AND student_instance.grade = grade_conversion.grade" + 
 				addition;
 		ps5 = conn.prepareStatement(sql5);
-		
+		/*
 		sql0 = "SELECT grade, COUNT(*) AS received" + 
 		" FROM quarter, quarter_course_class__instance, faculty_class_section, student_instance" +
 		" WHERE quarter.idquarter = quarter_course_class__instance.idquarter" + 
@@ -110,6 +110,9 @@ try
 		addition + 
 		" GROUP BY student_instance.grade " + 
 		" ORDER BY student_instance.grade";
+		*/
+		
+		sql0 = "SELECT grade, COUNT(*) AS received FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN faculty_class_section WHERE faculty_class_section.idclass = quarter_course_class__instance.idclass " + addition +  " GROUP BY grade ORDER BY grade";
 		
 		System.out.println(sql0);
 		ps0 = conn.prepareStatement(sql0);
