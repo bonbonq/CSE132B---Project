@@ -26,7 +26,7 @@ BEGIN
 	);
 
 	CREATE TEMPORARY TABLE faculty_of_interest (
-		faculty_name text;
+		idweekly integer
 	);
 
 	INSERT INTO same_section 
