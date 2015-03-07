@@ -387,7 +387,7 @@ CREATE TABLE course (
   max_units integer NOT NULL,
   lab boolean NOT NULL,
   consent_prereq boolean NOT NULL,
-  type text NOT NULL,
+  type text NOT NULL
   );
 
 
@@ -552,7 +552,7 @@ CREATE TABLE weekly (
   idweekly SERIAL PRIMARY KEY,
   building text NOT NULL,
   room text NOT NULL,
-  day_of_week text NOT NULL,
+  day_of_week integer NOT NULL,
   start_time time without time zone NOT NULL,
   end_time time without time zone NOT NULL,
   type text NOT NULL

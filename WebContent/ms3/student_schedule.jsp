@@ -33,9 +33,29 @@ String sql4 = null;
 PreparedStatement ps4 = null;
 ResultSet rs4 = null;
 
+String sql5 = null;
+PreparedStatement ps5 = null;
+ResultSet rs5 = null;
+
+String sql6 = null;
+PreparedStatement ps6 = null;
+ResultSet rs6 = null;
+
+String sql7 = null;
+PreparedStatement ps7 = null;
+ResultSet rs7 = null;
+
+String sql8 = null;
+PreparedStatement ps8 = null;
+ResultSet rs8 = null;
+
+String sql9 = null;
+PreparedStatement ps9 = null;
+ResultSet rs9 = null;
+
 //Data structures for storing queries
 HashMap<String,String> ssn_info = new HashMap<String,String>();
-HashSet<String> class_print = new HashSet<String>();
+HashMap<Integer,String> class_info = new HashMap<Integer,String>();
 
 String action = request.getParameter("action");
 
@@ -81,16 +101,25 @@ try
 		rs1.next();
 		int idstudent = rs1.getInt("idstudent");
 	
-		sql2 = "SELECT day_of_week, start_time, end_time" +
+		sql6 = "CREATE TEMPORARY TABLE students_schedule (day_of_week integer, start_time TIME, end_time TIME)";
+		sql7 = "CREATE TEMPORARY TABLE current_quarter_sections (idclass integer, idsection integer, day_of_week integer, start_time TIME, end_time TIME)";
+		
+		ps6 = conn.prepareStatement(sql6);
+		ps7 = conn.prepareStatement(sql7);
+		
+		ps6.execute();
+		ps7.execute();
+		
+		sql2 = "INSERT INTO students_schedule (SELECT day_of_week, start_time, end_time" +
 		" FROM student_section__enrolled, section_weekly, weekly" +
 	    " WHERE student_section__enrolled.idstudent = ?" +
 	    " AND student_section__enrolled.idsection = section_weekly.idsection" +
-	    " AND section_weekly.idweekly = weekly.idweekly";
+	    " AND section_weekly.idweekly = weekly.idweekly)";
 		ps2 = conn.prepareStatement(sql2);
 		ps2.setInt(1, idstudent);
 		rs2 = ps2.executeQuery();
 	
-		sql3 = "SELECT faculty_class_section.idclass, faculty_class_section.idsection, day_of_week, start_time, end_time" + 
+		sql3 = "INSERT INTO current_quarter_sections (SELECT faculty_class_section.idclass, faculty_class_section.idsection, day_of_week, start_time, end_time" + 
 	 	" FROM quarter, quarter_course_class__instance, faculty_class_section, section_weekly, weekly, class" +
 		" WHERE quarter_course_class__instance.idquarter = quarter.idquarter" +
 	 	" AND quarter.season = ?" +
@@ -99,12 +128,41 @@ try
 		" AND section_weekly.idsection = faculty_class_section.idsection" +
 	 	" AND weekly.idweekly = section_weekly.idweekly" +
 		" AND class.idclass = quarter_course_class__instance.idclass" +
-	 	" ORDER BY idclass, idsection";
+	 	" ORDER BY idclass, idsection)";
 		ps3 = conn.prepareStatement(sql3);
 		ps3.setString(1, current_season);
 		ps3.setInt(2, current_year);
 		rs3 = ps3.executeQuery();
-	
+		
+		sql5 = "CREATE TEMPORARY TABLE conflict_sections (idclass integer, idsection integer, day_of_week integer, start_time TIME, end_time TIME)";
+				
+		sql8 = "INSERT INTO conflict_sections (SELECT * FROM current_quarter_sections AS a " + 
+		" WHERE 0 <> ANY (SELECT (a.day_of_week & day_of_week) FROM students_schedule)" + 
+		" AND ((TRUE, TRUE) <> ANY"  +
+			" (SELECT (a.start_time < start_time AND a.end_time < start_time) FROM students_schedule)" + 
+		" OR (TRUE,TRUE) <> ANY" + 
+			"(SELECT (a.start_time > end_time AND a.end_time > end_time) FROM students_schedule))";
+		
+		ps5 = conn.prepareStatement(sql5);
+		ps5.execute();
+		
+		ps8 = conn.prepareStatement(sql8);
+		ps8.execute();
+		
+		sql9 = "SELECT * FROM class WHERE idclass IN (SELECT DISTINCT idclass FROM ((SELECT idclass, idsection FROM faculty_class_section) EXCEPT (SELECT idclass integer, idsection integer FROM conflict_sessions)))";
+		ps9 = conn.prepareStatement(sql9);
+		rs9 = ps9.executeQuery();
+		
+		if (!(rs9.isBeforeFirst()))
+			class_info = null;
+		else
+		{
+			while (rs9.next())
+			{
+				class_info.put(rs9.getInt("idclass"), rs9.getString("title"));
+			}
+		}
+	/*
 		String [] days = {"M", "Tu", "W", "Th", "F", "Sa", "Su"};
 		System.out.println("A:" + days.length);
 		ArrayList<Integer> start_times = new ArrayList<Integer>();
@@ -152,9 +210,9 @@ try
 			//Sort start and end times to synchronize by index
 			Collections.sort(start_times);
 			Collections.sort(end_times);
-			/*
+			
 			for (int i = 0; i < start_times.size(); i++)
-				System.out.println(start_times.get(i));*/
+				System.out.println(start_times.get(i));
 			
 			//Generate arrays for binary search of conflicts
 			Integer [] start_times_array = new Integer[start_times.size()];
@@ -326,7 +384,7 @@ try
 				}
 				first = false;
 			}
-		}
+		}*/
 	}
 }
 
@@ -393,7 +451,7 @@ if (action != null && action.equals("list"))
 	%>
 	<h2>Conflicting classes for Student with SSN <%=ss_num%>:</h2>
 	<%
-	if (class_print == null)
+	if (class_info == null)
 	{
 		%>
 		<h3>No conflicting classes</h3>
@@ -404,11 +462,13 @@ if (action != null && action.equals("list"))
 		%>
 		<ul>
 		<%
-		Iterator<String> it_print = class_print.iterator();
-		while (it_print.hasNext())
+		Iterator<Integer> class_keys = class_info.keySet().iterator();
+		Integer curr;
+		while (class_keys.hasNext())
 		{
+			curr = class_keys.next();
 			%>
-			<li><%=it_print.next()%></li>
+			<li><%=curr%> - <%=class_info.get(curr)%></li>
 			<%
 		}
 		%>

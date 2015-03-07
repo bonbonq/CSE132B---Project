@@ -395,6 +395,16 @@
 		
 			String dayType = "";
 			String dayString = "";
+			
+			int dayString2 = 0;
+			int [] dayKeys = {64, 32, 16, 8, 4, 2, 1};
+			HashMap<String,Integer> dayCodes = new HashMap<String,Integer>();
+			String [] dayCodesString = {"M", "Tu", "W", "Th", "F", "Sa", "Su"};
+
+			for (int i = 0; i < 7; i++)
+			{
+				dayCodes.put(dayCodesString[i], dayKeys[i]);
+			}
 		
 			if (type != null && (type.equals("lecture") || (type.equals("discussion"))))
 			{
@@ -408,6 +418,10 @@
 				dayType = "Days of Week";
 				for (int i = 0; i < dayslength; i++)
 				{
+					dayString2 = dayString2 | dayCodes.get(days[i]);
+				}
+				for (int i = 0; i < dayslength; i++)
+				{
 					dayString += days[i];
 				}
 			
@@ -415,7 +429,7 @@
 				ps1 = conn.prepareStatement(sql1);
 				ps1.setString(1, building);
 				ps1.setString(2, room);
-				ps1.setString(3, dayString);
+				ps1.setInt(3, dayString2);
 				ps1.setTimestamp(4, startTime);
 				ps1.setTimestamp(5, endTime);
 				ps1.setString(6, type);
@@ -528,6 +542,15 @@
 			
 				String dayType = "";
 				String dayString = "";
+				int dayString2 = 0;
+				int [] dayKeys = {64, 32, 16, 8, 4, 2, 1};
+				HashMap<String,Integer> dayCodes = new HashMap<String,Integer>();
+				String [] dayCodesString = {"M", "Tu", "W", "Th", "F", "Sa", "Su"};
+
+				for (int i = 0; i < 7; i++)
+				{
+					dayCodes.put(dayCodesString[i], dayKeys[i]);
+				}
 			
 				if (type != null && (type.equals("lecture") || (type.equals("discussion"))))
 				{
@@ -538,14 +561,18 @@
 					String [] days = request.getParameterValues("days");
 					int dayslength = days.length;
 					dayType = "Days of Week";
+					int j = 0;
 					for (int i = 0; i < dayslength; i++)
-						dayString += days[i];
+					{
+						dayString2 = dayString2 | dayCodes.get(days[i]);
+						j++;
+					}
 				
 					sql1 = "INSERT INTO weekly (building, room, day_of_week, start_time, end_time, type) VALUES (?, ?, ?, ?, ?, ?) RETURNING idweekly";
 					ps1 = conn.prepareStatement(sql1);
 					ps1.setString(1, building);
 					ps1.setString(2, room);
-					ps1.setString(3, dayString);
+					ps1.setInt(3, dayString2);
 					ps1.setTime(4, startTime);
 					ps1.setTime(5, endTime);
 					ps1.setString(6, type);
@@ -569,8 +596,8 @@
 					dayType = "Date";
 					dayString = year + "-" + month + "-" + day;
 					java.sql.Date revDate = java.sql.Date.valueOf(dayString);
-					java.sql.Timestamp startTime = java.sql.Timestamp.valueOf(dayString + " " + startTimeString);
-					java.sql.Timestamp endTime = java.sql.Timestamp.valueOf(dayString + " " + endTimeString);
+					java.sql.Timestamp startTime = java.sql.Timestamp.valueOf(dayString2 + " " + startTimeString);
+					java.sql.Timestamp endTime = java.sql.Timestamp.valueOf(dayString2 + " " + endTimeString);
 				
 					sql1 = "INSERT INTO reviewsession (time, start_time, end_time, building, room) VALUES (?, ?, ?, ?, ?) RETURNING idreviewsession";
 					ps1 = conn.prepareStatement(sql1);
