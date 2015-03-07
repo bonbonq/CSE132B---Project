@@ -1,9 +1,11 @@
 DROP TRIGGER IF EXISTS enroll_section ON student_section__enrolled;
 DROP TRIGGER IF EXISTS insert_update_section_weekly ON section_weekly;
 DROP TRIGGER IF EXISTS update_faculty_class_section ON faculty_class_section;
-DROP FUNCTION IF EXISTS check_conflict;
-DROP FUNCTION IF EXISTS check_section_conflict;
-DROP FUNCTION IF EXISTS check_enrollment;
+DROP TRIGGER IF EXISTS student_attends_entry ON student_quarter__attends;
+DROP FUNCTION IF EXISTS check_conflict();
+DROP FUNCTION IF EXISTS check_section_conflict();
+DROP FUNCTION IF EXISTS check_enrollment();
+DROP FUNCTION IF EXISTS check_student_attends();
 
 -------------------------------------------
 -- PROCECURE check_conflict
