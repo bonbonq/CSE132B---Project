@@ -44,23 +44,36 @@ String action = request.getParameter("action");
 /* ============= */
 if(action!=null && action.equals("insert")){
 	
-	PreparedStatement insert = conn.prepareStatement(	
-			"INSERT INTO student_quarter__attends (idstudent, idquarter) " +
-			"SELECT ?,?" +
-			"WHERE EXISTS (SELECT * FROM student WHERE idstudent=?)");
-	insert.setInt(1, Integer.parseInt(request.getParameter("idstudent")));
-	insert.setInt(2, Integer.parseInt(request.getParameter("idquarter")));
-	insert.setInt(3, Integer.parseInt(request.getParameter("idstudent")));
-	
-	
-	if (insert.executeUpdate()==1) {
-		%>
-		<h1>Successfully Added!</h1>
-		<%
-	}
-	else {
-		%>
-		<h1>Insert has failed! Please check if student pid is correct.</h1>
+	try {
+		conn.setAutoCommit(false);
+		PreparedStatement insert = conn.prepareStatement(	
+				"INSERT INTO student_quarter__attends (idstudent, idquarter) " +
+				"SELECT ?,?" +
+				"WHERE EXISTS (SELECT * FROM student WHERE idstudent=?)");
+		insert.setInt(1, Integer.parseInt(request.getParameter("idstudent")));
+		insert.setInt(2, Integer.parseInt(request.getParameter("idquarter")));
+		insert.setInt(3, Integer.parseInt(request.getParameter("idstudent")));
+		
+		
+		if (insert.executeUpdate()==1) {
+			%>
+			<h1>Successfully Added!</h1>
+			<%
+		}
+		else {
+			%>
+			<h1>Insert has failed! Please check if student pid is correct.</h1>
+			<%
+		}
+		conn.commit();
+		conn.setAutoCommit(true);
+		
+	} catch (SQLException e) {
+		conn.rollback();
+		e.printStackTrace();
+        String message = "Failure: Your entry failed " + e.getMessage();
+	   	%>
+		<h1><%=message %></h1>
 		<%
 	}
 }

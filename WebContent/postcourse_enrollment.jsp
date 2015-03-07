@@ -56,12 +56,15 @@ if (action!=null && action.equals("course")) {
 	if (idquarter==0 || idinstance==0)
 		response.sendRedirect("precourse_enrollment.jsp");
 }
+else {
+	response.sendRedirect("precourse_enrollment.jsp");
+}
 
 
 /* ================== */
 /* INSERT FORM action */
 /* ================== */
-else if(action!=null && action.equals("insert")){
+if(action!=null && action.equals("insert")){
 	
 	/* Get the enrollment limit */
 	int enrollment_limit = 0;

@@ -48,18 +48,24 @@ if(action!=null && action.equals("insert")){
 			"INSERT INTO degree (total_units, name, type) " +
 			"SELECT ?,?,?");
 	insert.setString(1, request.getParameter("total_units"));
-	insert.setString(2, request.getParameter("name"));
+	insert.setString(2, request.getParameter("name").trim());
 	insert.setString(3, request.getParameter("type"));
 	
-	
-	if (insert.executeUpdate()==1) {
-		%>
-		<h1>Successfully Updated!</h1>
-		<%
+	if (request.getParameter("name").trim().length() > 0) {
+		if (insert.executeUpdate()==1) {
+			%>
+			<h1>Successfully Inserted!</h1>
+			<%
+		}
+		else {
+			%>
+			<h1>Insert has failed!</h1>
+			<%
+		}
 	}
 	else {
 		%>
-		<h1>Update has failed!</h1>
+		<h1>Incorrect name entry</h1>
 		<%
 	}
 }
@@ -77,14 +83,21 @@ else if(action!=null && action.equals("update")){
 	update.setString(3, request.getParameter("type"));
 	update.setInt(4, Integer.parseInt(request.getParameter("iddegree")));
 	
-	if (update.executeUpdate()==1) {
-		%>
-		<h1>Successfully Updated!</h1>
-		<%
+	if (request.getParameter("name").trim().length() > 0) {
+		if (update.executeUpdate()==1) {
+			%>
+			<h1>Successfully Update!</h1>
+			<%
+		}
+		else {
+			%>
+			<h1>Update has failed!</h1>
+			<%
+		}
 	}
 	else {
 		%>
-		<h1>Update has failed!</h1>
+		<h1>Incorrect name entry</h1>
 		<%
 	}
 }
@@ -156,13 +169,17 @@ try{
 		<p>
 		
 		<div>
-			Type: <input type="text" name="type" required>
+			Type: 
+			<br>
+			<input type="radio" name="type" value="BS" checked>BS<br>
+			<input type="radio" name="type" value="MS">MS<br>
+			<input type="radio" name="type" value="PHD">PHD<br>
 			<br>
 		</div>
 		<p>
 		
 		<div>
-			Units: <input type="number" name="total_units" required>
+			Units: <input type="number" name="total_units" min=0 required>
 			<br>
 		</div>
 		<p>

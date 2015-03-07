@@ -75,11 +75,19 @@ if (action!=null && action.equals("insert")) {
 			sql1 = "INSERT INTO undergraduate (college, idstudent)" +
 					"SELECT ?,?" +
 					"WHERE NOT EXISTS (SELECT idundergraduate FROM undergraduate WHERE idstudent=?)" +
+					"AND EXISTS (SELECT idstudent FROM student WHERE idstudent=?) "+
+					"AND NOT EXISTS (SELECT idms FROM ms WHERE idstudent=?)" +
+					"AND NOT EXISTS (SELECT idcandidate FROM candidate WHERE idstudent=?)" +
+					"AND NOT EXISTS (SELECT idprecandidate FROM precandidate WHERE idstudent=?)" +
 					"RETURNING idundergraduate";
 			pstmt1 = conn.prepareStatement(sql1);
 			pstmt1.setString(1, college);
 			pstmt1.setInt(2, pid);
 			pstmt1.setInt(3, pid);
+			pstmt1.setInt(4, pid);
+			pstmt1.setInt(5, pid);
+			pstmt1.setInt(6, pid);
+			pstmt1.setInt(7, pid);
 			if (pstmt1.execute())
 			{
 				ResultSet rs1 = pstmt1.getResultSet();
@@ -87,7 +95,7 @@ if (action!=null && action.equals("insert")) {
 					idundergrdauate = rs1.getInt("idundergraduate");
 				}
 				else {
-					throw new SQLException("That student is already registered as an undergrad.");
+					throw new SQLException("That student is already registeredor the student doesn't exist.");
 				}
 			}
 			else

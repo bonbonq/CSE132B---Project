@@ -76,7 +76,7 @@ try{
 } catch(SQLException e) {
 	conn.rollback();
 	e.printStackTrace();
-	String message = "Failure: Unable to retrieve dropdown info - " + e.getMessage();
+	String message = "Inserting incompatible information - " + e.getMessage();
 	%>
 	<h1><%=message %></h1>
 	<%

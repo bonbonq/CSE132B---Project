@@ -70,11 +70,20 @@ if (action!=null && action.equals("insert")) {
 		conn.setAutoCommit(false);
 		if (type.equals("ms") || type.equals("5year")) {
 			
-			sql1 = "INSERT INTO ms (idstudent) SELECT ? WHERE NOT EXISTS (SELECT idms FROM ms WHERE idstudent=?) AND EXISTS (SELECT idstudent FROM student WHERE idstudent=?) RETURNING idms";
+			sql1 = "INSERT INTO ms (idstudent) SELECT ? "+
+					"WHERE NOT EXISTS (SELECT idms FROM ms WHERE idstudent=?) "+
+					"AND EXISTS (SELECT idstudent FROM student WHERE idstudent=?) "+
+					"AND NOT EXISTS (SELECT idcandidate FROM candidate WHERE idstudent=?)" +
+					"AND NOT EXISTS (SELECT idprecandidate FROM precandidate WHERE idstudent=?)" +
+					"and NOT EXISTS (SELECT idundergraduate FROM undergraduate WHERE idstudent=?)" +
+					"RETURNING idms";
 			pstmt1 = conn.prepareStatement(sql1);
 			pstmt1.setInt(1, pid);
 			pstmt1.setInt(2, pid);
 			pstmt1.setInt(3, pid);
+			pstmt1.setInt(4, pid);
+			pstmt1.setInt(5, pid);
+			pstmt1.setInt(6, pid);
 			if (pstmt1.execute())
 			{
 				ResultSet rs1 = pstmt1.getResultSet();
@@ -82,7 +91,7 @@ if (action!=null && action.equals("insert")) {
 					idms = rs1.getInt("idms");
 				}
 				else {
-					throw new SQLException("That student is already registered as an MS student or the student doesn't exist.");
+					throw new SQLException("That student is already registered or the student doesn't exist.");
 				}
 			}
 			else

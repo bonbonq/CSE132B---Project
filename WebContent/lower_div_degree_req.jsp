@@ -40,7 +40,7 @@ try {
 
 String action = request.getParameter("action");
 /* ============= */
-/* Update Action */
+/* Insert Action */
 /* ============= */
 if(action!=null && action.equals("insert")){
 	
@@ -49,16 +49,27 @@ if(action!=null && action.equals("insert")){
 			"SELECT ?,?,?");
 	update.setInt(1, Integer.parseInt(request.getParameter("iddegree")));
 	update.setInt(2, Integer.parseInt(request.getParameter("units")));
-	update.setDouble(3, Double.parseDouble(request.getParameter("gpa")));
-	
-	if (update.executeUpdate()==1) {
+	double gpa = 0;
+	try {
+		gpa = Double.parseDouble(request.getParameter("gpa"));
+		if (gpa<0.0) 
+			throw new Exception();
+		update.setDouble(3, gpa);
+		
+		if (update.executeUpdate()==1) {
+			%>
+			<h1>Successfully Inserted!</h1>
+			<%
+		}
+		else {
+			%>
+			<h1>Insert has failed!</h1>
+			<%
+		}
+		
+	} catch (Exception e) {
 		%>
-		<h1>Successfully Inserted!</h1>
-		<%
-	}
-	else {
-		%>
-		<h1>Insert has failed!</h1>
+		<h1>Please enter the GPA in the form of a decimal</h1>
 		<%
 	}
 }
@@ -115,7 +126,7 @@ try{
 		<p>
 		
 		<div>
-			Units: <input type="number" name="units" required>
+			Units: <input type="number" name="units" min=0 required>
 			<br>
 		</div>
 		<p>

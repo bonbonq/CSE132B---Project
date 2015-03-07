@@ -220,3 +220,35 @@ $secconflict$ LANGUAGE plpgsql;
  FOR EACH ROW
  EXECUTE PROCEDURE check_section_conflict();
 
+ 
+ 
+ 
+ 
+ 
+ -------------------------------------------
+-- PROCEDURE check_student_attends
+-- Ensures that redundant attendance doesn't exist for same quarter
+-- USE WITH TRIGGER enroll_section
+-------------------------------------------
+CREATE OR REPLACE FUNCTION check_student_attends() RETURNS trigger AS $attends$
+ BEGIN
+ 	IF EXISTS(
+ 		(SELECT * FROM student_quarter__attends WHERE idstudent = NEW.idstudent AND idquarter=NEW.idquarter)
+ 	) THEN RAISE EXCEPTION 'Student is enrolled in that quarter already.';
+ 	END IF;
+ 	RETURN NEW;
+ END;
+ $attends$ LANGUAGE plpgsql;
+-------------------------------------------
+--
+--
+--
+--
+-------------------------------------------
+-- TRIGGER student_attends_entry
+-------------------------------------------
+CREATE TRIGGER student_attends_entry
+BEFORE INSERT ON student_quarter__attends
+FOR EACH ROW
+EXECUTE PROCEDURE check_student_attends();
+-------------------------------------------

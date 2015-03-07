@@ -135,26 +135,40 @@ if (action!=null && action.equals("insert")) {
 /* ============= */
 else if(action!=null && action.equals("update")){
 	
-	PreparedStatement update = conn.prepareStatement(	
-			"Update student SET " +
-			"first_name = ?, last_name=?, middle_name=?, ss_num=?, enrolled=?, residency=? " +
-			"WHERE idstudent=?");
-	update.setString(1, request.getParameter("first_name"));
-	update.setString(2, request.getParameter("last_name"));
-	update.setString(3, request.getParameter("middle_name").trim().length()==0 ? "NULL" : request.getParameter("middle_name"));
-	update.setInt(4, Integer.parseInt(request.getParameter("ss_num")));
-	update.setBoolean(5, request.getParameter("enrollment").equals("True") ? true : false);
-	update.setString(6, request.getParameter("residency"));
-	update.setInt(7, Integer.parseInt(request.getParameter("idstudent")));
-	
-	if (update.executeUpdate()==1) {
-		%>
-		<h1>Successfully Updated!</h1>
-		<%
-	}
-	else {
-		%>
-		<h1>Update has failed!</h1>
+	try {
+		conn.setAutoCommit(false);
+		PreparedStatement update = conn.prepareStatement(	
+				"Update student SET " +
+				"first_name = ?, last_name=?, middle_name=?, ss_num=?, enrolled=?, residency=? " +
+				"WHERE idstudent=?");
+		update.setString(1, request.getParameter("first_name"));
+		update.setString(2, request.getParameter("last_name"));
+		update.setString(3, request.getParameter("middle_name").trim().length()==0 ? "NULL" : request.getParameter("middle_name"));
+		update.setInt(4, Integer.parseInt(request.getParameter("ss_num")));
+		update.setBoolean(5, request.getParameter("enrollment").equals("True") ? true : false);
+		update.setString(6, request.getParameter("residency"));
+		update.setInt(7, Integer.parseInt(request.getParameter("idstudent")));
+		
+		if (update.executeUpdate()==1) {
+			%>
+			<h1>Successfully Updated!</h1>
+			<%
+		}
+		else {
+			%>
+			<h1>Update has failed!</h1>
+			<%
+		}
+		
+		conn.commit();
+		conn.setAutoCommit(true);
+		
+	} catch (SQLException e) {
+		conn.rollback();
+		e.printStackTrace();
+        String message = "Failure: Your update failed " + e.getMessage();
+	   	%>
+		<h1><%=message %></h1>
 		<%
 	}
 }
