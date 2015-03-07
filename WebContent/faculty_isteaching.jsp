@@ -168,8 +168,8 @@ ResultSet course_rs = null;
 try{
 	conn.setAutoCommit(false);
 	int current_year = Calendar.getInstance().get(Calendar.YEAR);
-	PreparedStatement course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE year=? AND season='Winter'", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-	course_stmt.setInt(1, current_year);
+	PreparedStatement course_stmt = conn.prepareStatement("SELECT * FROM quarter_course_class__instance NATURAL JOIN quarter NATURAL JOIN course_coursenumber NATURAL JOIN coursenumber WHERE year='2009' AND season='Spring'", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+	//course_stmt.setInt(1, current_year);
 	/* The below two statements are not closed, this might cause issues later... */
 	course_rs = course_stmt.executeQuery();
 
@@ -230,11 +230,11 @@ try{
 			Course:
 			<select name="course">
 				<%
-				if (course_rs.isBeforeFirst())
+				if (rs.isBeforeFirst())
 				{
-					while(course_rs.next()){
+					while(rs.next()){
 						%>
-						<option value=<%=course_rs.getString("idinstance")%>><%=course_rs.getString("number")%> - <%=course_rs.getString("year")%> <%=course_rs.getString("season")%></option>
+						<option value=<%=rs.getString("idinstance")%>><%=rs.getString("number")%> - <%=rs.getString("year")%> <%=rs.getString("season")%></option>
 						<%
 					}
 				}
