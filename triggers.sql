@@ -50,7 +50,7 @@ BEGIN
  			FROM faculty_class_section NATURAL JOIN section_weekly NATURAL JOIN weekly
  			WHERE faculty_name IN 
  						(SELECT faculty_name FROM faculty_class_section NATURAL JOIN section_weekly NATURAL JOIN weekly
- 						WHERE NEW.idweekly = weekly));
+ 						WHERE NEW.idweekly = idweekly));
 
 	INSERT INTO section_of_interest 
 	(SELECT idweekly FROM weekly AS a 
@@ -59,9 +59,9 @@ BEGIN
 		(SELECT (a.day_of_week & day_of_week)
 		FROM same_section)
 	OR (
-		(TRUE,TRUE) = ALL
+		TRUE = ALL
 			(SELECT (a.start_time < start_time AND a.end_time < start_time) FROM same_section)
- 		OR (TRUE,TRUE) = ALL
+ 		OR TRUE = ALL
  			(SELECT (a.start_time > end_time AND a.end_time > end_time) FROM same_section)
 		)
 	);
@@ -73,9 +73,9 @@ BEGIN
 		(SELECT (a.day_of_week & day_of_week)
 		FROM same_faculty)
 	OR (
-		(TRUE,TRUE) = ALL
+		TRUE = ALL
 			(SELECT (a.start_time < start_time AND a.end_time < start_time) FROM same_faculty)
- 		OR (TRUE,TRUE) = ALL
+ 		OR TRUE = ALL
  			(SELECT (a.start_time > end_time AND a.end_time > end_time) FROM same_faculty)
 		)
 	);
@@ -190,9 +190,9 @@ EXECUTE PROCEDURE check_enrollment();
  		SELECT * FROM updated_section AS a 
  		WHERE 0 <> ANY
  			(SELECT (a.day_of_week & day_of_week) FROM same_faculty)
- 		OR (TRUE, TRUE) <> ANY
+ 		OR TRUE <> ANY
  			(SELECT (a.start_time < start_time AND a.end_time < start_time) FROM same_section)
- 		OR (TRUE,TRUE) = ALL
+ 		OR TRUE = ALL
  			(SELECT (a.start_time > end_time AND a.end_time > end_time) FROM same_section)
  		);
 
