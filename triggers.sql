@@ -1,3 +1,10 @@
+DROP TRIGGER IF EXISTS enroll_section ON student_section__enrolled;
+DROP TRIGGER IF EXISTS insert_update_section_weekly ON section_weekly;
+DROP TRIGGER IF EXISTS update_faculty_class_section ON faculty_class_section;
+DROP FUNCTION IF EXISTS check_conflict;
+DROP FUNCTION IF EXISTS check_section_conflict;
+DROP FUNCTION IF EXISTS check_enrollment;
+
 -------------------------------------------
 -- PROCECURE check_conflict
 -- Ensures no time conflict occurs within a section
@@ -132,8 +139,8 @@ CREATE OR REPLACE FUNCTION check_enrollment() RETURNS trigger AS $max$
 -- TRIGGER enroll_section
 -------------------------------------------
 CREATE TRIGGER enroll_section
-BEFORE INSERT ON student_section__enrollment
-FOR EACH STATEMENT
+BEFORE INSERT ON student_section__enrolled
+FOR EACH ROW
 EXECUTE PROCEDURE check_enrollment();
 -------------------------------------------
 
@@ -156,7 +163,7 @@ EXECUTE PROCEDURE check_enrollment();
 	);
 
 	CREATE TEMPORARY TABLE updated_section (
-		idweekly integer
+		idweekly integer,
 		day_of_week integer,
 		start_time TIME,
 		end_time TIME
@@ -197,6 +204,7 @@ EXECUTE PROCEDURE check_enrollment();
  	DROP TABLE same_faculty;
 	DROP TABLE updated_section;
 	DROP TABLE faculty_of_interest;
+	RETURN NEW;
 END
 $secconflict$ LANGUAGE plpgsql;
 -------------------------------------------
