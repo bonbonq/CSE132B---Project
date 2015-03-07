@@ -40,7 +40,7 @@ BEGIN
 
 	INSERT INTO same_section 
 		(SELECT idweekly, day_of_week, start_time, end_time 
-			FROM weekly, section_weekly 	
+			FROM weekly NATURAL JOIN section_weekly 	
 			WHERE idsection = NEW.idsection
 			AND idweekly <> NEW.idweekly
 		);
