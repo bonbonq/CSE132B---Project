@@ -37,13 +37,26 @@
 		String sql3 = null;
 		String sql4 = null;
 		
+		boolean error = false;
+		String error_message = null;
+		
 		try
 		{
 			Class.forName("org.postgresql.Driver");
 			conn = DriverManager.getConnection("jdbc:postgresql://localhost/CSE132B");
 			conn.setAutoCommit(false);
+			
+			error_message = (String) session.getAttribute("error");
+			
+			if (error_message != null && error_message.length() > 0)
+			{
+				%>
+				<h2><%=error_message%></h2>
+				<%
+				session.invalidate();
+			}
 		
-			if (action != null && action.equals("view"))
+			else if (action != null && action.equals("view"))
 			{
 				String success = (String) session.getAttribute("success");
 				Integer idsection = (Integer) session.getAttribute("idsection");
@@ -551,6 +564,8 @@
 				{
 					dayCodes.put(dayCodesString[i], dayKeys[i]);
 				}
+				
+				
 			
 				if (type != null && (type.equals("lecture") || (type.equals("discussion"))))
 				{
@@ -567,25 +582,33 @@
 						dayString2 = dayString2 | dayCodes.get(days[i]);
 						j++;
 					}
-				
-					sql1 = "INSERT INTO weekly (building, room, day_of_week, start_time, end_time, type) VALUES (?, ?, ?, ?, ?, ?) RETURNING idweekly";
-					ps1 = conn.prepareStatement(sql1);
-					ps1.setString(1, building);
-					ps1.setString(2, room);
-					ps1.setInt(3, dayString2);
-					ps1.setTime(4, startTime);
-					ps1.setTime(5, endTime);
-					ps1.setString(6, type);
-					ps1.execute();
-					rs1 = ps1.getResultSet();
-					rs1.next();
-					int idweekly = rs1.getInt("idweekly");
-					sql2 = "INSERT INTO section_weekly (idsection, idweekly) VALUES (?,?)";
-					ps2 = conn.prepareStatement(sql2);
-					ps2.setInt(1, idsection_insert);
-					ps2.setInt(2, idweekly);
-					ps2.executeUpdate();
-					conn.commit();
+					try
+					{
+						sql1 = "INSERT INTO weekly (building, room, day_of_week, start_time, end_time, type) VALUES (?, ?, ?, ?, ?, ?) RETURNING idweekly";
+						ps1 = conn.prepareStatement(sql1);
+						ps1.setString(1, building);
+						ps1.setString(2, room);
+						ps1.setInt(3, dayString2);
+						ps1.setTime(4, startTime);
+						ps1.setTime(5, endTime);
+						ps1.setString(6, type);
+						ps1.execute();
+						rs1 = ps1.getResultSet();
+						rs1.next();
+						int idweekly = rs1.getInt("idweekly");
+						sql2 = "INSERT INTO section_weekly (idsection, idweekly) VALUES (?,?)";
+						ps2 = conn.prepareStatement(sql2);
+						ps2.setInt(1, idsection_insert);
+						ps2.setInt(2, idweekly);
+						ps2.executeUpdate();
+						conn.commit();
+					}
+					catch (SQLException e)
+					{
+						conn.rollback();
+						error = true;
+						error_message = e.getMessage();
+					}
 				}
 			
 				else if (type != null && type.equals("review"))
@@ -617,9 +640,17 @@
 					ps2.executeUpdate();
 					conn.commit();
 				}
-				session.setAttribute("success", "Insert");
-				session.setAttribute("idsection", idsection_insert);
-				response.sendRedirect("subsection.jsp?action=view");
+				if (error == false)
+				{
+					session.setAttribute("success", "Insert");
+					session.setAttribute("idsection", idsection_insert);
+					response.sendRedirect("subsection.jsp?action=view");
+				}
+				else
+				{
+					session.setAttribute("error", error_message);
+					response.sendRedirect("subsection.jsp?action=error");
+				}
 			}
 			
 			else if (action != null && (action.equals("create") || action.equals("create_specific")))
