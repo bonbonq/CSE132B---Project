@@ -1,0 +1,12 @@
+Fill in CPQG using:
+SELECT idcourse, faculty_name, idquarter, grade FROM faculty_class_section AS fcs, instance_section AS i_s, quarter_course_class__instance as i, student_instance AS si WHERE si.idinstance=i.idinstance AND i.idinstance=i_s.idinstance AND i_s.idsection=fcs.idsection
+
+Query CPQG using:
+SELECT grade, COUNT(grade) FROM CPQG WHERE CPQG.idcourse=? AND CPQG.faculty_name=? AND CPQG.idquarter=? GROUP BY grade
+
+
+Fill in CPG using:
+SELECT idcourse, faculty_name, grade FROM faculty_class_section AS fcs, instance_section AS i_s, quarter_course_class__instance as i, student_instance AS si WHERE si.idinstance=i.idinstance AND i.idinstance=i_s.idinstance AND i_s.idsection=fcs.idsection
+
+Query CPG using:
+SELECT grade, COUNT(grade) FROM CPG WHERE CPG.idcourse=? AND CPG.faculty_name=? GROUP BY grade
