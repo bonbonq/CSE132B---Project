@@ -34,6 +34,7 @@ try {
 	Class.forName("org.postgresql.Driver");
 	conn = DriverManager.getConnection(
             "jdbc:postgresql://localhost/CSE132B?");
+	conn.setAutoCommit(false);
 	
 } catch (Exception e) {
 	e.printStackTrace();
@@ -49,15 +50,14 @@ int idinstance = 0;
 /* ============================== */
 /* Continue from course action */
 /* ============================== */
-
 if (action!=null && action.equals("course")) {
 	idquarter = Integer.parseInt(request.getParameter("idquarter"));
 	idinstance = Integer.parseInt(request.getParameter("idinstance"));
 	if (idquarter==0 || idinstance==0)
+	{
 		response.sendRedirect("precourse_enrollment.jsp");
-}
-else {
-	response.sendRedirect("precourse_enrollment.jsp");
+		return;
+	}
 }
 
 
@@ -65,103 +65,58 @@ else {
 /* INSERT FORM action */
 /* ================== */
 if(action!=null && action.equals("insert")){
-	
-	/* Get the enrollment limit */
-	int enrollment_limit = 0;
-	PreparedStatement insert0_1 = conn.prepareStatement(	
-			"SELECT * FROM section WHERE idsection=?");
-	insert0_1.setInt(1, Integer.parseInt(request.getParameter("idsection")));
-	if (insert0_1.execute())
-	{
-		ResultSet rs0 = insert0_1.getResultSet();
-		if (rs0.next()){
-			enrollment_limit = rs0.getInt("enrollment_limit");
-		}
-	}
-	else
-		%><h1>insert0_1 failed.</h1><%
-	
-	/* Check current enrolled number */
-	int currently_enrolled = 0;
-	PreparedStatement insert0_2 = conn.prepareStatement(	
-			"SELECT COUNT(*) FROM student_section__enrolled WHERE idsection=?");
-	insert0_2.setInt(1, Integer.parseInt(request.getParameter("idsection")));
-	if (insert0_2.execute())
-	{
-		ResultSet rs0_2 = insert0_2.getResultSet();
-		if (rs0_2.next()){
-			currently_enrolled = rs0_2.getInt("count");
-		}
-	}
-	else
-		%><h1>insert0_2 failed.</h1><%
 
-	
-	/* Add to student_instance */
-	int success_counter = 0;
-	
-	PreparedStatement insert1 = conn.prepareStatement(	
-			"INSERT INTO student_instance (idstudent, idinstance, units, grade_option_type, grade)" +
-			"SELECT ?,?,?,?,?" +
-			"WHERE NOT EXISTS (" +
-				"SELECT idstudent_instance FROM student_instance " +
-					"WHERE idstudent=? AND idinstance=?" +
-			")");
-	insert1.setInt(1, Integer.parseInt(request.getParameter("idstudent")));
-	insert1.setInt(2, Integer.parseInt(request.getParameter("idinstance")));
-	insert1.setInt(3, Integer.parseInt(request.getParameter("units")));
-	insert1.setString(4, request.getParameter("grade_option_type"));
-	insert1.setString(5, request.getParameter("grade"));
-	insert1.setInt(6, Integer.parseInt(request.getParameter("idstudent")));
-	insert1.setInt(7, Integer.parseInt(request.getParameter("idinstance")));
-	if (insert1.executeUpdate()==1) {
-		success_counter++;
-	}
-	else 
-		%><h1>Insert into student_instance failed.</h1><%
-	
+	try {
+		/* Add to student_instance */
+		int success_counter = 0;
 		
-	/* Add to student_section__enrolled */
-	if (currently_enrolled < enrollment_limit) {
-		
-		PreparedStatement insert2 = conn.prepareStatement(	
-				"INSERT INTO student_section__enrolled (idstudent, idsection)" +
-				"SELECT ?,?" +
+		PreparedStatement insert1 = conn.prepareStatement(	
+				"INSERT INTO student_instance (idstudent, idinstance, units, grade_option_type, grade)" +
+				"SELECT ?,?,?,?,?" +
 				"WHERE NOT EXISTS (" +
-					"SELECT idstudent_section__enrolled FROM student_section__enrolled " +
-						"WHERE idstudent=? AND idsection=?" +
+					"SELECT idstudent_instance FROM student_instance " +
+						"WHERE idstudent=? AND idinstance=?" +
 				")");
-		insert2.setInt(1, Integer.parseInt(request.getParameter("idstudent")));
-		insert2.setInt(2, Integer.parseInt(request.getParameter("idsection")));
-		insert2.setInt(3, Integer.parseInt(request.getParameter("idstudent")));
-		insert2.setInt(4, Integer.parseInt(request.getParameter("idsection")));
-		if (insert2.executeUpdate()==1 && success_counter==1) {
-			response.sendRedirect("section_enrollment_confirmation.jsp");
+		insert1.setInt(1, Integer.parseInt(request.getParameter("idstudent")));
+		insert1.setInt(2, Integer.parseInt(request.getParameter("idinstance")));
+		insert1.setInt(3, Integer.parseInt(request.getParameter("units")));
+		insert1.setString(4, request.getParameter("grade_option_type"));
+		insert1.setString(5, request.getParameter("grade"));
+		insert1.setInt(6, Integer.parseInt(request.getParameter("idstudent")));
+		insert1.setInt(7, Integer.parseInt(request.getParameter("idinstance")));
+		if (insert1.executeUpdate()==1) {
+			success_counter++;
 		}
 		else 
-			%><h1>Insert into student_section__enrolled failed.</h1><%
-			
-	}
-	/* Add to student_section__waitlist */
-	else {
+			%><h1>Insert into student_instance failed.</h1><%
 		
-		PreparedStatement insert2 = conn.prepareStatement(	
-				"INSERT INTO student_section__waitlist (idstudent, idsection)" +
-				"SELECT ?,?" +
-				"WHERE NOT EXISTS (" +
-					"SELECT idstudent_section__waitlist FROM student_section__waitlist " +
-						"WHERE idstudent=? AND idsection=?" +
-				")");
-		insert2.setInt(1, Integer.parseInt(request.getParameter("idstudent")));
-		insert2.setInt(2, Integer.parseInt(request.getParameter("idsection")));
-		insert2.setInt(3, Integer.parseInt(request.getParameter("idstudent")));
-		insert2.setInt(4, Integer.parseInt(request.getParameter("idsection")));
-		if (insert2.executeUpdate()==1 && success_counter==1) {
-			response.sendRedirect("section_waitlist_confirmation.jsp");
-		}
-		else 
-			%><h1>Insert into student_section__waitlist failed.</h1><%
 			
+		/* Add to student_section__enrolled */
+		if (true) {
+			
+			PreparedStatement insert2 = conn.prepareStatement(	
+					"INSERT INTO student_section__enrolled (idstudent, idsection) " +
+					"SELECT ?,? ");
+			insert2.setInt(1, Integer.parseInt(request.getParameter("idstudent")));
+			insert2.setInt(2, Integer.parseInt(request.getParameter("idsection")));
+			System.out.println(insert2);
+			if (insert2.executeUpdate()==1) {
+				session.setAttribute("message", "Successfully enrolled!");
+				response.sendRedirect("precourse_enrollment.jsp");
+			}
+				
+		}
+			
+		conn.setAutoCommit(true);
+		
+	} catch (SQLException e){
+		conn.rollback();
+		String error_message = e.getMessage();
+		System.out.println("test");
+		System.out.println(error_message);
+		session.setAttribute("message", error_message);
+		response.sendRedirect("precourse_enrollment.jsp");
+		
 	}
 
 	

@@ -438,19 +438,24 @@
 					dayString += days[i];
 				}
 			
-				sql1 = "UPDATE weekly SET building = ?, room = ?, day_of_week = ?, start_time = ?, end_time = ?, type = ? WHERE idweekly = ?";
-				ps1 = conn.prepareStatement(sql1);
-				ps1.setString(1, building);
-				ps1.setString(2, room);
-				ps1.setInt(3, dayString2);
-				ps1.setTimestamp(4, startTime);
-				ps1.setTimestamp(5, endTime);
-				ps1.setString(6, type);
-				ps1.setInt(7, Integer.parseInt(idweekly));
-				ps1.executeUpdate();
-				conn.commit();
-				
-				response.sendRedirect("subsection.jsp?action=view");
+				try {
+					sql1 = "UPDATE weekly SET building = ?, room = ?, day_of_week = ?, start_time = ?, end_time = ?, type = ? WHERE idweekly = ?";
+					ps1 = conn.prepareStatement(sql1);
+					ps1.setString(1, building);
+					ps1.setString(2, room);
+					ps1.setInt(3, dayString2);
+					ps1.setTimestamp(4, startTime);
+					ps1.setTimestamp(5, endTime);
+					ps1.setString(6, type);
+					ps1.setInt(7, Integer.parseInt(idweekly));
+					System.out.println(ps1);
+					ps1.executeUpdate();
+					conn.commit();					
+				} catch (SQLException e) {
+					conn.rollback();
+					error = true;
+					error_message = e.getMessage();
+				}
 			}
 		
 			else if (type != null && type.equals("review"))
@@ -476,22 +481,18 @@
 				conn.commit();
 				response.sendRedirect("subsection.jsp?action=view");
 			}
-			%>
-			<h3>Successfully added a <%=type%></h3>
-			<h3>Summary:</h3>
-			<h4><%=dayType%>: <%=dayString%></h4>
-			<h4>Start Time: <%=startTimeString%></h4>
-			<h4>End Time: <%=endTimeString%></h4>
-			<form action="subsection.jsp" method="POST">
-				<input type="submit" value="Add more subsections">
-			</form>
-			<form action="section.jsp" method="POST">
-				<input type="submit" value="Add a new section">
-			</form>
-			<form action="class_entry_form.jsp">
-				<input type="submit" value="Add a new class">
-			</form>
-			<%
+			
+			if (error == false)
+			{
+				session.setAttribute("success", "Update");
+				//session.setAttribute("idsection", );
+				response.sendRedirect("subsection.jsp?action=view");
+			}
+			else
+			{
+				session.setAttribute("error", error_message);
+				response.sendRedirect("subsection.jsp?action=error");
+			}
 					
 		}
 		
@@ -592,6 +593,7 @@
 						ps1.setTime(4, startTime);
 						ps1.setTime(5, endTime);
 						ps1.setString(6, type);
+						System.out.println(ps1);
 						ps1.execute();
 						rs1 = ps1.getResultSet();
 						rs1.next();
@@ -600,6 +602,7 @@
 						ps2 = conn.prepareStatement(sql2);
 						ps2.setInt(1, idsection_insert);
 						ps2.setInt(2, idweekly);
+						System.out.println(ps2);
 						ps2.executeUpdate();
 						conn.commit();
 					}

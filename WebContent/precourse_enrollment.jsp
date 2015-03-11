@@ -28,6 +28,17 @@ try {
 	out.println("<h1>org.postgresql.Driver Not Found</h1>");
 }
 
+// Check for error message
+String errormessage = "";
+errormessage = (String) session.getAttribute("message");
+		
+if (errormessage!=null && errormessage.length()>0){
+	%>
+	<h1><%= errormessage %></h1>
+	<%
+	session.invalidate();
+}
+
 /* =========================== */
 /* Generate Form Fields Action */
 /* =========================== */

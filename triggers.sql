@@ -1,8 +1,11 @@
 DROP TRIGGER IF EXISTS enroll_section ON student_section__enrolled;
 DROP TRIGGER IF EXISTS insert_update_section_weekly ON section_weekly;
+DROP TRIGGER IF EXISTS insert_section_weekly ON section_weekly;
+DROP TRIGGER IF EXISTS update_section_weekly ON weekly;
 DROP TRIGGER IF EXISTS update_faculty_class_section ON faculty_class_section;
 DROP TRIGGER IF EXISTS student_attends_entry ON student_quarter__attends;
 DROP FUNCTION IF EXISTS check_conflict();
+DROP FUNCTION IF EXISTS check_conflict_update();
 DROP FUNCTION IF EXISTS check_section_conflict();
 DROP FUNCTION IF EXISTS check_enrollment();
 DROP FUNCTION IF EXISTS check_student_attends();
@@ -50,7 +53,99 @@ BEGIN
  			FROM faculty_class_section NATURAL JOIN section_weekly NATURAL JOIN weekly
  			WHERE faculty_name IN 
  						(SELECT faculty_name FROM faculty_class_section NATURAL JOIN section_weekly NATURAL JOIN weekly
- 						WHERE NEW.idweekly = idweekly));
+ 						WHERE faculty_class_section.idsection = NEW.idsection)
+ 			AND idweekly <> NEW.idweekly);
+
+	INSERT INTO section_of_interest
+	(SELECT idweekly FROM weekly AS a 
+	WHERE NEW.idweekly = a.idweekly
+	AND (
+		(0 = ALL (SELECT (a.day_of_week & day_of_week) FROM same_section))
+		OR 
+		(TRUE = ALL 
+			(SELECT (a.end_time < start_time) OR (a.start_time > end_time) FROM same_section)
+		)
+		)
+		);
+
+	INSERT INTO faculty_of_interest
+	(SELECT idweekly FROM weekly AS a 
+	WHERE NEW.idweekly = a.idweekly
+	AND (
+	--	(0 = ALL
+		--	(SELECT (a.day_of_week & day_of_week) FROM same_faculty))
+	--OR 
+		(TRUE = ALL
+			(SELECT (same_faculty.end_time < a.start_time) OR (same_faculty.start_time > a.end_time)  FROM same_faculty)
+		))
+	);
+
+	IF (NOT EXISTS (SELECT * FROM section_of_interest)) THEN
+		DROP TABLE same_section;
+		DROP TABLE same_faculty;
+		DROP TABLE section_of_interest;
+		DROP TABLE faculty_of_interest;
+		RAISE EXCEPTION 'Conflicts with another subsection of this section';
+
+	ELSIF (NOT EXISTS (SELECT * FROM faculty_of_interest)) THEN
+		DROP TABLE same_section;
+		DROP TABLE same_faculty;
+		DROP TABLE section_of_interest;
+		DROP TABLE faculty_of_interest;
+		RAISE EXCEPTION 'Conflicts with another of facultys sections';
+
+	END IF;
+	
+	DROP TABLE same_section;
+	DROP TABLE same_faculty;
+	DROP TABLE section_of_interest;
+	DROP TABLE faculty_of_interest;
+	RETURN NEW;
+
+END;
+$conflict$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION check_conflict_update() RETURNS trigger AS $conflict_update$
+BEGIN
+
+	CREATE TEMPORARY TABLE same_section (
+		idweekly integer,
+		day_of_week integer,
+		start_time TIME,
+		end_time TIME
+	);
+
+	CREATE TEMPORARY TABLE same_faculty (
+		idweekly integer,
+		day_of_week integer,
+		start_time TIME,
+		end_time TIME
+	);
+
+	CREATE TEMPORARY TABLE section_of_interest (
+		idweekly integer
+	);
+
+	CREATE TEMPORARY TABLE faculty_of_interest (
+		idweekly integer
+	);
+
+	INSERT INTO same_section 
+		(SELECT idweekly, day_of_week, start_time, end_time 
+			FROM weekly NATURAL JOIN section_weekly
+			WHERE idsection IN
+			(SELECT idsection FROM weekly NATURAL JOIN section_weekly WHERE idweekly = NEW.idweekly)
+			AND idweekly <> NEW.idweekly
+		);
+
+	INSERT INTO same_faculty
+		(SELECT idweekly, day_of_week, start_time, end_time
+ 			FROM faculty_class_section NATURAL JOIN section_weekly NATURAL JOIN weekly
+ 			WHERE faculty_name IN 
+ 						(SELECT faculty_name FROM faculty_class_section NATURAL JOIN section_weekly NATURAL JOIN weekly
+ 						WHERE NEW.idweekly = idweekly)
+ 			AND idweekly <> NEW.idweekly);
 
 	INSERT INTO section_of_interest 
 	(SELECT idweekly FROM weekly AS a 
@@ -92,6 +187,7 @@ BEGIN
 		DROP TABLE same_faculty;
 		DROP TABLE section_of_interest;
 		DROP TABLE faculty_of_interest;
+		RAISE EXCEPTION 'Conflicts with another of facultys sections';
 	END IF;
 	
 	DROP TABLE same_section;
@@ -101,7 +197,7 @@ BEGIN
 	RETURN NEW;
 
 END;
-$conflict$ LANGUAGE plpgsql;
+$conflict_update$ LANGUAGE plpgsql;
 -------------------------------------------
 --
 --
@@ -110,12 +206,15 @@ $conflict$ LANGUAGE plpgsql;
 -------------------------------------------
 -- TRIGGER insert_update_section_weekly
 -------------------------------------------
-CREATE TRIGGER insert_update_section_weekly
-BEFORE INSERT OR UPDATE ON section_weekly
+CREATE TRIGGER insert_section_weekly
+BEFORE INSERT ON section_weekly
 FOR EACH ROW
 EXECUTE PROCEDURE check_conflict();
 -------------------------------------------
-
+CREATE TRIGGER update_section_weekly
+BEFORE UPDATE ON weekly
+FOR EACH ROW
+EXECUTE PROCEDURE check_conflict_update();
 
 
 
@@ -126,7 +225,7 @@ EXECUTE PROCEDURE check_conflict();
 -------------------------------------------
 CREATE OR REPLACE FUNCTION check_enrollment() RETURNS trigger AS $max$
  BEGIN
- 	IF ((SELECT enrollment_limit FROM section WHERE idsection = NEW.idsection) <= (SELECT COUNT(*) FROM student_section__enrolled WHERE idsection = NEW.idsection GROUP BY idsection)) THEN
+ 	IF ((SELECT enrollment_limit FROM section WHERE idsection = NEW.idsection) <= (SELECT (COUNT(*)) FROM student_section__enrolled WHERE idsection = NEW.idsection GROUP BY idsection)) THEN
  	RAISE EXCEPTION 'Enrollment Limit Reached';
  	END IF;
  	RETURN NEW;
