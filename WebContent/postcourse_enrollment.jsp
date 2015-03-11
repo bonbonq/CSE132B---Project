@@ -72,18 +72,13 @@ if(action!=null && action.equals("insert")){
 		
 		PreparedStatement insert1 = conn.prepareStatement(	
 				"INSERT INTO student_instance (idstudent, idinstance, units, grade_option_type, grade)" +
-				"SELECT ?,?,?,?,?" +
-				"WHERE NOT EXISTS (" +
-					"SELECT idstudent_instance FROM student_instance " +
-						"WHERE idstudent=? AND idinstance=?" +
-				")");
+				"SELECT ?,?,?,?,?");
 		insert1.setInt(1, Integer.parseInt(request.getParameter("idstudent")));
 		insert1.setInt(2, Integer.parseInt(request.getParameter("idinstance")));
 		insert1.setInt(3, Integer.parseInt(request.getParameter("units")));
 		insert1.setString(4, request.getParameter("grade_option_type"));
 		insert1.setString(5, request.getParameter("grade"));
-		insert1.setInt(6, Integer.parseInt(request.getParameter("idstudent")));
-		insert1.setInt(7, Integer.parseInt(request.getParameter("idinstance")));
+		
 		if (insert1.executeUpdate()==1) {
 			success_counter++;
 		}

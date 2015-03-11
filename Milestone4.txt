@@ -1,12 +1,38 @@
 Fill in CPQG using:
-SELECT idcourse, faculty_name, idquarter, grade FROM faculty_class_section AS fcs, instance_section AS i_s, quarter_course_class__instance as i, student_instance AS si WHERE si.idinstance=i.idinstance AND i.idinstance=i_s.idinstance AND i_s.idsection=fcs.idsection
+CREATE MATERIALIZED VIEW cpqg AS
+SELECT idcourse, faculty_name, idquarter, grade FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah NATURAL JOIN quarter
+
+
+CREATE TABLE cpqg_table
+(
+	idcourse integer,
+	faculty_name text,
+	idquarter integer,
+	grade text
+);
+
+INSERT INTO cpqg_table
+(SELECT idcourse, faculty_name, idquarter, grade FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah NATURAL JOIN quarter)
+
+CREATE VIEW cpqg AS
+(SELECT * FROM cpqg_table)
 
 Query CPQG using:
 SELECT grade, COUNT(grade) FROM CPQG WHERE CPQG.idcourse=? AND CPQG.faculty_name=? AND CPQG.idquarter=? GROUP BY grade
 
 
 Fill in CPG using:
-SELECT idcourse, faculty_name, grade FROM faculty_class_section AS fcs, instance_section AS i_s, quarter_course_class__instance as i, student_instance AS si WHERE si.idinstance=i.idinstance AND i.idinstance=i_s.idinstance AND i_s.idsection=fcs.idsection
+CREATE TABLE cpg_table
+(
+	idcourse integer,
+	faculty_name text,
+	grade text
+);
 
+INSERT INTO cpg_table
+(SELECT idcourse, faculty_name, grade FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah)
+
+CREATE VIEW cpg AS
+(SELECT * FROM cpg_table)
 Query CPG using:
 SELECT grade, COUNT(grade) FROM CPG WHERE CPG.idcourse=? AND CPG.faculty_name=? GROUP BY grade
