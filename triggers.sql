@@ -1,7 +1,40 @@
+DROP TABLE cpqg_table CASCADE;
+CREATE TABLE cpqg_table
+(
+	idcourse integer,
+	faculty_name text,
+	idquarter integer,
+	grade text,
+	idcpqg SERIAL
+);
+
+INSERT INTO cpqg_table (idcourse, faculty_name, idquarter, grade) 
+(SELECT idcourse, faculty_name, idquarter, grade FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah NATURAL JOIN quarter);
+
+CREATE VIEW cpqg AS
+(SELECT * FROM cpqg_table);
+
+DROP TABLE cpg_table CASCADE;
+CREATE TABLE cpg_table
+(
+	idcourse integer,
+	faculty_name text,
+	grade text,
+	idcpg SERIAL
+);
+
+INSERT INTO cpg_table (idcourse, faculty_name, grade) 
+(SELECT idcourse, faculty_name, grade FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah);
+
+CREATE VIEW cpg AS
+(SELECT * FROM cpg_table);
+
 DROP TRIGGER IF EXISTS delete_cpqg ON student_instance;
 DROP TRIGGER IF EXISTS delete_cpg ON student_instance;
 DROP TRIGGER IF EXISTS insert_cpqg ON student_instance;
 DROP TRIGGER IF EXISTS insert_cpg ON student_instance;
+DROP TRIGGER IF EXISTS update_cpqg ON student_instance;
+DROP TRIGGER IF EXISTS update_cpg ON student_instance;
 DROP TRIGGER IF EXISTS enroll_section ON student_section__enrolled;
 DROP TRIGGER IF EXISTS insert_update_section_weekly ON section_weekly;
 DROP TRIGGER IF EXISTS insert_section_weekly ON section_weekly;
@@ -17,6 +50,8 @@ DROP FUNCTION IF EXISTS proc_insert_cpqg();
 DROP FUNCTION IF EXISTS proc_insert_cpg();
 DROP FUNCTION IF EXISTS proc_delete_cpqg();
 DROP FUNCTION IF EXISTS proc_delete_cpg();
+DROP FUNCTION IF EXISTS proc_update_cpqg();
+DROP FUNCTION IF EXISTS proc_update_cpg();
 
 -------------------------------------------
 -- PROCECURE check_conflict
@@ -254,49 +289,29 @@ EXECUTE PROCEDURE check_enrollment();
 -------------------------------------------
 
 
---NOTE UPDATE IS ACTUALLY INSERT
-CREATE OR REPLACE FUNCTION pro_insert_cpqg() RETURNS trigger AS $view$
+
+CREATE OR REPLACE FUNCTION pro_insert_cpqg() RETURNS trigger AS $pro_insert_cpqg$
 BEGIN
 	INSERT INTO cpqg_table
-	(SELECT idcourse, faculty_name, idquarter, grade 
+	(SELECT DISTINCT idcourse, faculty_name, idquarter, grade 
 	FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs 
 		NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah 
 		NATURAL JOIN quarter WHERE NEW.idstudent_instance = idstudent_instance LIMIT 1);
-	RETURN NEW;
+	RETURN NULL;
 END;
-$view$ LANGUAGE plpgsql;
+$pro_insert_cpqg$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION pro_insert_cpg() RETURNS trigger AS $view$
+CREATE OR REPLACE FUNCTION pro_insert_cpg() RETURNS trigger AS $pro_insert_cpg$
 BEGIN
-	INSERT INTO cpg_table
-	(SELECT idcourse, faculty_name, grade 
+	INSERT INTO cpg_table (idcourse, faculty_name, grade)
+	(SELECT DISTINCT idcourse, faculty_name, grade 
 	FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs 
 		NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah 
 		WHERE NEW.idstudent_instance = idstudent_instance LIMIT 1);
-	RETURN NEW;
+	RETURN NULL;
 END;
-$view$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION pro_delete_cpg() RETURNS trigger AS $view$
-BEGIN
-	DELETE FROM cpg_table WHERE (idcourse, faculty_name, grade, idcpg) IN (SELECT * FROM cpg_table WHERE ((idcourse, faculty_name, grade, idcpg) IN (SELECT idcourse, faculty_name, grade, idcpg 
-	FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs 
-		NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah 
-		NATURAL JOIN quarter WHERE OLD.idstudent_instance = idstudent_instance)) LIMIT 1);
-	RETURN OLD;
-END;
-$view$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION pro_delete_cpqg() RETURNS trigger AS $view$
-BEGIN
-	DELETE FROM cpqg_table WHERE (idcourse, faculty_name, idquarter, grade, idcpqg) IN (SELECT * FROM cpqg_table WHERE ((idcourse, faculty_name, idquarter, grade, idcpqg) IN (SELECT idcourse, faculty_name, idquarter, grade, idcpqg 
-	FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs 
-		NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah 
-		NATURAL JOIN quarter WHERE OLD.idstudent_instance = idstudent_instance)) LIMIT 1);
-	RETURN OLD;
-END;
-$view$ LANGUAGE plpgsql;
+$pro_insert_cpg$ LANGUAGE plpgsql;
 
 CREATE TRIGGER insert_cpqg
 AFTER INSERT ON student_instance
@@ -308,6 +323,30 @@ AFTER INSERT ON student_instance
 FOR EACH ROW
 EXECUTE PROCEDURE pro_insert_cpg();
 
+
+
+
+
+CREATE OR REPLACE FUNCTION pro_delete_cpg() RETURNS trigger AS $pro_delete_cpg$
+BEGIN
+	DELETE FROM cpg_table WHERE (idcourse, faculty_name, grade, idcpg) IN (SELECT * FROM cpg_table WHERE ((idcourse, faculty_name, grade, idcpg) IN (SELECT idcourse, faculty_name, grade, idcpg 
+	FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs 
+		NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah 
+		NATURAL JOIN quarter WHERE OLD.idstudent_instance = idstudent_instance)) LIMIT 1);
+	RETURN OLD;
+END;
+$pro_delete_cpg$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION pro_delete_cpqg() RETURNS trigger AS $pro_delete_cpqg$
+BEGIN
+	DELETE FROM cpqg_table WHERE (idcourse, faculty_name, idquarter, grade, idcpqg) IN (SELECT * FROM cpqg_table WHERE ((idcourse, faculty_name, idquarter, grade, idcpqg) IN (SELECT idcourse, faculty_name, idquarter, grade, idcpqg 
+	FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs 
+		NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah 
+		NATURAL JOIN quarter WHERE OLD.idstudent_instance = idstudent_instance)) LIMIT 1);
+	RETURN OLD;
+END;
+$pro_delete_cpqg$ LANGUAGE plpgsql;
+
 CREATE TRIGGER delete_cpqg
 BEFORE DELETE ON student_instance
 FOR EACH ROW
@@ -317,6 +356,49 @@ CREATE TRIGGER delete_cpg
 BEFORE DELETE ON student_instance
 FOR EACH ROW
 EXECUTE PROCEDURE pro_delete_cpg();
+
+CREATE OR REPLACE FUNCTION pro_update_cpg() RETURNS trigger AS $pro_update_cpg$
+BEGIN
+	DELETE FROM cpg_table WHERE (idcourse, faculty_name, grade, idcpg) IN (SELECT * FROM cpg_table WHERE ((idcourse, faculty_name, grade, idcpg) IN (SELECT idcourse, faculty_name, grade, idcpg 
+	FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs 
+		NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah 
+		NATURAL JOIN quarter WHERE OLD.idstudent_instance = idstudent_instance)) LIMIT 1);
+	INSERT INTO cpg_table (idcourse, faculty_name, grade)
+	(SELECT DISTINCT idcourse, faculty_name, grade 
+	FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs 
+		NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah 
+		WHERE NEW.idstudent_instance = idstudent_instance);
+	RETURN NEW;
+END;
+$pro_update_cpg$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION pro_update_cpqg() RETURNS trigger AS $pro_update_cpqg$
+BEGIN
+	DELETE FROM cpqg_table WHERE (idcourse, faculty_name, idquarter, grade, idcpqg) IN (SELECT * FROM cpqg_table WHERE ((idcourse, faculty_name, idquarter, grade, idcpqg) IN (SELECT idcourse, faculty_name, idquarter, grade, idcpqg 
+	FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs 
+		NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah 
+		NATURAL JOIN quarter WHERE OLD.idstudent_instance = idstudent_instance)) LIMIT 1);
+	INSERT INTO cpqg_table
+	(SELECT DISTINCT idcourse, faculty_name, idquarter, grade 
+	FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs 
+		NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah 
+		NATURAL JOIN quarter WHERE NEW.idstudent_instance = idstudent_instance LIMIT 1);
+	RETURN NEW;
+END;
+$pro_update_cpqg$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER update_cpqg
+AFTER UPDATE ON student_instance
+FOR EACH ROW
+EXECUTE PROCEDURE pro_update_cpqg();
+
+CREATE TRIGGER update_cpg
+AFTER UPDATE ON student_instance
+FOR EACH ROW
+EXECUTE PROCEDURE pro_update_cpg();
+
+
 
 
 -------------------------------------------

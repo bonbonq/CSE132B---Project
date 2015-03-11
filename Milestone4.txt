@@ -2,37 +2,43 @@ Fill in CPQG using:
 CREATE MATERIALIZED VIEW cpqg AS
 SELECT idcourse, faculty_name, idquarter, grade FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah NATURAL JOIN quarter
 
-
+DROP TABLE cpqg_table CASCADE;
 CREATE TABLE cpqg_table
 (
 	idcourse integer,
 	faculty_name text,
 	idquarter integer,
-	grade text
+	grade text,
+	idcpqg SERIAL
 );
 
-INSERT INTO cpqg_table
-(SELECT idcourse, faculty_name, idquarter, grade FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah NATURAL JOIN quarter)
+INSERT INTO cpqg_table (idcourse, faculty_name, idquarter, grade) 
+(SELECT idcourse, faculty_name, idquarter, grade FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah NATURAL JOIN quarter);
 
 CREATE VIEW cpqg AS
-(SELECT * FROM cpqg_table)
+(SELECT * FROM cpqg_table);
 
-Query CPQG using:
-SELECT grade, COUNT(grade) FROM CPQG WHERE CPQG.idcourse=? AND CPQG.faculty_name=? AND CPQG.idquarter=? GROUP BY grade
-
-
-Fill in CPG using:
+DROP TABLE cpg_table CASCADE;
 CREATE TABLE cpg_table
 (
 	idcourse integer,
 	faculty_name text,
-	grade text
+	grade text,
+	idcpg SERIAL
 );
 
-INSERT INTO cpg_table
-(SELECT idcourse, faculty_name, grade FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah)
+INSERT INTO cpg_table (idcourse, faculty_name, grade) 
+(SELECT idcourse, faculty_name, grade FROM (SELECT DISTINCT faculty_name, idclass FROM faculty_class_section) AS fcs NATURAL JOIN (SELECT * FROM quarter_course_class__instance NATURAL JOIN student_instance) AS yeah);
 
 CREATE VIEW cpg AS
-(SELECT * FROM cpg_table)
+(SELECT * FROM cpg_table);
+
+
 Query CPG using:
-SELECT grade, COUNT(grade) FROM CPG WHERE CPG.idcourse=? AND CPG.faculty_name=? GROUP BY grade
+SELECT grade, COUNT(grade) FROM cpg WHERE cpg.idcourse=? AND cpg.faculty_name=? GROUP BY grade
+
+Query CPQG using:
+SELECT grade, COUNT(grade) FROM cpqg WHERE cpqg.idcourse=? AND cpqg.faculty_name=? AND cpqg.idquarter=? GROUP BY grade
+
+
+Fill in CPG using:
