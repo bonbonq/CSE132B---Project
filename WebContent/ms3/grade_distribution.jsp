@@ -50,14 +50,20 @@ if (action!=null && action.equals("submit")) {
 	try {
 		conn.setAutoCommit(false);
 		
-		if(request.getParameter("idquarter").equals("None"))
+		if(request.getParameter("idquarter").equals("None")) {
 			sql1 =	"SELECT grade, COUNT(grade) FROM cpg WHERE cpg.idcourse=? AND cpg.faculty_name=? GROUP BY grade";
-		else
+			pstmt1 = conn.prepareStatement(sql1);
+			pstmt1.setInt(1, Integer.parseInt(request.getParameter("idcourse")));
+			pstmt1.setString(2, request.getParameter("faculty_name"));
+		}
+			
+		else {
 			sql1 =	"SELECT grade, COUNT(grade) FROM cpqg WHERE cpqg.idcourse=? AND cpqg.faculty_name=? AND cpqg.idquarter=? GROUP BY grade";
-		
-		pstmt1 = conn.prepareStatement(sql1);
-		pstmt1.setInt(1, Integer.parseInt(request.getParameter("idcourse")));
-		pstmt1.setString(2, request.getParameter("faculty_name"));
+			pstmt1 = conn.prepareStatement(sql1);
+			pstmt1.setInt(1, Integer.parseInt(request.getParameter("idcourse")));
+			pstmt1.setString(2, request.getParameter("faculty_name"));
+			pstmt1.setInt(3, Integer.parseInt(request.getParameter("idquarter")));
+		}
 
 		if (pstmt1.execute())
 		{
@@ -130,7 +136,7 @@ try{
 	<h2>Faculty Is Teaching Course Form</h2>
 	
 	<!-- Student Insertion Form -->
-	<form action="grade_distribution" method="POST">
+	<form action="grade_distribution.jsp" method="POST">
 		
 		<div>
 			Course:

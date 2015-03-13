@@ -1,4 +1,4 @@
-DROP TABLE cpqg_table CASCADE;
+DROP TABLE IF EXISTS cpqg_table CASCADE;
 CREATE TABLE cpqg_table
 (
 	idcourse integer,
@@ -14,7 +14,7 @@ INSERT INTO cpqg_table (idcourse, faculty_name, idquarter, grade)
 CREATE VIEW cpqg AS
 (SELECT * FROM cpqg_table);
 
-DROP TABLE cpg_table CASCADE;
+DROP TABLE IF EXISTS cpg_table CASCADE;
 CREATE TABLE cpg_table
 (
 	idcourse integer,
@@ -98,29 +98,26 @@ BEGIN
  						(SELECT faculty_name FROM faculty_class_section NATURAL JOIN section_weekly NATURAL JOIN weekly
  						WHERE faculty_class_section.idsection = NEW.idsection)
  			AND idweekly <> NEW.idweekly);
-
-	INSERT INTO section_of_interest
+ 			
+ 	
+ 	INSERT INTO section_of_interest 
 	(SELECT idweekly FROM weekly AS a 
 	WHERE NEW.idweekly = a.idweekly
 	AND (
-		(0 = ALL (SELECT (a.day_of_week & day_of_week) FROM same_section))
-		OR 
-		(TRUE = ALL 
-			(SELECT (a.end_time < start_time) OR (a.start_time > end_time) FROM same_section)
+		0 = ALL (SELECT (a.day_of_week & day_of_week) FROM same_section)
+		OR (TRUE = ALL (SELECT (a.start_time < start_time AND a.end_time < start_time) FROM same_section)
+ 			OR TRUE = ALL (SELECT (a.start_time > end_time AND a.end_time > end_time) FROM same_section))
 		)
-		)
-		);
+	);
 
 	INSERT INTO faculty_of_interest
 	(SELECT idweekly FROM weekly AS a 
 	WHERE NEW.idweekly = a.idweekly
 	AND (
-	--	(0 = ALL
-		--	(SELECT (a.day_of_week & day_of_week) FROM same_faculty))
-	--OR 
-		(TRUE = ALL
-			(SELECT (same_faculty.end_time < a.start_time) OR (same_faculty.start_time > a.end_time)  FROM same_faculty)
-		))
+		0 = ALL (SELECT (a.day_of_week & day_of_week) FROM same_faculty)
+		OR (TRUE = ALL (SELECT (a.start_time < start_time AND a.end_time < start_time) FROM same_faculty)
+ 			OR TRUE = ALL (SELECT (a.start_time > end_time AND a.end_time > end_time) FROM same_faculty))
+		)
 	);
 
 	IF (NOT EXISTS (SELECT * FROM section_of_interest)) THEN
@@ -178,7 +175,7 @@ BEGIN
 		(SELECT idweekly, day_of_week, start_time, end_time 
 			FROM weekly NATURAL JOIN section_weekly
 			WHERE idsection IN
-			(SELECT idsection FROM weekly NATURAL JOIN section_weekly WHERE idweekly = NEW.idweekly)
+			(SELECT idsection FROM weekly NATURAL JOIN section_weekly WHERE idsection = NEW.idsection)
 			AND idweekly <> NEW.idweekly
 		);
 
@@ -186,35 +183,27 @@ BEGIN
 		(SELECT idweekly, day_of_week, start_time, end_time
  			FROM faculty_class_section NATURAL JOIN section_weekly NATURAL JOIN weekly
  			WHERE faculty_name IN 
- 						(SELECT faculty_name FROM faculty_class_section NATURAL JOIN section_weekly NATURAL JOIN weekly
- 						WHERE NEW.idweekly = idweekly)
- 			AND idweekly <> NEW.idweekly);
+ 				(SELECT faculty_name FROM faculty_class_section NATURAL JOIN section_weekly WHERE NEW.idweekly = idweekly)
+ 			AND idweekly <> NEW.idweekly
+ 		);
 
 	INSERT INTO section_of_interest 
 	(SELECT idweekly FROM weekly AS a 
 	WHERE NEW.idweekly = a.idweekly
-	AND 0 = ALL
-		(SELECT (a.day_of_week & day_of_week)
-		FROM same_section)
-	OR (
-		TRUE = ALL
-			(SELECT (a.start_time < start_time AND a.end_time < start_time) FROM same_section)
- 		OR TRUE = ALL
- 			(SELECT (a.start_time > end_time AND a.end_time > end_time) FROM same_section)
+	AND (
+		0 = ALL (SELECT (a.day_of_week & day_of_week) FROM same_section)
+		OR (TRUE = ALL (SELECT (a.start_time < start_time AND a.end_time < start_time) FROM same_section)
+ 			OR TRUE = ALL (SELECT (a.start_time > end_time AND a.end_time > end_time) FROM same_section))
 		)
 	);
 
 	INSERT INTO faculty_of_interest
 	(SELECT idweekly FROM weekly AS a 
 	WHERE NEW.idweekly = a.idweekly
-	AND 0 = ALL
-		(SELECT (a.day_of_week & day_of_week)
-		FROM same_faculty)
-	OR (
-		TRUE = ALL
-			(SELECT (a.start_time < start_time AND a.end_time < start_time) FROM same_faculty)
- 		OR TRUE = ALL
- 			(SELECT (a.start_time > end_time AND a.end_time > end_time) FROM same_faculty)
+	AND (
+		0 = ALL (SELECT (a.day_of_week & day_of_week) FROM same_faculty)
+		OR (TRUE = ALL (SELECT (a.start_time < start_time AND a.end_time < start_time) FROM same_faculty)
+ 			OR TRUE = ALL (SELECT (a.start_time > end_time AND a.end_time > end_time) FROM same_faculty))
 		)
 	);
 

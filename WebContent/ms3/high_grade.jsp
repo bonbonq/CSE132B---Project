@@ -112,8 +112,8 @@ try
 		" ORDER BY student_instance.grade";
 		*/
 		
-		sql0 = "SELECT grade, COUNT(*) AS received FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN faculty_class_section WHERE faculty_class_section.idclass = quarter_course_class__instance.idclass " + addition +  " GROUP BY grade ORDER BY grade";
-		
+		//sql0 = "SELECT grade, COUNT(*) AS received FROM student_instance NATURAL JOIN quarter_course_class__instance NATURAL JOIN faculty_class_section WHERE faculty_class_section.idclass = quarter_course_class__instance.idclass " + addition +  " GROUP BY grade ORDER BY grade";
+		sql0 = "SELECT grade, COUNT(grade) FROM cpg WHERE cpg.idcourse=? AND cpg.faculty_name=? GROUP BY grade";
 		System.out.println(sql0);
 		ps0 = conn.prepareStatement(sql0);
 		
